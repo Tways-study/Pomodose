@@ -1,5 +1,5 @@
 {
-  "name": "apothecary",
+  "name": "pomodose",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@google/genai": "^2.10.0",
     "framer-motion": "^12.42.2",
     "next": "16.2.9",
     "react": "19.2.4",

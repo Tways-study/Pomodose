@@ -22,3 +22,19 @@ export interface PersistedGoals {
   date: string;    // "YYYY-MM-DD"
   goals: Goal[];
 }
+
+// --- Dosey chat companion ---
+
+export interface ChatMessage {
+  role: "user" | "model";
+  content: string;
+}
+
+// Compact, live snapshot of the user's session that Dosey reasons about.
+export interface DoseyStats {
+  dailyDoses: number;     // focus sessions completed today
+  cyclePosition: number;  // focusCycle % cycleLength (position toward long break)
+  cycleLength: number;    // focus sessions per cycle (SETTINGS.CYCLE_LENGTH)
+  phase: Phase;
+  status: TimerStatus;
+}
