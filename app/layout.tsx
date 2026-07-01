@@ -20,7 +20,7 @@ const splineSans = Spline_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Apothecary — Study Companion",
+  title: "Pomodose — Study Companion",
   description: "A measured-dose focus timer for the pharmacist in your life.",
 };
 
