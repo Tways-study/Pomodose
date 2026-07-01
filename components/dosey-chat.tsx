@@ -196,10 +196,9 @@ export function DoseyChat({ stats }: Props) {
                       animate={reduceMotion ? undefined : { y: [0, -6, 0] }}
                       transition={reduceMotion ? undefined : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
                       whileHover={reduceMotion ? undefined : { scale: 1.03, rotate: -1 }}
-                      className="rounded-2xl border border-line bg-paper-2 bg-[radial-gradient(120%_90%_at_75%_0%,#F0E7F7_0%,transparent_55%)] px-5 py-4 shadow-[0_1px_0_white_inset,0_12px_32px_-22px_rgba(46,36,51,.30)]"
                     >
                       <Image
-                        src="/dosey.png"
+                        src="/dosey-transparent.png"
                         alt="Dosey, a friendly capsule with a tomato sprout"
                         width={240}
                         height={133}
