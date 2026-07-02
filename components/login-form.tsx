@@ -4,7 +4,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "verify-code" | "forgot-password" | "reset-code";
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -36,10 +36,13 @@ function friendlyError(err: unknown, mode: Mode): string {
   if (message.includes("already exists")) {
     return "Looks like you already have an account with that email, Doc. Try signing in instead.";
   }
-  if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
-    return mode === "login"
-      ? "That email or password doesn't match, Doc. Try again."
-      : "Something went wrong setting up your account. Try again.";
+  if (message.includes("InvalidAccountId")) {
+    return mode === "forgot-password" || mode === "reset-code"
+      ? "We couldn't find an account with that email, Doc."
+      : "That email or password doesn't match, Doc. Try again.";
+  }
+  if (message.includes("InvalidSecret")) {
+    return "That email or password doesn't match, Doc. Try again.";
   }
   if (message.includes("TooManyFailedAttempts")) {
     return "Too many tries, Doc — give it a minute and try again.";
@@ -47,8 +50,18 @@ function friendlyError(err: unknown, mode: Mode): string {
   if (message.includes("Invalid password")) {
     return "Passwords need at least 8 characters, Doc.";
   }
+  if (message.includes("Could not verify code")) {
+    return "That code didn't match or has expired, Doc. Try again.";
+  }
   return "Something went wrong. Try again.";
 }
+
+const labelClass = "block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft";
+const inputClass =
+  "w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60";
+const submitClass =
+  "mt-1 w-full rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-paper hover:opacity-90 transition-opacity duration-200 disabled:opacity-40";
+const backLinkClass = "text-center text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60";
 
 export function LoginForm() {
   const { signIn } = useAuthActions();
@@ -57,27 +70,45 @@ export function LoginForm() {
   const emailId = useId();
   const passwordId = useId();
   const confirmId = useId();
+  const codeId = useId();
+  const newPasswordId = useId();
+  const confirmNewPasswordId = useId();
 
   const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [reveal, setReveal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function toggleMode() {
     setMode((m) => (m === "login" ? "register" : "login"));
     setError(null);
+    setInfo(null);
     setPassword("");
     setConfirmPassword("");
   }
 
-  async function handleSubmit(e: FormEvent) {
+  function goToLogin() {
+    setMode("login");
+    setError(null);
+    setInfo(null);
+    setCode("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+  }
+
+  async function handleLoginOrRegister(e: FormEvent) {
     e.preventDefault();
     if (isSubmitting) return;
     setError(null);
+    setInfo(null);
 
     if (mode === "register" && password !== confirmPassword) {
       setError("Those two passwords don't match. Give it another try, Doc.");
@@ -86,12 +117,77 @@ export function LoginForm() {
 
     setIsSubmitting(true);
     try {
-      await signIn("password", {
+      const result = await signIn("password", {
         flow: mode === "login" ? "signIn" : "signUp",
         email,
         password,
         ...(mode === "register" && name ? { name } : {}),
       });
+      if (result.signingIn) {
+        router.push("/");
+        router.refresh();
+        return;
+      }
+      // Verification is mandatory: a successful signUp, or a signIn on an
+      // unverified account, sends a code instead of completing sign-in.
+      setInfo(
+        mode === "register"
+          ? `We've emailed a 6-digit code to ${email}. Enter it below to finish setting up your account, Doc.`
+          : `This account hasn't been verified yet — we've emailed a fresh code to ${email}.`,
+      );
+      setMode("verify-code");
+    } catch (err) {
+      setError(friendlyError(err, mode));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleVerifyCode(e: FormEvent) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await signIn("password", { flow: "email-verification", email, code });
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError(friendlyError(err, mode));
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleRequestReset(e: FormEvent) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setError(null);
+    setInfo(null);
+    setIsSubmitting(true);
+    try {
+      await signIn("password", { flow: "reset", email });
+      setInfo(`We've emailed a 6-digit code to ${email}.`);
+      setMode("reset-code");
+    } catch (err) {
+      setError(friendlyError(err, mode));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleResetVerification(e: FormEvent) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setError(null);
+
+    if (newPassword !== confirmNewPassword) {
+      setError("Those two passwords don't match. Give it another try, Doc.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await signIn("password", { flow: "reset-verification", email, code, newPassword });
       router.push("/");
       router.refresh();
     } catch (err) {
@@ -102,8 +198,187 @@ export function LoginForm() {
 
   const inputType = reveal ? "text" : "password";
 
+  if (mode === "verify-code") {
+    return (
+      <form onSubmit={handleVerifyCode} noValidate>
+        <div className="mb-5 text-center">
+          <h2 className="font-serif font-semibold text-xl">Check your email, Doc</h2>
+          {info && <p className="mt-1.5 text-sm text-ink-soft">{info}</p>}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div>
+            <label htmlFor={codeId} className={labelClass}>
+              6-digit code
+            </label>
+            <input
+              id={codeId}
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              autoComplete="one-time-code"
+              autoFocus
+              required
+              disabled={isSubmitting}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              className={inputClass}
+              placeholder="123456"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={isSubmitting || code.length !== 6} className={submitClass}>
+            {isSubmitting ? "Confirming…" : "Confirm code"}
+          </button>
+
+          <button type="button" onClick={goToLogin} disabled={isSubmitting} className={backLinkClass}>
+            Back to sign in
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  if (mode === "forgot-password") {
+    return (
+      <form onSubmit={handleRequestReset} noValidate>
+        <div className="mb-5 text-center">
+          <h2 className="font-serif font-semibold text-xl">Let&apos;s get you back in, Doc</h2>
+          <p className="mt-1.5 text-sm text-ink-soft">
+            Enter your email and we&apos;ll send you a code to reset your password.
+          </p>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div>
+            <label htmlFor={emailId} className={labelClass}>
+              Email
+            </label>
+            <input
+              id={emailId}
+              type="email"
+              value={email}
+              maxLength={254}
+              autoComplete="email"
+              autoFocus
+              required
+              disabled={isSubmitting}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputClass}
+              placeholder="doc@apothecary.com"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={isSubmitting || !email} className={submitClass}>
+            {isSubmitting ? "Sending…" : "Send reset code"}
+          </button>
+
+          <button type="button" onClick={goToLogin} disabled={isSubmitting} className={backLinkClass}>
+            Back to sign in
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  if (mode === "reset-code") {
+    return (
+      <form onSubmit={handleResetVerification} noValidate>
+        <div className="mb-5 text-center">
+          <h2 className="font-serif font-semibold text-xl">Set a new password, Doc</h2>
+          {info && <p className="mt-1.5 text-sm text-ink-soft">{info}</p>}
+        </div>
+        <div className="flex flex-col gap-4">
+          <div>
+            <label htmlFor={codeId} className={labelClass}>
+              6-digit code
+            </label>
+            <input
+              id={codeId}
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              autoComplete="one-time-code"
+              autoFocus
+              required
+              disabled={isSubmitting}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              className={inputClass}
+              placeholder="123456"
+            />
+          </div>
+
+          <div>
+            <label htmlFor={newPasswordId} className={labelClass}>
+              New password
+            </label>
+            <input
+              id={newPasswordId}
+              type={inputType}
+              value={newPassword}
+              maxLength={128}
+              autoComplete="new-password"
+              required
+              disabled={isSubmitting}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className={inputClass}
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label htmlFor={confirmNewPasswordId} className={labelClass}>
+              Confirm new password
+            </label>
+            <input
+              id={confirmNewPasswordId}
+              type={inputType}
+              value={confirmNewPassword}
+              maxLength={128}
+              autoComplete="new-password"
+              required
+              disabled={isSubmitting}
+              onChange={(e) => setConfirmNewPassword(e.target.value)}
+              className={inputClass}
+              placeholder="••••••••"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting || code.length !== 6 || !newPassword || !confirmNewPassword}
+            className={submitClass}
+          >
+            {isSubmitting ? "Resetting…" : "Reset password"}
+          </button>
+
+          <button type="button" onClick={goToLogin} disabled={isSubmitting} className={backLinkClass}>
+            Back to sign in
+          </button>
+        </div>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={handleLoginOrRegister} noValidate>
       <div className="mb-5 text-center">
         <h2 className="font-serif font-semibold text-xl">
           {mode === "register" ? "Set up your dose log, Doc" : "Welcome back, Doc"}
@@ -118,10 +393,7 @@ export function LoginForm() {
       <div className="flex flex-col gap-4">
         {mode === "register" && (
           <div>
-            <label
-              htmlFor={nameId}
-              className="block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft"
-            >
+            <label htmlFor={nameId} className={labelClass}>
               Name (optional)
             </label>
             <input
@@ -132,17 +404,14 @@ export function LoginForm() {
               autoComplete="name"
               disabled={isSubmitting}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
+              className={inputClass}
               placeholder="Doc"
             />
           </div>
         )}
 
         <div>
-          <label
-            htmlFor={emailId}
-            className="block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft"
-          >
+          <label htmlFor={emailId} className={labelClass}>
             Email
           </label>
           <input
@@ -155,18 +424,30 @@ export function LoginForm() {
             required
             disabled={isSubmitting}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
+            className={inputClass}
             placeholder="doc@apothecary.com"
           />
         </div>
 
         <div>
-          <label
-            htmlFor={passwordId}
-            className="block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft"
-          >
-            Password
-          </label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label htmlFor={passwordId} className="text-xs font-medium tracking-[.14em] uppercase text-ink-soft">
+              Password
+            </label>
+            {mode === "login" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("forgot-password");
+                  setError(null);
+                  setInfo(null);
+                }}
+                className="text-xs text-ink-soft hover:text-ink transition-colors"
+              >
+                Forgot password?
+              </button>
+            )}
+          </div>
           <div className="relative">
             <input
               id={passwordId}
@@ -177,7 +458,7 @@ export function LoginForm() {
               required
               disabled={isSubmitting}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 pr-11 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
+              className={`${inputClass} pr-11`}
               placeholder="••••••••"
             />
             <button
@@ -193,10 +474,7 @@ export function LoginForm() {
 
         {mode === "register" && (
           <div>
-            <label
-              htmlFor={confirmId}
-              className="block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft"
-            >
+            <label htmlFor={confirmId} className={labelClass}>
               Confirm password
             </label>
             <input
@@ -208,7 +486,7 @@ export function LoginForm() {
               required
               disabled={isSubmitting}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
+              className={inputClass}
               placeholder="••••••••"
             />
           </div>
@@ -222,13 +500,8 @@ export function LoginForm() {
 
         <button
           type="submit"
-          disabled={
-            isSubmitting ||
-            !email ||
-            !password ||
-            (mode === "register" && !confirmPassword)
-          }
-          className="mt-1 w-full rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-paper hover:opacity-90 transition-opacity duration-200 disabled:opacity-40"
+          disabled={isSubmitting || !email || !password || (mode === "register" && !confirmPassword)}
+          className={submitClass}
         >
           {mode === "register"
             ? isSubmitting
@@ -239,12 +512,7 @@ export function LoginForm() {
               : "Sign in"}
         </button>
 
-        <button
-          type="button"
-          onClick={toggleMode}
-          disabled={isSubmitting}
-          className="text-center text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60"
-        >
+        <button type="button" onClick={toggleMode} disabled={isSubmitting} className={backLinkClass}>
           {mode === "register"
             ? "Already have an account? Sign in."
             : "New here? Create an account, Doc."}
