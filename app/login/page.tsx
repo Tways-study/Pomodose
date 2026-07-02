@@ -23,8 +23,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-ink-soft">
-          Forgot your password? Password reset isn&apos;t set up yet, Doc — for now, a new
-          account is the way back in.
+          Trouble getting in? Use &quot;Forgot password?&quot; on the sign-in form, Doc.
         </p>
       </div>
     </div>
