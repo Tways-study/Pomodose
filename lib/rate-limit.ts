@@ -65,6 +65,19 @@ export function consumeRateLimit(ip: string, now: Date = new Date()): RateLimitR
  * Best-effort client identifier from standard Fetch API headers. Falls back
  * to a shared "unknown" bucket (fail-safe, not fail-open) when there's no
  * reverse proxy in front to set forwarding headers — e.g. local dev.
+ *
+ * Verified against Vercel's documented behavior (vercel.com/docs/headers/request-headers,
+ * "x-forwarded-for" section): Vercel's edge overwrites x-forwarded-for
+ * entirely rather than appending to a client-supplied value — "we currently
+ * overwrite the X-Forwarded-For header and do not forward external IPs.
+ * This restriction is in place to prevent IP spoofing." So in production
+ * (behind Vercel) this header is a single edge-set value, not a
+ * client-extendable proxy chain, and taking the first (only) segment is
+ * correct — do NOT "fix" this to take the last segment instead, that
+ * pattern only matters behind a multi-hop reverse proxy Vercel doesn't put
+ * you behind. Local dev (`next dev`, no edge in front) has no such
+ * guarantee and this value is attacker-controlled there, which is fine for
+ * a local-only rate limit.
  */
 export function getClientIp(headers: Headers): string {
   const forwardedFor = headers.get("x-forwarded-for");
