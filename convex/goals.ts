@@ -13,13 +13,22 @@ export const list = query({
   },
 });
 
+// Mirrors the UI's own limit (goal-list.tsx's <input maxLength={80}> and its
+// add() guard) — that's client-side only, so callers hitting this mutation
+// directly (bypassing the form) need the same cap enforced here.
+const MAX_GOAL_TEXT_LENGTH = 80;
+
 export const add = mutation({
   args: { text: v.string(), date: v.string() },
   handler: async (ctx, { text, date }) => {
     const userId = await getAuthedUserId(ctx);
+    const trimmed = text.trim();
+    if (!trimmed || trimmed.length > MAX_GOAL_TEXT_LENGTH) {
+      throw new Error("Goal text must be between 1 and 80 characters.");
+    }
     return ctx.db.insert("goals", {
       userId,
-      text,
+      text: trimmed,
       date,
       done: false,
       createdAt: Date.now(),

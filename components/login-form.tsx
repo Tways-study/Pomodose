@@ -45,6 +45,9 @@ function friendlyError(err: unknown): string {
   if (message.includes("Invalid password")) {
     return "Passwords need at least 8 characters, Doc.";
   }
+  if (message.includes("Invalid email address")) {
+    return "That doesn't look like a valid email, Doc.";
+  }
   if (message.includes("Could not verify code")) {
     return "That code didn't match or has expired, Doc. Try again.";
   }

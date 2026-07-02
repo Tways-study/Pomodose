@@ -21,7 +21,7 @@ const statsSchema = z.object({
 
 const goalSchema = z.object({
   id: z.string(),
-  text: z.string(),
+  text: z.string().max(80),
   done: z.boolean(),
   createdAt: z.number(),
 });
