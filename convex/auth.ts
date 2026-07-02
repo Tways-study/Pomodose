@@ -1,5 +1,6 @@
 import { convexAuth } from "@convex-dev/auth/server";
 import { Password } from "@convex-dev/auth/providers/Password";
+import type { EmailConfig } from "@convex-dev/auth/server";
 import type { DataModel } from "./_generated/dataModel";
 import { createGmailOtp } from "./GmailOtp";
 
@@ -13,8 +14,8 @@ const PasswordWithProfile = Password<DataModel>({
       name: (params.name as string | undefined) || undefined,
     };
   },
-  verify: verifyEmail,
-  reset: resetEmail,
+  verify: verifyEmail as EmailConfig,
+  reset: resetEmail as EmailConfig,
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({

@@ -6,7 +6,7 @@ import { generateOtpCode } from "./lib/generateOtpCode";
 
 type Purpose = "verify" | "reset";
 
-export function createGmailOtp(purpose: Purpose): EmailConfig<any> {
+export function createGmailOtp(purpose: Purpose) {
   // `generateVerificationToken` is only declared on Convex Auth's PhoneConfig
   // type, but the runtime checks it generically for any provider — see
   // node_modules/@convex-dev/auth/dist/server/implementation/signIn.js. Widen
