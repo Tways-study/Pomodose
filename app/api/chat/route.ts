@@ -1,6 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 import { DOSEY_SYSTEM_PROMPT, buildContextBlock } from "@/lib/dosey";
+import { trimHistory } from "@/lib/chat-history";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import type { ChatRateLimitError } from "@/types";
 
 // Validate the client payload. Mirrors ChatMessage / DoseyStats / Goal in @/types.
 const messageSchema = z.object({
@@ -50,9 +53,28 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  const ip = getClientIp(request.headers);
+  const rateLimit = consumeRateLimit(ip);
+  if (!rateLimit.allowed) {
+    return Response.json(
+      {
+        error: "Dosey's used up her free questions for today. She'll be back tomorrow!",
+        resetAt: rateLimit.resetAt,
+      } satisfies ChatRateLimitError,
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(
+            Math.max(1, Math.ceil((new Date(rateLimit.resetAt).getTime() - Date.now()) / 1000)),
+          ),
+        },
+      },
+    );
+  }
+
   const { messages, stats, goals } = parsed.data;
   const systemInstruction = `${DOSEY_SYSTEM_PROMPT}\n\n${buildContextBlock(stats, goals)}`;
-  const contents = messages.map((m) => ({
+  const contents = trimHistory(messages).map((m) => ({
     role: m.role,
     parts: [{ text: m.content }],
   }));

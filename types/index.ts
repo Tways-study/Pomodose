@@ -38,3 +38,15 @@ export interface DoseyStats {
   phase: Phase;
   status: TimerStatus;
 }
+
+// Client-persisted "Dosey is resting" state, and the shape of a 429 body
+// from /api/chat. Both carry only resetAt — the UI derives "am I limited"
+// and "when am I not" purely by comparing it to Date.now().
+export interface DoseyRateLimitState {
+  resetAt: string; // ISO instant when the daily quota refills
+}
+
+export interface ChatRateLimitError {
+  error: string;
+  resetAt: string;
+}

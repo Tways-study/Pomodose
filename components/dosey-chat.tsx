@@ -3,8 +3,10 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
+import { trimHistory } from "@/lib/chat-history";
+import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
 import { loadGoals } from "@/lib/storage";
-import type { ChatMessage, DoseyStats } from "@/types";
+import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
 interface Props {
   stats: DoseyStats;
@@ -17,6 +19,10 @@ const SUGGESTIONS = [
   "What should I focus on next?",
   "Quiz me on pharmacokinetics",
 ];
+
+function formatResetTime(resetAt: string): string {
+  return new Date(resetAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
 
 // Dosey the capsule: purple top + cream bottom, smiley face, tomato sprout.
 // A crisp vector version of the mascot, matching the illustration in the panel.
@@ -68,10 +74,22 @@ export function DoseyChat({ stats }: Props) {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitedUntil, setLimitedUntil] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Reads the persisted "Dosey is resting" state and syncs it into local
+  // state. Doubles as the entire "notify when back" mechanism: loadRateLimit
+  // already returns null once resetAt has passed, so calling this on mount
+  // and on every reopen is enough to silently clear a stale limit — no
+  // polling/timers/push infra needed.
+  function refreshLimitState(): string | null {
+    const stored = loadRateLimit();
+    setLimitedUntil(stored?.resetAt ?? null);
+    return stored?.resetAt ?? null;
+  }
 
   // Keep the transcript pinned to the latest message.
   useEffect(() => {
@@ -79,12 +97,22 @@ export function DoseyChat({ stats }: Props) {
   }, [messages]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refreshLimitState();
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      refreshLimitState();
+      inputRef.current?.focus();
+    }
   }, [open]);
 
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || isStreaming) return;
+    if (refreshLimitState()) return; // belt-and-suspenders; composer is already disabled
 
     const history: ChatMessage[] = [...messages, { role: "user", content: trimmed }];
     // Add the user turn plus an empty model placeholder we stream into.
@@ -97,10 +125,18 @@ export function DoseyChat({ stats }: Props) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history, stats, goals: loadGoals() }),
+        body: JSON.stringify({ messages: trimHistory(history), stats, goals: loadGoals() }),
       });
 
       if (!res.ok || !res.body) {
+        if (res.status === 429) {
+          const data = (await res.json().catch(() => null)) as ChatRateLimitError | null;
+          const resetAt = data?.resetAt ?? new Date(Date.now() + 86_400_000).toISOString();
+          saveRateLimit(resetAt);
+          setLimitedUntil(resetAt);
+          setMessages((prev) => prev.slice(0, -1));
+          return;
+        }
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(data?.error ?? "Dosey ran into a problem.");
       }
@@ -207,20 +243,30 @@ export function DoseyChat({ stats }: Props) {
                       />
                     </motion.div>
                   </div>
-                  <p className="text-center text-sm text-ink-soft">
-                    Hi, Doc. Ask me about your progress today, or a quick study question.
-                  </p>
-                  <div className="mt-4 flex flex-col gap-2">
-                    {SUGGESTIONS.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => send(s)}
-                        className="rounded-xl border border-line bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+                  {limitedUntil ? (
+                    <p className="text-center text-sm text-ink-soft" role="status">
+                      Dosey&apos;s tapped out for today, Doc — free questions refill at{" "}
+                      <b className="text-ink">{formatResetTime(limitedUntil)}</b>. Go log a dose
+                      or two and I&apos;ll see you then!
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-center text-sm text-ink-soft">
+                        Hi, Doc. Ask me about your progress today, or a quick study question.
+                      </p>
+                      <div className="mt-4 flex flex-col gap-2">
+                        {SUGGESTIONS.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => send(s)}
+                            className="rounded-xl border border-line bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -247,6 +293,13 @@ export function DoseyChat({ stats }: Props) {
                 </div>
               ))}
 
+              {limitedUntil && messages.length > 0 && (
+                <p className="rounded-xl bg-lilac/25 px-3 py-2 text-sm text-ink" role="status">
+                  Dosey&apos;s tapped out for today, Doc — free questions refill at{" "}
+                  <b>{formatResetTime(limitedUntil)}</b>.
+                </p>
+              )}
+
               {error && (
                 <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
                   {error}
@@ -262,15 +315,15 @@ export function DoseyChat({ stats }: Props) {
                   type="text"
                   value={input}
                   maxLength={4000}
-                  disabled={isStreaming}
+                  disabled={isStreaming || !!limitedUntil}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
-                  placeholder="Ask Dosey…"
+                  placeholder={limitedUntil ? "Dosey's resting…" : "Ask Dosey…"}
                   className="flex-1 rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
                 />
                 <button
                   onClick={() => send(input)}
-                  disabled={isStreaming || !input.trim()}
+                  disabled={isStreaming || !!limitedUntil || !input.trim()}
                   aria-label="Send message"
                   className="flex-none rounded-xl bg-lilac px-4 text-ink font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200 disabled:opacity-40 disabled:hover:bg-lilac disabled:hover:text-ink"
                 >
