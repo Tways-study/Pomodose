@@ -31,17 +31,12 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
-function friendlyError(err: unknown, mode: Mode): string {
+function friendlyError(err: unknown): string {
   const message = err instanceof Error ? err.message : "";
   if (message.includes("already exists")) {
     return "Looks like you already have an account with that email, Doc. Try signing in instead.";
   }
-  if (message.includes("InvalidAccountId")) {
-    return mode === "forgot-password" || mode === "reset-code"
-      ? "We couldn't find an account with that email, Doc."
-      : "That email or password doesn't match, Doc. Try again.";
-  }
-  if (message.includes("InvalidSecret")) {
+  if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
     return "That email or password doesn't match, Doc. Try again.";
   }
   if (message.includes("TooManyFailedAttempts")) {
@@ -137,7 +132,7 @@ export function LoginForm() {
       );
       setMode("verify-code");
     } catch (err) {
-      setError(friendlyError(err, mode));
+      setError(friendlyError(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -153,7 +148,7 @@ export function LoginForm() {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(friendlyError(err, mode));
+      setError(friendlyError(err));
       setIsSubmitting(false);
     }
   }
@@ -166,13 +161,20 @@ export function LoginForm() {
     setIsSubmitting(true);
     try {
       await signIn("password", { flow: "reset", email });
-      setInfo(`We've emailed a 6-digit code to ${email}.`);
-      setMode("reset-code");
     } catch (err) {
-      setError(friendlyError(err, mode));
-    } finally {
-      setIsSubmitting(false);
+      const message = err instanceof Error ? err.message : "";
+      // Don't let "no account with that email" behave differently from a
+      // real send — that would let this form be used to check which
+      // emails are registered. Every other error is still surfaced.
+      if (!message.includes("InvalidAccountId")) {
+        setError(friendlyError(err));
+        setIsSubmitting(false);
+        return;
+      }
     }
+    setInfo(`If an account exists for ${email}, we've sent a code, Doc.`);
+    setMode("reset-code");
+    setIsSubmitting(false);
   }
 
   async function handleResetVerification(e: FormEvent) {
@@ -191,7 +193,7 @@ export function LoginForm() {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(friendlyError(err, mode));
+      setError(friendlyError(err));
       setIsSubmitting(false);
     }
   }
