@@ -65,6 +65,9 @@ export function LoginForm() {
   const emailId = useId();
   const passwordId = useId();
   const confirmId = useId();
+  // Reused across the verify-code and reset-code screens below — safe
+  // because those two render branches are mutually exclusive early
+  // returns and never mount at the same time.
   const codeId = useId();
   const newPasswordId = useId();
   const confirmNewPasswordId = useId();
@@ -94,6 +97,8 @@ export function LoginForm() {
     setMode("login");
     setError(null);
     setInfo(null);
+    setPassword("");
+    setConfirmPassword("");
     setCode("");
     setNewPassword("");
     setConfirmNewPassword("");
@@ -149,6 +154,7 @@ export function LoginForm() {
       router.refresh();
     } catch (err) {
       setError(friendlyError(err));
+    } finally {
       setIsSubmitting(false);
     }
   }
@@ -194,6 +200,7 @@ export function LoginForm() {
       router.refresh();
     } catch (err) {
       setError(friendlyError(err));
+    } finally {
       setIsSubmitting(false);
     }
   }
@@ -205,7 +212,11 @@ export function LoginForm() {
       <form onSubmit={handleVerifyCode} noValidate>
         <div className="mb-5 text-center">
           <h2 className="font-serif font-semibold text-xl">Check your email, Doc</h2>
-          {info && <p className="mt-1.5 text-sm text-ink-soft">{info}</p>}
+          {info && (
+            <p className="mt-1.5 text-sm text-ink-soft" aria-live="polite">
+              {info}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <div>
@@ -298,7 +309,11 @@ export function LoginForm() {
       <form onSubmit={handleResetVerification} noValidate>
         <div className="mb-5 text-center">
           <h2 className="font-serif font-semibold text-xl">Set a new password, Doc</h2>
-          {info && <p className="mt-1.5 text-sm text-ink-soft">{info}</p>}
+          {info && (
+            <p className="mt-1.5 text-sm text-ink-soft" aria-live="polite">
+              {info}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <div>
