@@ -1,11 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useQuery } from "convex/react";
 import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { trimHistory } from "@/lib/chat-history";
 import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
-import { loadGoals } from "@/lib/storage";
+import { todayKey } from "@/lib/date";
+import { api } from "@/convex/_generated/api";
 import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
 interface Props {
@@ -79,6 +81,7 @@ export function DoseyChat({ stats }: Props) {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const goals = useQuery(api.goals.list, { date: todayKey() }) ?? [];
 
   // Reads the persisted "Dosey is resting" state and syncs it into local
   // state. Doubles as the entire "notify when back" mechanism: loadRateLimit
@@ -125,7 +128,11 @@ export function DoseyChat({ stats }: Props) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: trimHistory(history), stats, goals: loadGoals() }),
+        body: JSON.stringify({
+          messages: trimHistory(history),
+          stats,
+          goals: goals.map((g) => ({ id: g._id, text: g.text, done: g.done, createdAt: g.createdAt })),
+        }),
       });
 
       if (!res.ok || !res.body) {

@@ -1,54 +1,49 @@
 "use client";
 import { AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GoalItem } from "./goal-item";
-import { loadGoals, saveGoals } from "@/lib/storage";
-import type { Goal } from "@/types";
+import { api } from "@/convex/_generated/api";
+import { todayKey } from "@/lib/date";
+import type { Id } from "@/convex/_generated/dataModel";
 
 interface Props {
   onProgressChange?: (done: number, total: number) => void;
 }
 
 export function GoalList({ onProgressChange }: Props) {
-  const [goals, setGoals] = useState<Goal[]>([]);
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const date = todayKey();
 
-  // Hydrate from localStorage on mount (client only). This must run after mount:
-  // the server has no localStorage, so a lazy initializer would cause a hydration
-  // mismatch. Reading persisted state here is the intended pattern.
+  const goalsResult = useQuery(api.goals.list, { date });
+  const goals = useMemo(() => goalsResult ?? [], [goalsResult]);
+  const addGoal = useMutation(api.goals.add);
+  const toggleGoal = useMutation(api.goals.toggle);
+  const removeGoal = useMutation(api.goals.remove);
+
+  const doneCount = useMemo(() => goals.filter((g) => g.done).length, [goals]);
+  const totalCount = goals.length;
+
+  // Report aggregate progress up to the parent whenever the live query updates.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setGoals(loadGoals());
-  }, []);
-
-  // Persist + notify parent on every change
-  const update = useCallback((next: Goal[]) => {
-    setGoals(next);
-    saveGoals(next);
-    onProgressChange?.(next.filter(g => g.done).length, next.length);
-  }, [onProgressChange]);
+    onProgressChange?.(doneCount, totalCount);
+  }, [doneCount, totalCount, onProgressChange]);
 
   function add() {
     const text = input.trim();
     if (!text || text.length > 80) return;
-    const goal: Goal = {
-      id: crypto.randomUUID(),
-      text,
-      done: false,
-      createdAt: Date.now(),
-    };
-    update([...goals, goal]);
+    void addGoal({ text, date });
     setInput("");
     inputRef.current?.focus();
   }
 
   function toggle(id: string) {
-    update(goals.map(g => g.id === id ? { ...g, done: !g.done } : g));
+    void toggleGoal({ id: id as Id<"goals"> });
   }
 
   function remove(id: string) {
-    update(goals.filter(g => g.id !== id));
+    void removeGoal({ id: id as Id<"goals"> });
   }
 
   return (
@@ -83,7 +78,7 @@ export function GoalList({ onProgressChange }: Props) {
       <ul className="flex flex-col gap-2">
         <AnimatePresence initial={false}>
           {goals.map(g => (
-            <GoalItem key={g.id} goal={g} onToggle={toggle} onDelete={remove} />
+            <GoalItem key={g._id} goal={{ id: g._id, text: g.text, done: g.done, createdAt: g.createdAt }} onToggle={toggle} onDelete={remove} />
           ))}
         </AnimatePresence>
       </ul>

@@ -1,7 +1,7 @@
 export const DAILY_MESSAGE_LIMIT = 30;
 
 export interface RateLimitEntry {
-  day: string; // "YYYY-MM-DD", same UTC-based key as lib/storage.ts's todayKey()
+  day: string; // "YYYY-MM-DD", same UTC-based key as lib/date.ts's todayKey()
   count: number;
 }
 
@@ -12,7 +12,7 @@ export interface RateLimitResult {
 }
 
 export function dayKey(now: Date = new Date()): string {
-  return now.toISOString().slice(0, 10); // mirrors lib/storage.ts's todayKey()
+  return now.toISOString().slice(0, 10); // mirrors lib/date.ts's todayKey()
 }
 
 function nextRolloverIso(now: Date): string {

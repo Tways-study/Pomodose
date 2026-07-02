@@ -12,15 +12,10 @@ export interface TimerState {
 }
 
 export interface Goal {
-  id: string;
+  id: string; // Convex document id (convex/_generated/dataModel's Id<"goals">)
   text: string;
   done: boolean;
   createdAt: number;
-}
-
-export interface PersistedGoals {
-  date: string;    // "YYYY-MM-DD"
-  goals: Goal[];
 }
 
 // --- Dosey chat companion ---
