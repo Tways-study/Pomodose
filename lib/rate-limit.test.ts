@@ -9,7 +9,7 @@ import {
 } from "./rate-limit";
 
 describe("dayKey", () => {
-  it("formats as YYYY-MM-DD in UTC, matching lib/storage.ts's todayKey()", () => {
+  it("formats as YYYY-MM-DD in UTC, matching lib/date.ts's todayKey()", () => {
     expect(dayKey(new Date("2026-03-05T23:59:59.000Z"))).toBe("2026-03-05");
     expect(dayKey(new Date("2026-03-06T00:00:00.000Z"))).toBe("2026-03-06");
   });

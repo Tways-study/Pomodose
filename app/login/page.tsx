@@ -1,15 +1,6 @@
-import { hasAccessCode } from "@/lib/auth";
-import { GateForm } from "@/components/gate-form";
+import { LoginForm } from "@/components/login-form";
 
-// This reads in-memory server state (not cookies()/headers()), so Next has
-// no automatic signal to treat it as dynamic — force it, or the register/
-// login mode gets baked into a static snapshot at build time and never
-// updates again.
-export const dynamic = "force-dynamic";
-
-export default function GatePage() {
-  const mode = hasAccessCode() ? "login" : "register";
-
+export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
@@ -28,13 +19,12 @@ export default function GatePage() {
         </div>
 
         <div className="bg-paper border border-line rounded-card p-6 sm:p-8 shadow-[0_1px_0_white_inset,0_8px_26px_-18px_rgba(46,36,51,.10)]">
-          <GateForm mode={mode} />
+          <LoginForm />
         </div>
 
         <p className="mt-4 text-center text-xs text-ink-soft">
-          {mode === "register"
-            ? "No recovery yet — if you forget your code, the server needs a restart to reset it."
-            : "Forgot your code? The server needs a restart to reset it."}
+          Forgot your password? Password reset isn&apos;t set up yet, Doc — for now, a new
+          account is the way back in.
         </p>
       </div>
     </div>

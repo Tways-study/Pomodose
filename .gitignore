@@ -36,9 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
-# access-gate state (see lib/auth.ts)
-.pomodose-auth.json
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# convex
+/convex/_generated

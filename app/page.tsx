@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
 import { useReducer, useState } from "react";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
@@ -11,9 +13,16 @@ import { timerReducer, initialTimerState } from "@/lib/timer-machine";
 import { SETTINGS }           from "@/lib/settings";
 
 export default function Home() {
+  const { signOut } = useAuthActions();
+  const router = useRouter();
   const [timer, dispatch] = useReducer(timerReducer, initialTimerState);
   const [goalsDone, setGoalsDone]   = useState(0);
   const [goalsTotal, setGoalsTotal] = useState(0);
+
+  async function handleSignOut() {
+    await signOut();
+    router.push("/login");
+  }
 
   const cyclePosition = timer.focusCycle % 4;
 
@@ -34,10 +43,18 @@ export default function Home() {
             <p className="text-xs tracking-[.18em] uppercase text-ink-soft mt-0.5">Study Companion</p>
           </div>
         </div>
-        <p className="text-sm text-ink-soft">
-          Doses taken today &nbsp;
-          <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
-        </p>
+        <div className="flex flex-col items-end gap-1">
+          <p className="text-sm text-ink-soft">
+            Doses taken today &nbsp;
+            <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
+          </p>
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-ink-soft hover:text-ink transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {/* Main grid */}
