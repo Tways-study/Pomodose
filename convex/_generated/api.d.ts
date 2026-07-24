@@ -8,13 +8,10 @@
  * @module
  */
 
-import type * as GmailOtp from "../GmailOtp.js";
 import type * as auth from "../auth.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
-import type * as lib_generateOtpCode from "../lib/generateOtpCode.js";
-import type * as lib_sendOtpEmail from "../lib/sendOtpEmail.js";
 
 import type {
   ApiFromModules,
@@ -23,13 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  GmailOtp: typeof GmailOtp;
   auth: typeof auth;
   goals: typeof goals;
   http: typeof http;
   "lib/auth": typeof lib_auth;
-  "lib/generateOtpCode": typeof lib_generateOtpCode;
-  "lib/sendOtpEmail": typeof lib_sendOtpEmail;
 }>;
 
 /**
