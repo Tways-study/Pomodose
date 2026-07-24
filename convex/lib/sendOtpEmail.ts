@@ -7,12 +7,12 @@ import nodemailer from "nodemailer";
 const PURPOSE_COPY = {
   verify: {
     subject: "Confirm your email for Pomodose",
-    heading: "Confirm it's you, Doc",
+    heading: "Confirm it's you, Pill Whisperer",
     body: "Here's your code to confirm your email and finish setting up your dose log:",
   },
   reset: {
     subject: "Reset your Pomodose password",
-    heading: "Let's get you back in, Doc",
+    heading: "Let's get you back in, Pill Whisperer",
     body: "Here's your code to reset your password:",
   },
 } as const;

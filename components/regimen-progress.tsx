@@ -15,18 +15,18 @@ export function RegimenProgress({ cyclePosition, dailyDoses, goalsDone, goalsTot
   return (
     <section className="bg-paper border border-line rounded-card p-6 shadow-[0_1px_0_white_inset,0_8px_26px_-18px_rgba(46,36,51,.10)]">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-serif font-semibold text-lg tracking-tight">Focus regimen</h2>
+        <h2 className="font-serif font-semibold text-lg tracking-tight">Dose regimen</h2>
         <span className="text-xs tracking-widest uppercase text-ink-soft">Progress</span>
       </div>
 
       <div className="flex items-baseline justify-between mb-3">
         <div>
           <span className="font-serif text-3xl font-semibold">{goalsDone}</span>
-          <span className="text-sm text-ink-soft"> / {goalsTotal} goals done</span>
+          <span className="text-sm text-ink-soft"> / {goalsTotal} dispensed</span>
         </div>
         <div className="text-right">
           <span className="font-serif text-3xl font-semibold">{cyclePosition}</span>
-          <span className="text-sm text-ink-soft"> / {SETTINGS.CYCLE_LENGTH} to long break</span>
+          <span className="text-sm text-ink-soft"> / {SETTINGS.CYCLE_LENGTH} to antidote</span>
         </div>
       </div>
 

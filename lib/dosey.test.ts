@@ -20,19 +20,19 @@ describe("buildContextBlock", () => {
     expect(buildContextBlock(baseStats, [])).toContain("completed today: 3");
   });
 
-  it("includes cycle progress toward the long break", () => {
+  it("includes cycle progress toward the antidote", () => {
     expect(buildContextBlock(baseStats, [])).toContain(
-      "2 of 4 focus sessions toward the next long break",
+      "2 of 4 doses toward the next antidote",
     );
   });
 
   it("labels the current phase and timer status", () => {
-    expect(buildContextBlock(baseStats, [])).toContain("Focus (timer running)");
+    expect(buildContextBlock(baseStats, [])).toContain("Dose (timer running)");
   });
 
   it("lists goal titles with their done state and a done/total count", () => {
     const block = buildContextBlock(baseStats, goals);
-    expect(block).toContain("Today's goals (1/2 done):");
+    expect(block).toContain("Today's goals (1/2 dispensed):");
     expect(block).toContain("[x] Review pharmacokinetics");
     expect(block).toContain("[ ] Practice IV calculations");
   });

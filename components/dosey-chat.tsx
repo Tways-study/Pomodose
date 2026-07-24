@@ -252,14 +252,14 @@ export function DoseyChat({ stats }: Props) {
                   </div>
                   {limitedUntil ? (
                     <p className="text-center text-sm text-ink-soft" role="status">
-                      Dosey&apos;s tapped out for today, Doc — free questions refill at{" "}
+                      Dosey&apos;s tapped out for today, Pill Whisperer — free questions refill at{" "}
                       <b className="text-ink">{formatResetTime(limitedUntil)}</b>. Go log a dose
                       or two and I&apos;ll see you then!
                     </p>
                   ) : (
                     <>
                       <p className="text-center text-sm text-ink-soft">
-                        Hi, Doc. Ask me about your progress today, or a quick study question.
+                        Hi, Pill Whisperer. Ask me about your progress today, or a quick study question.
                       </p>
                       <div className="mt-4 flex flex-col gap-2">
                         {SUGGESTIONS.map((s) => (
@@ -302,7 +302,7 @@ export function DoseyChat({ stats }: Props) {
 
               {limitedUntil && messages.length > 0 && (
                 <p className="rounded-xl bg-lilac/25 px-3 py-2 text-sm text-ink" role="status">
-                  Dosey&apos;s tapped out for today, Doc — free questions refill at{" "}
+                  Dosey&apos;s tapped out for today, Pill Whisperer — free questions refill at{" "}
                   <b>{formatResetTime(limitedUntil)}</b>.
                 </p>
               )}

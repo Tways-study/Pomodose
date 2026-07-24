@@ -1,25 +1,30 @@
 "use client";
 
-import { useEffect, type Dispatch } from "react";
+import { useEffect, useState, type Dispatch } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
 
-// --- Vial geometry (SVG user units) -----------------------------------------
-const VIAL_TOP = 44;    // y where liquid starts, just below the neck
-const VIAL_BOTTOM = 205; // y at the bottom of the glass
-const VIAL_RANGE = VIAL_BOTTOM - VIAL_TOP; // 161px
+// --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
+const FLASK_TOP = 54;
+const FLASK_BOTTOM = 206;
+const FLASK_RANGE = FLASK_BOTTOM - FLASK_TOP; // 152px
 
-// Fillable interior of the glass body (also used as the liquid clip region).
-const BODY_PATH =
-  "M 62 36 C 62 50, 44 52, 44 68 L 44 196 Q 44 214, 62 214 " +
-  "L 88 214 Q 106 214, 106 196 L 106 68 C 106 52, 88 50, 88 36 Z";
-const NECK_PATH = "M 62 36 L 62 20 L 88 20 L 88 36";
+const FLASK_BODY_PATH =
+  "M 74 24 L 74 54 C 74 68, 18 155, 18 194 Q 18 208, 32 208 L 148 208 Q 162 208, 162 194 C 162 155, 106 68, 106 54 L 106 24 Z";
+
+// --- Graduated Cylinder Geometry (180 x 230 viewBox) -----------------------
+const CYLINDER_TOP = 28;
+const CYLINDER_BOTTOM = 190;
+const CYLINDER_RANGE = CYLINDER_BOTTOM - CYLINDER_TOP; // 162px
+
+const CYLINDER_BODY_PATH =
+  "M 56 16 L 68 26 L 68 184 Q 68 192, 76 192 L 104 192 Q 112 192, 112 184 L 112 26 L 118 20 L 112 20 L 68 20 Z";
 
 const PHASE_LABEL: Record<TimerState["phase"], string> = {
-  focus: "Focus",
-  short: "Short break",
-  long: "Long break",
+  focus: "Dose",
+  short: "Refill",
+  long: "Antidote",
 };
 
 function formatTime(seconds: number): string {
@@ -35,6 +40,7 @@ interface Props {
 }
 
 export function VialTimer({ state, dispatch }: Props) {
+  const [vessel, setVessel] = useState<"flask" | "cylinder">("flask");
   const reduceMotion = useReducedMotion();
 
   // --- Countdown tick: timestamp-delta driven so backgrounded tabs stay true ---
@@ -56,8 +62,16 @@ export function VialTimer({ state, dispatch }: Props) {
   // Focus drains; rests "top up" (invert) to signal refilling.
   const fillFraction = state.phase === "focus" ? ratio : 1 - ratio;
   const clamped = Math.min(1, Math.max(0, fillFraction));
-  const height = VIAL_RANGE * clamped;
-  const y = VIAL_BOTTOM - height;
+
+  const isFlask = vessel === "flask";
+  const bottomY = isFlask ? FLASK_BOTTOM : CYLINDER_BOTTOM;
+  const range = isFlask ? FLASK_RANGE : CYLINDER_RANGE;
+
+  const height = range * clamped;
+  const y = bottomY - height;
+
+  // Meniscus rx for flask scales with height (wider at bottom, narrower at top)
+  const meniscusRx = isFlask ? 16 + 48 * (1 - clamped) : 22;
 
   const liquidTransition = reduceMotion
     ? { duration: 0 }
@@ -69,39 +83,86 @@ export function VialTimer({ state, dispatch }: Props) {
       ? { label: "Pause", action: { type: "PAUSE" as const } }
       : state.status === "paused"
         ? { label: "Resume", action: { type: "RESUME" as const } }
-        : { label: "Begin dose", action: { type: "START" as const } };
+        : { label: `Begin ${PHASE_LABEL[state.phase].toLowerCase()}`, action: { type: "START" as const } };
 
   return (
     <div className="flex flex-col items-center">
+      {/* Vessel Shape Selector */}
+      <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-3 border border-line shadow-xs">
+        <button
+          onClick={() => setVessel("flask")}
+          className={`px-3 py-1 rounded-full transition-all duration-200 ${
+            vessel === "flask"
+              ? "bg-ink text-paper font-medium shadow-xs"
+              : "text-ink-soft hover:text-ink"
+          }`}
+          aria-label="Switch to Flask view"
+        >
+          Flask
+        </button>
+        <button
+          onClick={() => setVessel("cylinder")}
+          className={`px-3 py-1 rounded-full transition-all duration-200 ${
+            vessel === "cylinder"
+              ? "bg-ink text-paper font-medium shadow-xs"
+              : "text-ink-soft hover:text-ink"
+          }`}
+          aria-label="Switch to Graduated Cylinder view"
+        >
+          Graduated Cylinder
+        </button>
+      </div>
+
+      {/* Prominent Readout Display (100% visible with zero line overlap) */}
+      <div className="flex flex-col items-center my-2">
+        <span className="font-serif timer-display text-5xl font-semibold tabular-nums text-ink">
+          {formatTime(state.remaining)}
+        </span>
+        <span className="text-ink-soft text-xs tracking-widest uppercase mt-1">
+          {PHASE_LABEL[state.phase]}
+        </span>
+      </div>
+
+      {/* Vessel Graphic */}
       <div className="relative">
         <svg
-          viewBox="0 0 150 224"
-          className="w-[180px] h-auto"
+          viewBox="0 0 180 230"
+          className="w-[200px] h-auto"
           role="img"
           aria-label={`${PHASE_LABEL[state.phase]} timer, ${formatTime(state.remaining)} remaining`}
         >
           <defs>
-            <clipPath id="vial-clip">
-              <path d={BODY_PATH} />
+            <clipPath id="vessel-clip">
+              <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} />
             </clipPath>
           </defs>
 
-          {/* Empty glass tint */}
-          <path d={BODY_PATH} className="fill-paper-2" />
+          {/* Base for Cylinder */}
+          {!isFlask && (
+            <path
+              d="M 48 190 L 34 204 L 44 216 L 136 216 L 146 204 L 132 190 Z"
+              className="fill-paper-2 stroke-ink"
+              strokeWidth={2}
+              strokeLinejoin="round"
+            />
+          )}
+
+          {/* Empty glass interior tint */}
+          <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} className="fill-paper-2" />
 
           {/* Liquid + meniscus, constrained to the glass interior */}
-          <g clipPath="url(#vial-clip)">
+          <g clipPath="url(#vessel-clip)">
             <motion.rect
-              x={38}
-              width={78}
+              x={0}
+              width={180}
               className="fill-lilac"
               initial={false}
               animate={{ y, height }}
               transition={liquidTransition}
             />
             <motion.ellipse
-              cx={75}
-              rx={31}
+              cx={90}
+              rx={meniscusRx}
               ry={3.5}
               className="fill-lilac-deep"
               initial={false}
@@ -110,34 +171,58 @@ export function VialTimer({ state, dispatch }: Props) {
             />
           </g>
 
-          {/* Measure ticks at 3/4, 1/2, 1/4 heights */}
-          <g className="stroke-lilac-deep" strokeWidth={1.5} strokeLinecap="round" opacity={0.5}>
-            <line x1={96} x2={104} y1={VIAL_BOTTOM - VIAL_RANGE * 0.75} y2={VIAL_BOTTOM - VIAL_RANGE * 0.75} />
-            <line x1={96} x2={104} y1={VIAL_BOTTOM - VIAL_RANGE * 0.5} y2={VIAL_BOTTOM - VIAL_RANGE * 0.5} />
-            <line x1={96} x2={104} y1={VIAL_BOTTOM - VIAL_RANGE * 0.25} y2={VIAL_BOTTOM - VIAL_RANGE * 0.25} />
-          </g>
+          {/* Graduations only on Cylinder (Flask is kept completely clean) */}
+          {!isFlask && (
+            <g className="stroke-lilac-deep fill-ink-soft" opacity={0.7}>
+              {[1.0, 0.8, 0.6, 0.4, 0.2].map((frac) => {
+                const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
+                const val = Math.round(frac * 100);
+                return (
+                  <g key={frac}>
+                    <line x1={98} x2={112} y1={tickY} y2={tickY} strokeWidth={1.5} />
+                    <text x={116} y={tickY + 3} className="text-[8px] font-mono fill-ink-soft stroke-none">{val}</text>
+                  </g>
+                );
+              })}
+              {[0.9, 0.7, 0.5, 0.3, 0.1].map((frac) => {
+                const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
+                return <line key={frac} x1={104} x2={112} y1={tickY} y2={tickY} strokeWidth={1} />;
+              })}
+              {[0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05].map((frac) => {
+                const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
+                return <line key={frac} x1={108} x2={112} y1={tickY} y2={tickY} strokeWidth={0.8} opacity={0.6} />;
+              })}
+              <text x={116} y={22} className="text-[8px] font-mono fill-ink-soft stroke-none">mL</text>
+            </g>
+          )}
 
           {/* Glass outline over the liquid for a crisp edge */}
-          <path d={BODY_PATH} className="fill-none stroke-ink" strokeWidth={2} strokeLinejoin="round" />
+          <path
+            d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH}
+            className="fill-none stroke-ink"
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
 
-          {/* Neck + cap */}
-          <path d={NECK_PATH} className="fill-none stroke-ink" strokeWidth={2} strokeLinejoin="round" />
-          <rect x={57} y={3} width={36} height={15} rx={5} className="fill-lilac stroke-ink" strokeWidth={2} />
+          {/* Top rim / Lip detail */}
+          {isFlask ? (
+            <g>
+              <rect x={68} y={16} width={44} height={10} rx={4} className="fill-lilac stroke-ink" strokeWidth={2} />
+              <line x1={68} x2={112} y1={26} y2={26} className="stroke-ink" strokeWidth={1.5} />
+            </g>
+          ) : (
+            <path
+              d="M 56 16 L 68 26 L 112 26 L 118 20 L 112 20 L 68 20 Z"
+              className="fill-lilac stroke-ink"
+              strokeWidth={1.5}
+              strokeLinejoin="round"
+            />
+          )}
         </svg>
-
-        {/* Centered readout over the vial */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="font-serif timer-display text-4xl font-semibold tabular-nums">
-            {formatTime(state.remaining)}
-          </span>
-          <span className="text-ink-soft text-xs tracking-widest uppercase mt-1">
-            {PHASE_LABEL[state.phase]}
-          </span>
-        </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 mt-7">
+      <div className="flex items-center gap-3 mt-6">
         <button
           onClick={() => dispatch(primary.action)}
           className="px-6 py-2.5 rounded-full bg-ink text-paper text-sm font-medium hover:opacity-90 transition-opacity duration-200"
@@ -154,3 +239,6 @@ export function VialTimer({ state, dispatch }: Props) {
     </div>
   );
 }
+
+
+

@@ -34,22 +34,22 @@ function EyeIcon({ open }: { open: boolean }) {
 function friendlyError(err: unknown): string {
   const message = err instanceof Error ? err.message : "";
   if (message.includes("already exists")) {
-    return "Looks like you already have an account with that email, Doc. Try signing in instead.";
+    return "Looks like you already have an account with that email, Pill Whisperer. Try signing in instead.";
   }
   if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
-    return "That email or password doesn't match, Doc. Try again.";
+    return "That email or password doesn't match, Pill Whisperer. Try again.";
   }
   if (message.includes("TooManyFailedAttempts")) {
-    return "Too many tries, Doc — give it a minute and try again.";
+    return "Too many tries, Pill Whisperer — give it a minute and try again.";
   }
   if (message.includes("Invalid password")) {
-    return "Passwords need at least 8 characters, Doc.";
+    return "Passwords need at least 8 characters, Pill Whisperer.";
   }
   if (message.includes("Invalid email address")) {
-    return "That doesn't look like a valid email, Doc.";
+    return "That doesn't look like a valid email, Pill Whisperer.";
   }
   if (message.includes("Could not verify code")) {
-    return "That code didn't match or has expired, Doc. Try again.";
+    return "That code didn't match or has expired, Pill Whisperer. Try again.";
   }
   return "Something went wrong. Try again.";
 }
@@ -114,7 +114,7 @@ export function LoginForm() {
     setInfo(null);
 
     if (mode === "register" && password !== confirmPassword) {
-      setError("Those two passwords don't match. Give it another try, Doc.");
+      setError("Those two passwords don't match. Give it another try, Pill Whisperer.");
       return;
     }
 
@@ -135,7 +135,7 @@ export function LoginForm() {
       // unverified account, sends a code instead of completing sign-in.
       setInfo(
         mode === "register"
-          ? `We've emailed a 6-digit code to ${email}. Enter it below to finish setting up your account, Doc.`
+          ? `We've emailed a 6-digit code to ${email}. Enter it below to finish setting up your account, Pill Whisperer.`
           : `This account hasn't been verified yet — we've emailed a fresh code to ${email}.`,
       );
       setMode("verify-code");
@@ -181,7 +181,7 @@ export function LoginForm() {
         return;
       }
     }
-    setInfo(`If an account exists for ${email}, we've sent a code, Doc.`);
+    setInfo(`If an account exists for ${email}, we've sent a code, Pill Whisperer.`);
     setMode("reset-code");
     setIsSubmitting(false);
   }
@@ -192,7 +192,7 @@ export function LoginForm() {
     setError(null);
 
     if (newPassword !== confirmNewPassword) {
-      setError("Those two passwords don't match. Give it another try, Doc.");
+      setError("Those two passwords don't match. Give it another try, Pill Whisperer.");
       return;
     }
 
@@ -214,7 +214,7 @@ export function LoginForm() {
     return (
       <form onSubmit={handleVerifyCode} noValidate>
         <div className="mb-5 text-center">
-          <h2 className="font-serif font-semibold text-xl">Check your email, Doc</h2>
+          <h2 className="font-serif font-semibold text-xl">Check your email, Pill Whisperer</h2>
           {info && (
             <p className="mt-1.5 text-sm text-ink-soft" aria-live="polite">
               {info}
@@ -264,7 +264,7 @@ export function LoginForm() {
     return (
       <form onSubmit={handleRequestReset} noValidate>
         <div className="mb-5 text-center">
-          <h2 className="font-serif font-semibold text-xl">Let&apos;s get you back in, Doc</h2>
+          <h2 className="font-serif font-semibold text-xl">Let&apos;s get you back in, Pill Whisperer</h2>
           <p className="mt-1.5 text-sm text-ink-soft">
             Enter your email and we&apos;ll send you a code to reset your password.
           </p>
@@ -311,7 +311,7 @@ export function LoginForm() {
     return (
       <form onSubmit={handleResetVerification} noValidate>
         <div className="mb-5 text-center">
-          <h2 className="font-serif font-semibold text-xl">Set a new password, Doc</h2>
+          <h2 className="font-serif font-semibold text-xl">Set a new password, Pill Whisperer</h2>
           {info && (
             <p className="mt-1.5 text-sm text-ink-soft" aria-live="polite">
               {info}
@@ -401,7 +401,7 @@ export function LoginForm() {
     <form onSubmit={handleLoginOrRegister} noValidate>
       <div className="mb-5 text-center">
         <h2 className="font-serif font-semibold text-xl">
-          {mode === "register" ? "Set up your dose log, Doc" : "Welcome back, Doc"}
+          {mode === "register" ? "Set up your dose log, Pill Whisperer" : "Welcome back, Pill Whisperer"}
         </h2>
         <p className="mt-1.5 text-sm text-ink-soft">
           {mode === "register"
@@ -425,7 +425,7 @@ export function LoginForm() {
               disabled={isSubmitting}
               onChange={(e) => setName(e.target.value)}
               className={inputClass}
-              placeholder="Doc"
+              placeholder="Pill Whisperer"
             />
           </div>
         )}
@@ -535,7 +535,7 @@ export function LoginForm() {
         <button type="button" onClick={toggleMode} disabled={isSubmitting} className={backLinkClass}>
           {mode === "register"
             ? "Already have an account? Sign in."
-            : "New here? Create an account, Doc."}
+            : "New here? Create an account, Pill Whisperer."}
         </button>
       </div>
     </form>

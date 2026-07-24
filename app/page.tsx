@@ -45,7 +45,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-end gap-1">
           <p className="text-sm text-ink-soft">
-            Doses taken today &nbsp;
+            Daily Prescription &nbsp;
             <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
           </p>
           <button
@@ -94,7 +94,7 @@ export default function Home() {
       </main>
 
       <footer className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
-        <span className="font-serif italic">Each session is a measured dose — take care of yourself, Doc.</span>
+        <span className="font-serif italic">Each session is a measured dose — take care of yourself, Pill Whisperer.</span>
         <span>Pomodose · v1</span>
       </footer>
 

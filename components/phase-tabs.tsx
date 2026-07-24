@@ -2,9 +2,9 @@
 import type { Phase } from "@/types";
 
 const PHASES: { id: Phase; label: string }[] = [
-  { id: "focus", label: "Focus" },
-  { id: "short", label: "Short break" },
-  { id: "long",  label: "Long break" },
+  { id: "focus", label: "Dose" },
+  { id: "short", label: "Refill" },
+  { id: "long",  label: "Antidote" },
 ];
 
 interface Props {

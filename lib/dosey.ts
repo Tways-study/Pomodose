@@ -21,9 +21,9 @@ Guardrails:
 - If you don't have the data to answer, say so plainly.`;
 
 const PHASE_LABELS: Record<Phase, string> = {
-  focus: "Focus",
-  short: "Short break",
-  long: "Long break",
+  focus: "Dose",
+  short: "Refill",
+  long: "Antidote",
 };
 
 /**
@@ -36,7 +36,7 @@ export function buildContextBlock(stats: DoseyStats, goals: Goal[]): string {
 
   lines.push(`Doses (focus sessions) completed today: ${stats.dailyDoses}`);
   lines.push(
-    `Cycle progress: ${stats.cyclePosition} of ${stats.cycleLength} focus sessions toward the next long break`,
+    `Cycle progress: ${stats.cyclePosition} of ${stats.cycleLength} doses toward the next antidote`,
   );
   lines.push(`Current phase: ${PHASE_LABELS[stats.phase]} (timer ${stats.status})`);
 
@@ -44,7 +44,7 @@ export function buildContextBlock(stats: DoseyStats, goals: Goal[]): string {
     lines.push("Today's goals: none added yet.");
   } else {
     const done = goals.filter((g) => g.done).length;
-    lines.push(`Today's goals (${done}/${goals.length} done):`);
+    lines.push(`Today's goals (${done}/${goals.length} dispensed):`);
     for (const goal of goals) {
       lines.push(`  [${goal.done ? "x" : " "}] ${goal.text}`);
     }
