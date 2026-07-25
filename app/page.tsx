@@ -11,6 +11,7 @@ import { RegimenProgress }   from "@/components/regimen-progress";
 import { DoseyChat }          from "@/components/dosey-chat";
 import { timerReducer, initialTimerState } from "@/lib/timer-machine";
 import { SETTINGS }           from "@/lib/settings";
+import { useAddressTerm }      from "@/components/address-term-provider";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -25,6 +26,7 @@ export default function Home() {
   }
 
   const cyclePosition = timer.focusCycle % 4;
+  const name = useAddressTerm();
 
   return (
     <div className="max-w-[1180px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
@@ -94,7 +96,7 @@ export default function Home() {
       </main>
 
       <footer className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
-        <span className="font-serif italic">Each session is a measured dose — take care of yourself, Pill Whisperer.</span>
+        <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
         <span>Pomodose · v1</span>
       </footer>
 

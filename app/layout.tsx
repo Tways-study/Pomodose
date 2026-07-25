@@ -2,6 +2,7 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import type { Metadata } from "next";
 import { Fraunces, Spline_Sans } from "next/font/google";
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import { AddressTermProvider } from "@/components/address-term-provider";
 import "./globals.css";
 
 // Fraunces is a variable font: to use the `opsz` axis the weight must stay
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ConvexAuthNextjsServerProvider>
       <html lang="en" className={`${fraunces.variable} ${splineSans.variable}`}>
         <body className="font-sans bg-paper text-ink antialiased">
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider>
+            <AddressTermProvider>{children}</AddressTermProvider>
+          </ConvexClientProvider>
         </body>
       </html>
     </ConvexAuthNextjsServerProvider>

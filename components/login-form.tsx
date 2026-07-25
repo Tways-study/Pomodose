@@ -3,6 +3,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useAddressTerm } from "@/components/address-term-provider";
 
 type Mode = "login" | "register";
 
@@ -31,22 +32,22 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
-function friendlyError(err: unknown): string {
+function friendlyError(err: unknown, name: string): string {
   const message = err instanceof Error ? err.message : "";
   if (message.includes("already exists")) {
-    return "Looks like you already have an account with that email, Pill Whisperer. Try signing in instead.";
+    return `Looks like you already have an account with that email, ${name}. Try signing in instead.`;
   }
   if (message.includes("InvalidAccountId") || message.includes("InvalidSecret")) {
-    return "That email or password doesn't match, Pill Whisperer. Try again.";
+    return `That email or password doesn't match, ${name}. Try again.`;
   }
   if (message.includes("TooManyFailedAttempts")) {
-    return "Too many tries, Pill Whisperer — give it a minute and try again.";
+    return `Too many tries, ${name} — give it a minute and try again.`;
   }
   if (message.includes("Invalid password")) {
-    return "Passwords need at least 8 characters, Pill Whisperer.";
+    return `Passwords need at least 8 characters, ${name}.`;
   }
   if (message.includes("Invalid email address")) {
-    return "That doesn't look like a valid email, Pill Whisperer.";
+    return `That doesn't look like a valid email, ${name}.`;
   }
   return "Something went wrong. Try again.";
 }
@@ -61,6 +62,7 @@ const backLinkClass = "text-center text-xs text-ink-soft hover:text-ink transiti
 export function LoginForm() {
   const { signIn } = useAuthActions();
   const router = useRouter();
+  const addressName = useAddressTerm();
   const nameId = useId();
   const emailId = useId();
   const passwordId = useId();
@@ -88,7 +90,7 @@ export function LoginForm() {
     setError(null);
 
     if (mode === "register" && password !== confirmPassword) {
-      setError("Those two passwords don't match. Give it another try, Pill Whisperer.");
+      setError(`Those two passwords don't match. Give it another try, ${addressName}.`);
       return;
     }
 
@@ -105,7 +107,7 @@ export function LoginForm() {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(friendlyError(err));
+      setError(friendlyError(err, addressName));
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +119,7 @@ export function LoginForm() {
     <form onSubmit={handleLoginOrRegister} noValidate>
       <div className="mb-5 text-center">
         <h2 className="font-serif font-semibold text-xl">
-          {mode === "register" ? "Set up your dose log, Pill Whisperer" : "Welcome back, Pill Whisperer"}
+          {mode === "register" ? `Set up your dose log, ${addressName}` : `Welcome back, ${addressName}`}
         </h2>
         <p className="mt-1.5 text-sm text-ink-soft">
           {mode === "register"
@@ -141,7 +143,7 @@ export function LoginForm() {
               disabled={isSubmitting}
               onChange={(e) => setName(e.target.value)}
               className={inputClass}
-              placeholder="Pill Whisperer"
+              placeholder={addressName}
             />
           </div>
         )}
@@ -236,7 +238,7 @@ export function LoginForm() {
         <button type="button" onClick={toggleMode} disabled={isSubmitting} className={backLinkClass}>
           {mode === "register"
             ? "Already have an account? Sign in."
-            : "New here? Create an account, Pill Whisperer."}
+            : `New here? Create an account, ${addressName}.`}
         </button>
       </div>
     </form>

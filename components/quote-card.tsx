@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { QUOTES, shuffledOrder } from "@/lib/quotes";
 import { SETTINGS } from "@/lib/settings";
+import { ADDRESS_TOKEN } from "@/lib/address-terms";
+import { useAddressTerm } from "@/components/address-term-provider";
 
 interface Props {
   /** Increment this whenever a session completes to force an immediate advance. */
@@ -50,6 +52,8 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
   }, [advanceSignal, next]);
 
   const quote = QUOTES[index];
+  const name = useAddressTerm();
+  const author = quote.author.replaceAll(ADDRESS_TOKEN, name);
 
   // Directional blur-lift: exits up, enters from below
   const variants = reduceMotion
@@ -78,7 +82,7 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
             transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="font-serif text-lg leading-snug">{quote.text}</p>
-            <cite className="block mt-2 not-italic text-sm text-ink-soft">{quote.author}</cite>
+            <cite className="block mt-2 not-italic text-sm text-ink-soft">{author}</cite>
           </motion.blockquote>
         </AnimatePresence>
       </div>

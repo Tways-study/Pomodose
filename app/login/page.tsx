@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/login-form";
+import { AddressName } from "@/components/address-term-provider";
 
 export default function LoginPage() {
   return (
@@ -23,7 +24,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-4 text-center text-xs text-ink-soft">
-          Trouble getting in? Use &quot;Forgot password?&quot; on the sign-in form, Pill Whisperer.
+          Trouble getting in? Use &quot;Forgot password?&quot; on the sign-in form, <AddressName />.
         </p>
       </div>
     </div>

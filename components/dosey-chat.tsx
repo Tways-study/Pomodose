@@ -8,6 +8,7 @@ import { trimHistory } from "@/lib/chat-history";
 import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
 import { todayKey } from "@/lib/date";
 import { api } from "@/convex/_generated/api";
+import { useAddressTerm } from "@/components/address-term-provider";
 import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
 interface Props {
@@ -78,6 +79,7 @@ export function DoseyChat({ stats }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [limitedUntil, setLimitedUntil] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const name = useAddressTerm();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -252,14 +254,14 @@ export function DoseyChat({ stats }: Props) {
                   </div>
                   {limitedUntil ? (
                     <p className="text-center text-sm text-ink-soft" role="status">
-                      Dosey&apos;s tapped out for today, Pill Whisperer — free questions refill at{" "}
+                      Dosey&apos;s tapped out for today, {name} — free questions refill at{" "}
                       <b className="text-ink">{formatResetTime(limitedUntil)}</b>. Go log a dose
                       or two and I&apos;ll see you then!
                     </p>
                   ) : (
                     <>
                       <p className="text-center text-sm text-ink-soft">
-                        Hi, Pill Whisperer. Ask me about your progress today, or a quick study question.
+                        Hi, {name}. Ask me about your progress today, or a quick study question.
                       </p>
                       <div className="mt-4 flex flex-col gap-2">
                         {SUGGESTIONS.map((s) => (
@@ -302,7 +304,7 @@ export function DoseyChat({ stats }: Props) {
 
               {limitedUntil && messages.length > 0 && (
                 <p className="rounded-xl bg-lilac/25 px-3 py-2 text-sm text-ink" role="status">
-                  Dosey&apos;s tapped out for today, Pill Whisperer — free questions refill at{" "}
+                  Dosey&apos;s tapped out for today, {name} — free questions refill at{" "}
                   <b>{formatResetTime(limitedUntil)}</b>.
                 </p>
               )}
