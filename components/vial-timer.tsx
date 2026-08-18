@@ -88,12 +88,12 @@ export function VialTimer({ state, dispatch }: Props) {
   return (
     <div className="flex flex-col items-center">
       {/* Vessel Shape Selector */}
-      <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-3 border border-line shadow-xs">
+      <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-5 border border-line">
         <button
           onClick={() => setVessel("flask")}
           className={`px-3 py-1 rounded-full transition-all duration-200 ${
             vessel === "flask"
-              ? "bg-ink text-paper font-medium shadow-xs"
+              ? "bg-paper text-ink font-medium shadow-sm"
               : "text-ink-soft hover:text-ink"
           }`}
           aria-label="Switch to Flask view"
@@ -104,7 +104,7 @@ export function VialTimer({ state, dispatch }: Props) {
           onClick={() => setVessel("cylinder")}
           className={`px-3 py-1 rounded-full transition-all duration-200 ${
             vessel === "cylinder"
-              ? "bg-ink text-paper font-medium shadow-xs"
+              ? "bg-paper text-ink font-medium shadow-sm"
               : "text-ink-soft hover:text-ink"
           }`}
           aria-label="Switch to Graduated Cylinder view"
@@ -114,7 +114,7 @@ export function VialTimer({ state, dispatch }: Props) {
       </div>
 
       {/* Prominent Readout Display (100% visible with zero line overlap) */}
-      <div className="flex flex-col items-center my-2">
+      <div className="flex flex-col items-center mb-4">
         <span className="font-serif timer-display text-5xl font-semibold tabular-nums text-ink">
           {formatTime(state.remaining)}
         </span>

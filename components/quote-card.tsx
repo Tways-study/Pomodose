@@ -65,7 +65,7 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
       };
 
   return (
-    <figure className="max-w-sm mt-8">
+    <figure className="max-w-sm mt-12">
       <span className="font-serif italic text-xs tracking-widest uppercase text-lilac-deep block mb-2.5">
         Rx — Take as needed
       </span>

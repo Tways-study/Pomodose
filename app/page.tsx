@@ -42,7 +42,7 @@ export default function Home() {
   const name = useAddressTerm();
 
   return (
-    <div className="max-w-[1180px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+    <div className="max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
 
       {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 mb-10">
@@ -58,7 +58,7 @@ export default function Home() {
             <p className="text-xs tracking-[.18em] uppercase text-ink-soft mt-0.5">Study Companion</p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
           <p className="text-sm text-ink-soft">
             Daily Prescription &nbsp;
             <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
@@ -79,13 +79,13 @@ export default function Home() {
       </header>
 
       {/* Main grid */}
-      <main className="grid grid-cols-1 lg:grid-cols-[1.15fr_.85fr] gap-8 lg:gap-14">
+      <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-8 lg:gap-14 max-w-xl mx-auto lg:max-w-none">
 
         {/* Left: timer + quote */}
         <section className="flex flex-col items-center text-center">
           <PhaseTabs active={timer.phase} onChange={phase => dispatch({ type: "SET_PHASE", phase })} />
 
-          <div className="mt-8">
+          <div className="mt-6">
             <VialTimer state={timer} dispatch={dispatch} />
           </div>
 

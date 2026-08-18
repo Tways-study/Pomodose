@@ -21,12 +21,12 @@ export function RegimenProgress({ cyclePosition, dailyDoses, goalsDone, goalsTot
 
       <div className="flex items-baseline justify-between mb-3">
         <div>
-          <span className="font-serif text-3xl font-semibold">{goalsDone}</span>
+          <span className="font-serif text-4xl font-semibold text-ink">{goalsDone}</span>
           <span className="text-sm text-ink-soft"> / {goalsTotal} dispensed</span>
         </div>
         <div className="text-right">
-          <span className="font-serif text-3xl font-semibold">{cyclePosition}</span>
-          <span className="text-sm text-ink-soft"> / {SETTINGS.CYCLE_LENGTH} to antidote</span>
+          <span className="font-serif text-xl font-medium text-ink-soft">{cyclePosition}</span>
+          <span className="text-xs text-ink-soft"> / {SETTINGS.CYCLE_LENGTH} to antidote</span>
         </div>
       </div>
 
