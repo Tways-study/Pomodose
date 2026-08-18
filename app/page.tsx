@@ -19,10 +19,23 @@ export default function Home() {
   const [timer, dispatch] = useReducer(timerReducer, initialTimerState);
   const [goalsDone, setGoalsDone]   = useState(0);
   const [goalsTotal, setGoalsTotal] = useState(0);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   async function handleSignOut() {
-    await signOut();
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      await signOut();
+    } catch (err) {
+      console.error("Sign out failed", err);
+      setSignOutError("Couldn't sign out, Doc — try again.");
+      setSigningOut(false);
+      return;
+    }
     router.push("/login");
+    router.refresh();
   }
 
   const cyclePosition = timer.focusCycle % 4;
@@ -52,10 +65,16 @@ export default function Home() {
           </p>
           <button
             onClick={handleSignOut}
-            className="text-xs text-ink-soft hover:text-ink transition-colors"
+            disabled={signingOut}
+            className="text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60"
           >
-            Sign out
+            {signingOut ? "Signing out…" : "Sign out"}
           </button>
+          {signOutError && (
+            <p className="rounded-xl bg-clay/25 px-3 py-2 text-xs text-ink" role="alert">
+              {signOutError}
+            </p>
+          )}
         </div>
       </header>
 
