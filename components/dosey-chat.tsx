@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { trimHistory } from "@/lib/chat-history";
@@ -79,10 +79,15 @@ export function DoseyChat({ stats }: Props) {
   const [limitedUntil, setLimitedUntil] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
   const name = useAddressTerm();
+  const { isAuthenticated } = useConvexAuth();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const goals = useQuery(api.goals.list, { date: todayKey() }) ?? [];
+  // Skip while unauthenticated (including the moment sign-out clears the
+  // token but this component hasn't unmounted yet) — otherwise this reactive
+  // query re-fires, the server throws "Not authenticated", and Convex's
+  // useQuery re-throws that during render, crashing into the error boundary.
+  const goals = useQuery(api.goals.list, isAuthenticated ? { date: todayKey() } : "skip") ?? [];
 
   // Reads the persisted "Dosey is resting" state and syncs it into local
   // state. Doubles as the entire "notify when back" mechanism: loadRateLimit
