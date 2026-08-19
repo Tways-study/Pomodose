@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useMutation, useQuery } from "convex/react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GoalItem } from "./goal-item";
 import { api } from "@/convex/_generated/api";
@@ -13,11 +13,16 @@ interface Props {
 
 export function GoalList({ onProgressChange }: Props) {
   const reduceMotion = useReducedMotion();
+  const { isAuthenticated } = useConvexAuth();
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const date = todayKey();
 
-  const goalsResult = useQuery(api.goals.list, { date });
+  // Skip while unauthenticated (including the moment sign-out clears the
+  // token but this component hasn't unmounted yet) — otherwise this reactive
+  // query re-fires, the server throws "Not authenticated", and Convex's
+  // useQuery re-throws that during render, crashing into the error boundary.
+  const goalsResult = useQuery(api.goals.list, isAuthenticated ? { date } : "skip");
   const goals = useMemo(() => goalsResult ?? [], [goalsResult]);
   const addGoal = useMutation(api.goals.add);
   const toggleGoal = useMutation(api.goals.toggle);
