@@ -3,7 +3,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useReducer, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
 import { VialMark }          from "@/components/vial-mark";
@@ -43,8 +43,27 @@ export default function Home() {
   const cyclePosition = timer.focusCycle % 4;
   const name = useAddressTerm();
 
+  // --- Page-wide ambient wash: complements the vial's own running halo ---
+  const reduceMotion = useReducedMotion();
+  const isRunning = timer.status === "running";
+  const ambientOpacity = reduceMotion
+    ? (isRunning ? 0.06 : 0)
+    : (isRunning ? [0.04, 0.1, 0.04] : 0);
+  const ambientTransition = !reduceMotion && isRunning
+    ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
+    : { duration: 0.4, ease: "easeOut" as const };
+
   return (
-    <div className="max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
+    <>
+      <motion.div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{ background: "radial-gradient(55% 45% at 8% 108%, #C9B6E4 0%, transparent 70%)" }}
+        initial={false}
+        animate={{ opacity: ambientOpacity }}
+        transition={ambientTransition}
+      />
+      <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
 
       {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 mb-10">
@@ -134,6 +153,7 @@ export default function Home() {
           status: timer.status,
         }}
       />
-    </div>
+      </div>
+    </>
   );
 }

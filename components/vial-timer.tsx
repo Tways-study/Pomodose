@@ -89,6 +89,15 @@ export function VialTimer({ state, dispatch }: Props) {
     ? { duration: 0 }
     : { type: "tween" as const, duration: 0.8, ease: EASE_OUT };
 
+  // --- "Session is running" ambient halo ---------------------------------
+  const isRunning = state.status === "running";
+  const haloOpacity = reduceMotion
+    ? (isRunning ? 0.2 : 0)
+    : (isRunning ? [0.15, 0.3, 0.15] : 0);
+  const haloTransition = !reduceMotion && isRunning
+    ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
+    : { duration: 0.3, ease: "easeOut" as const };
+
   // --- Primary control label / action ----------------------------------------
   const primary =
     state.status === "running"
@@ -149,7 +158,22 @@ export function VialTimer({ state, dispatch }: Props) {
             <clipPath id="vessel-clip">
               <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} />
             </clipPath>
+            <filter id="vial-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="8" />
+            </filter>
           </defs>
+
+          {/* Ambient halo — signals a session is running, sits behind the vessel */}
+          <motion.circle
+            cx={90}
+            cy={124}
+            r={78}
+            className="fill-lilac"
+            filter="url(#vial-glow)"
+            initial={false}
+            animate={{ opacity: haloOpacity }}
+            transition={haloTransition}
+          />
 
           {/* Base for Cylinder */}
           {!isFlask && (
