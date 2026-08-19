@@ -4,6 +4,7 @@ import { useEffect, useState, type Dispatch } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
+import { EASE_OUT } from "@/lib/motion";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -75,7 +76,7 @@ export function VialTimer({ state, dispatch }: Props) {
 
   const liquidTransition = reduceMotion
     ? { duration: 0 }
-    : { type: "tween" as const, duration: 0.8, ease: [0.22, 1, 0.36, 1] as const };
+    : { type: "tween" as const, duration: 0.8, ease: EASE_OUT };
 
   // --- Primary control label / action ----------------------------------------
   const primary =
@@ -89,9 +90,10 @@ export function VialTimer({ state, dispatch }: Props) {
     <div className="flex flex-col items-center">
       {/* Vessel Shape Selector */}
       <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-5 border border-line">
-        <button
+        <motion.button
           onClick={() => setVessel("flask")}
-          className={`px-3 py-1 rounded-full transition-all duration-200 ${
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          className={`px-3 py-1 rounded-full transition-colors duration-200 ${
             vessel === "flask"
               ? "bg-paper text-ink font-medium shadow-sm"
               : "text-ink-soft hover:text-ink"
@@ -99,10 +101,11 @@ export function VialTimer({ state, dispatch }: Props) {
           aria-label="Switch to Flask view"
         >
           Flask
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           onClick={() => setVessel("cylinder")}
-          className={`px-3 py-1 rounded-full transition-all duration-200 ${
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          className={`px-3 py-1 rounded-full transition-colors duration-200 ${
             vessel === "cylinder"
               ? "bg-paper text-ink font-medium shadow-sm"
               : "text-ink-soft hover:text-ink"
@@ -110,7 +113,7 @@ export function VialTimer({ state, dispatch }: Props) {
           aria-label="Switch to Graduated Cylinder view"
         >
           Graduated Cylinder
-        </button>
+        </motion.button>
       </div>
 
       {/* Prominent Readout Display (100% visible with zero line overlap) */}
@@ -223,18 +226,20 @@ export function VialTimer({ state, dispatch }: Props) {
 
       {/* Controls */}
       <div className="flex items-center gap-3 mt-6">
-        <button
+        <motion.button
           onClick={() => dispatch(primary.action)}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className="px-6 py-2.5 rounded-full bg-ink text-paper text-sm font-medium hover:opacity-90 transition-opacity duration-200"
         >
           {primary.label}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           onClick={() => dispatch({ type: "RESET" })}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className="px-5 py-2.5 rounded-full border border-line text-ink-soft text-sm font-medium hover:text-ink hover:border-ink-soft transition-colors duration-200"
         >
           Reset
-        </button>
+        </motion.button>
       </div>
     </div>
   );

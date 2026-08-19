@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { SETTINGS } from "@/lib/settings";
+import { EASE_OUT } from "@/lib/motion";
 
 interface Props {
   cyclePosition: number;   // 0–3 (focus sessions completed in current cycle)
@@ -51,7 +52,7 @@ export function RegimenProgress({ cyclePosition, dailyDoses, goalsDone, goalsTot
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-lilac to-lilac-deep"
           animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: EASE_OUT }}
         />
       </div>
     </section>

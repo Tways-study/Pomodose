@@ -9,13 +9,12 @@ import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
 import { todayKey } from "@/lib/date";
 import { api } from "@/convex/_generated/api";
 import { useAddressTerm } from "@/components/address-term-provider";
+import { EASE_OUT } from "@/lib/motion";
 import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
 interface Props {
   stats: DoseyStats;
 }
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 const SUGGESTIONS = [
   "How focused was I today?",
@@ -210,7 +209,8 @@ export function DoseyChat({ stats }: Props) {
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: EASE }}
+            transition={{ duration: 0.32, ease: EASE_OUT }}
+            style={{ originX: 1, originY: 1 }}
             className="fixed bottom-24 right-6 z-50 flex h-[520px] max-h-[calc(100vh-8rem)] w-[360px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-card border border-line bg-paper shadow-[0_1px_0_white_inset,0_18px_50px_-24px_rgba(46,36,51,.35)]"
           >
             {/* Header */}
@@ -265,13 +265,14 @@ export function DoseyChat({ stats }: Props) {
                       </p>
                       <div className="mt-4 flex flex-col gap-2">
                         {SUGGESTIONS.map((s) => (
-                          <button
+                          <motion.button
                             key={s}
                             onClick={() => send(s)}
+                            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
                             className="rounded-xl border border-line bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
                           >
                             {s}
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
                     </>
@@ -291,13 +292,15 @@ export function DoseyChat({ stats }: Props) {
                         : "max-w-[85%] rounded-2xl rounded-bl-sm bg-paper-2 px-3.5 py-2 text-sm text-ink whitespace-pre-wrap"
                     }
                   >
-                    {m.content || (
+                    {m.content || (reduceMotion ? (
+                      <span className="text-ink-soft">Dosey is typing…</span>
+                    ) : (
                       <span className="inline-flex gap-1 text-ink-soft" aria-label="Dosey is typing">
                         <span className="animate-pulse">●</span>
                         <span className="animate-pulse [animation-delay:150ms]">●</span>
                         <span className="animate-pulse [animation-delay:300ms]">●</span>
                       </span>
-                    )}
+                    ))}
                   </div>
                 </div>
               ))}
@@ -328,16 +331,17 @@ export function DoseyChat({ stats }: Props) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
                   placeholder={limitedUntil ? "Dosey's resting…" : "Ask Dosey…"}
-                  className="flex-1 rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60"
+                  className="flex-1 rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
                 />
-                <button
+                <motion.button
                   onClick={() => send(input)}
                   disabled={isStreaming || !!limitedUntil || !input.trim()}
                   aria-label="Send message"
+                  whileTap={reduceMotion ? undefined : { scale: 0.95 }}
                   className="flex-none rounded-xl bg-lilac px-4 text-ink font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200 disabled:opacity-40 disabled:hover:bg-lilac disabled:hover:text-ink"
                 >
                   ↑
-                </button>
+                </motion.button>
               </div>
               <p className="mt-2 text-center text-[10px] text-ink-soft">
                 Dosey is a study aid, not clinical advice — verify against official sources.

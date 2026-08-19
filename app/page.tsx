@@ -3,8 +3,10 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useReducer, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
+import { VialMark }          from "@/components/vial-mark";
 import { QuoteCard }         from "@/components/quote-card";
 import { GoalList }          from "@/components/goal-list";
 import { RegimenProgress }   from "@/components/regimen-progress";
@@ -47,12 +49,7 @@ export default function Home() {
       {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 mb-10">
         <div className="flex items-center gap-3.5">
-          {/* Pomodose vial mark */}
-          <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden>
-            <rect x="11" y="2" width="12" height="6" rx="2" fill="#C9B6E4" stroke="#2E2433" strokeWidth="2"/>
-            <path d="M13 8v5l-5 14a4 4 0 0 0 3.7 5.5h10.6A4 4 0 0 0 26 27L21 13V8" stroke="#2E2433" strokeWidth="2" fill="rgba(201,182,228,.35)"/>
-            <path d="M9.2 24h15.6" stroke="#9B7FC4" strokeWidth="2"/>
-          </svg>
+          <VialMark />
           <div>
             <h1 className="font-serif font-medium text-2xl sm:text-3xl tracking-tight">Pomodose</h1>
             <p className="text-xs tracking-[.18em] uppercase text-ink-soft mt-0.5">Study Companion</p>
@@ -70,11 +67,20 @@ export default function Home() {
           >
             {signingOut ? "Signing out…" : "Sign out"}
           </button>
-          {signOutError && (
-            <p className="rounded-xl bg-clay/25 px-3 py-2 text-xs text-ink" role="alert">
-              {signOutError}
-            </p>
-          )}
+          <AnimatePresence>
+            {signOutError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-xl bg-clay/25 px-3 py-2 text-xs text-ink"
+                role="alert"
+              >
+                {signOutError}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 

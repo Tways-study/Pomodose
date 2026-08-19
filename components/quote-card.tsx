@@ -6,6 +6,7 @@ import { QUOTES, shuffledOrder } from "@/lib/quotes";
 import { SETTINGS } from "@/lib/settings";
 import { ADDRESS_TOKEN } from "@/lib/address-terms";
 import { useAddressTerm } from "@/components/address-term-provider";
+import { EASE_OUT } from "@/lib/motion";
 
 interface Props {
   /** Increment this whenever a session completes to force an immediate advance. */
@@ -79,7 +80,7 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: EASE_OUT }}
           >
             <p className="font-serif text-lg leading-snug">{quote.text}</p>
             <cite className="block mt-2 not-italic text-sm text-ink-soft">{author}</cite>

@@ -3,6 +3,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useAddressTerm } from "@/components/address-term-provider";
 
 type Mode = "login" | "register";
@@ -54,7 +55,7 @@ function friendlyError(err: unknown, name: string): string {
 
 const labelClass = "block mb-1.5 text-xs font-medium tracking-[.14em] uppercase text-ink-soft";
 const inputClass =
-  "w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-all disabled:opacity-60";
+  "w-full rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow] disabled:opacity-60";
 const submitClass =
   "mt-1 w-full rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-paper hover:opacity-90 transition-opacity duration-200 disabled:opacity-40";
 const backLinkClass = "text-center text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60";
@@ -62,6 +63,7 @@ const backLinkClass = "text-center text-xs text-ink-soft hover:text-ink transiti
 export function LoginForm() {
   const { signIn } = useAuthActions();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const addressName = useAddressTerm();
   const nameId = useId();
   const emailId = useId();
@@ -129,24 +131,32 @@ export function LoginForm() {
       </div>
 
       <div className="flex flex-col gap-4">
-        {mode === "register" && (
-          <div>
-            <label htmlFor={nameId} className={labelClass}>
-              Name (optional)
-            </label>
-            <input
-              id={nameId}
-              type="text"
-              value={name}
-              maxLength={80}
-              autoComplete="name"
-              disabled={isSubmitting}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClass}
-              placeholder={addressName}
-            />
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {mode === "register" && (
+            <motion.div
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <label htmlFor={nameId} className={labelClass}>
+                Name (optional)
+              </label>
+              <input
+                id={nameId}
+                type="text"
+                value={name}
+                maxLength={80}
+                autoComplete="name"
+                disabled={isSubmitting}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClass}
+                placeholder={addressName}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div>
           <label htmlFor={emailId} className={labelClass}>
@@ -184,36 +194,45 @@ export function LoginForm() {
               className={`${inputClass} pr-11`}
               placeholder="••••••••"
             />
-            <button
+            <motion.button
               type="button"
               onClick={() => setReveal((v) => !v)}
               aria-label={reveal ? "Hide password" : "Show password"}
+              whileTap={reduceMotion ? undefined : { scale: 0.95 }}
               className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-soft hover:text-ink transition-colors"
             >
               <EyeIcon open={reveal} />
-            </button>
+            </motion.button>
           </div>
         </div>
 
-        {mode === "register" && (
-          <div>
-            <label htmlFor={confirmId} className={labelClass}>
-              Confirm password
-            </label>
-            <input
-              id={confirmId}
-              type={inputType}
-              value={confirmPassword}
-              maxLength={128}
-              autoComplete="new-password"
-              required
-              disabled={isSubmitting}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputClass}
-              placeholder="••••••••"
-            />
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {mode === "register" && (
+            <motion.div
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <label htmlFor={confirmId} className={labelClass}>
+                Confirm password
+              </label>
+              <input
+                id={confirmId}
+                type={inputType}
+                value={confirmPassword}
+                maxLength={128}
+                autoComplete="new-password"
+                required
+                disabled={isSubmitting}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputClass}
+                placeholder="••••••••"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {error && (
           <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
@@ -221,9 +240,10 @@ export function LoginForm() {
           </p>
         )}
 
-        <button
+        <motion.button
           type="submit"
           disabled={isSubmitting || !email || !password || (mode === "register" && !confirmPassword)}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className={submitClass}
         >
           {mode === "register"
@@ -233,13 +253,19 @@ export function LoginForm() {
             : isSubmitting
               ? "Signing in…"
               : "Sign in"}
-        </button>
+        </motion.button>
 
-        <button type="button" onClick={toggleMode} disabled={isSubmitting} className={backLinkClass}>
+        <motion.button
+          type="button"
+          onClick={toggleMode}
+          disabled={isSubmitting}
+          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          className={backLinkClass}
+        >
           {mode === "register"
             ? "Already have an account? Sign in."
             : `New here? Create an account, ${addressName}.`}
-        </button>
+        </motion.button>
       </div>
     </form>
   );
