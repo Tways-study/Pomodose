@@ -120,7 +120,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLoginOrRegister} noValidate>
       <div className="mb-5 text-center">
-        <h2 className="font-serif font-semibold text-xl">
+        <h2 className="font-serif font-medium text-2xl tracking-[-0.01em]">
           {mode === "register" ? `Set up your dose log, ${addressName}` : `Welcome back, ${addressName}`}
         </h2>
         <p className="mt-1.5 text-sm text-ink-soft">
