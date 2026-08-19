@@ -47,8 +47,8 @@ export default function Home() {
   const reduceMotion = useReducedMotion();
   const isRunning = timer.status === "running";
   const ambientOpacity = reduceMotion
-    ? (isRunning ? 0.06 : 0)
-    : (isRunning ? [0.04, 0.1, 0.04] : 0);
+    ? (isRunning ? 0.14 : 0)
+    : (isRunning ? [0.1, 0.22, 0.1] : 0);
   const ambientTransition = !reduceMotion && isRunning
     ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
     : { duration: 0.4, ease: "easeOut" as const };
@@ -58,7 +58,7 @@ export default function Home() {
       <motion.div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
-        style={{ background: "radial-gradient(55% 45% at 8% 108%, #C9B6E4 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(65% 55% at 8% 108%, #C9B6E4 0%, transparent 72%)" }}
         initial={false}
         animate={{ opacity: ambientOpacity }}
         transition={ambientTransition}

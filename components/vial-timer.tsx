@@ -92,8 +92,8 @@ export function VialTimer({ state, dispatch }: Props) {
   // --- "Session is running" ambient halo ---------------------------------
   const isRunning = state.status === "running";
   const haloOpacity = reduceMotion
-    ? (isRunning ? 0.2 : 0)
-    : (isRunning ? [0.15, 0.3, 0.15] : 0);
+    ? (isRunning ? 0.4 : 0)
+    : (isRunning ? [0.3, 0.55, 0.3] : 0);
   const haloTransition = !reduceMotion && isRunning
     ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
     : { duration: 0.3, ease: "easeOut" as const };
@@ -158,16 +158,17 @@ export function VialTimer({ state, dispatch }: Props) {
             <clipPath id="vessel-clip">
               <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} />
             </clipPath>
-            <filter id="vial-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="8" />
+            <filter id="vial-glow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="10" />
             </filter>
           </defs>
 
-          {/* Ambient halo — signals a session is running, sits behind the vessel */}
-          <motion.circle
-            cx={90}
-            cy={124}
-            r={78}
+          {/* Ambient halo — signals a session is running. Traces the vessel's own
+              silhouette (not a plain circle) so the blurred bleed always clears
+              the opaque glass-interior fill painted on top of it, for either
+              vessel shape, instead of mostly disappearing behind it. */}
+          <motion.path
+            d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH}
             className="fill-lilac"
             filter="url(#vial-glow)"
             initial={false}
