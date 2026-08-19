@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
 import { EASE_OUT } from "@/lib/motion";
+import { playChime } from "@/lib/chime";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -50,6 +51,7 @@ export function VialTimer({ state, dispatch }: Props) {
     const id = setInterval(() => {
       const elapsed = Math.floor((Date.now() - (state.startedAt ?? Date.now())) / 1000);
       if (elapsed >= state.total) {
+        playChime();
         dispatch({ type: "COMPLETE" });
       } else {
         dispatch({ type: "TICK" });
