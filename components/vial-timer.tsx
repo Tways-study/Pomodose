@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, type Dispatch } from "react";
+import { useEffect, useRef, useState, type Dispatch } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
 import { EASE_OUT } from "@/lib/motion";
 import { playChime } from "@/lib/chime";
+import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
+import { setRunningTitle, resetTitle, flashCompletionTitle } from "@/lib/document-title";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -23,19 +25,6 @@ const CYLINDER_RANGE = CYLINDER_BOTTOM - CYLINDER_TOP; // 162px
 const CYLINDER_BODY_PATH =
   "M 56 16 L 68 26 L 68 184 Q 68 192, 76 192 L 104 192 Q 112 192, 112 184 L 112 26 L 118 20 L 112 20 L 68 20 Z";
 
-const PHASE_LABEL: Record<TimerState["phase"], string> = {
-  focus: "Dose",
-  short: "Refill",
-  long: "Antidote",
-};
-
-function formatTime(seconds: number): string {
-  const s = Math.max(0, Math.floor(seconds));
-  const mm = Math.floor(s / 60).toString().padStart(2, "0");
-  const ss = (s % 60).toString().padStart(2, "0");
-  return `${mm}:${ss}`;
-}
-
 interface Props {
   state: TimerState;
   dispatch: Dispatch<TimerAction>;
@@ -44,6 +33,7 @@ interface Props {
 export function VialTimer({ state, dispatch }: Props) {
   const [vessel, setVessel] = useState<"flask" | "cylinder">("flask");
   const reduceMotion = useReducedMotion();
+  const justCompletedRef = useRef(false);
 
   // --- Countdown tick: timestamp-delta driven so backgrounded tabs stay true ---
   useEffect(() => {
@@ -52,6 +42,8 @@ export function VialTimer({ state, dispatch }: Props) {
       const elapsed = Math.floor((Date.now() - (state.startedAt ?? Date.now())) / 1000);
       if (elapsed >= state.total) {
         playChime();
+        justCompletedRef.current = true;
+        flashCompletionTitle();
         dispatch({ type: "COMPLETE" });
       } else {
         dispatch({ type: "TICK" });
@@ -59,6 +51,23 @@ export function VialTimer({ state, dispatch }: Props) {
     }, 1000);
     return () => clearInterval(id);
   }, [state.status, state.startedAt, state.total, dispatch]);
+
+  // --- Tab title: live countdown while running; hand off to the completion
+  // flash (already started above) instead of stomping it when idle is reached
+  // via COMPLETE, but reset it for any other idle transition (Reset, phase switch).
+  useEffect(() => {
+    if (state.status === "running") {
+      setRunningTitle(state.phase, state.remaining);
+    } else if (state.status === "idle") {
+      if (justCompletedRef.current) {
+        justCompletedRef.current = false;
+      } else {
+        resetTitle();
+      }
+    }
+  }, [state.status, state.phase, state.remaining]);
+
+  useEffect(() => () => resetTitle(), []);
 
   // --- Liquid level ----------------------------------------------------------
   const ratio = state.total > 0 ? state.remaining / state.total : 0;
