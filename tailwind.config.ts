@@ -11,6 +11,8 @@ const config: Config = {
         "ink-soft": "#6B5E6F",
         lilac:      "#C9B6E4",
         "lilac-deep":"#9B7FC4",
+        amber:      "#D9B36B",
+        "amber-deep":"#B98A3E",
         sage:       "#A8B89A",
         clay:       "#E0B4A8",
         line:       "#DED5C8",

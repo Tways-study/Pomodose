@@ -8,6 +8,8 @@ colors:
   ink-soft: "#6B5E6F"
   lilac: "#C9B6E4"
   lilac-deep: "#9B7FC4"
+  amber: "#D9B36B"
+  amber-deep: "#B98A3E"
   sage: "#A8B89A"
   clay: "#E0B4A8"
   line: "#DED5C8"
@@ -108,6 +110,7 @@ A warm, low-saturation palette — paper and ink, lilac tincture, sage for compl
 ### Secondary
 - **Sage** (#A8B89A): completion state only — a checked goal's checkmark button and strikethrough decoration. Never used decoratively elsewhere.
 - **Clay** (#E0B4A8): the one warm/warning note — delete-button hover, inline error banners (at low opacity, `bg-clay/25`). Reserved for "something needs attention," never a primary color.
+- **Amber** (#D9B36B) / **Amber Deep** (#B98A3E): the second tincture, reserved exclusively for running-state phase chrome (page wash, header sweep, dashboard-card glow, active-tab dot, dose-ring) during short/long breaks — focus sessions stay lilac. Never decorative, never used on the vial itself. Introduced in `plans/003-whole-ui-running-state.md` as a scoped exception to the Rare Accent Rule below.
 
 ### Named Rules
 **The One Border Rule.** Every border in the app is `border-line` (#DED5C8) at 1px. No exceptions, no secondary border colors — this is what keeps dozens of small surfaces (cards, inputs, pills, panels) feeling like one system.
@@ -141,6 +144,8 @@ Pomodose is nearly flat — surfaces are distinguished mainly by the paper/paper
 
 ### Named Rules
 **The Whisper Shadow Rule.** Every shadow in this system uses `rgba(46,36,51,...)` (the ink color) at low opacity, never black, and is paired with a `0 1px 0 white inset` highlight. A shadow that reads as heavy or neutral-gray is off-system.
+
+`plans/003-whole-ui-running-state.md` introduces one sanctioned second shadow-tint: a phase-colored glow (lilac or amber, see Colors → Amber) layered under the whisper shadow on the two dashboard cards, strictly gated to `status === "running"` and toggled via a CSS transition, never a continuous loop. This is the only place a non-ink shadow color appears in the system — treat any other use as off-system.
 
 ## 5. Components
 
@@ -186,5 +191,5 @@ A hand-drawn SVG vial (glass body + neck + cap), never a circular progress ring.
 - **Don't** use Inter, Roboto, Arial, or any system-default sans as a primary typeface.
 - **Don't** build a generic SaaS login screen: no centered-white-card-on-gradient template, no "Sign in to your account" boilerplate copy, no cold corporate sans-serif auth form.
 - **Don't** add gamified productivity chrome — streak counters, badges, confetti, achievement toasts. This app tracks doses and goals plainly, without game mechanics.
-- **Don't** introduce a second border color, a second shadow color (e.g. neutral black), or a saturated accent beyond lilac/sage/clay — the restraint is the point.
+- **Don't** introduce a second border color or a neutral/black shadow color. Amber (running-state phase chrome only, see Colors → Amber) and the one phase-tinted card-glow shadow (see Elevation → Named Rules) are sanctioned exceptions from `plans/003-whole-ui-running-state.md` — don't add further accents or shadow tints beyond those without a new plan entry.
 - **Don't** build a sidebar-nav-plus-stat-cards dashboard layout. Pomodose is one page; new surfaces should extend it, not fork into a different information architecture.
