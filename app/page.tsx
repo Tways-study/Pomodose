@@ -12,6 +12,7 @@ import { GoalList }          from "@/components/goal-list";
 import { RegimenProgress }   from "@/components/regimen-progress";
 import { DoseyChat }          from "@/components/dosey-chat";
 import { timerReducer, initialTimerState } from "@/lib/timer-machine";
+import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
 
@@ -108,7 +109,13 @@ export default function Home() {
 
         {/* Left: timer + quote */}
         <section className="flex flex-col items-center text-center">
-          <PhaseTabs active={timer.phase} onChange={phase => dispatch({ type: "SET_PHASE", phase })} />
+          <PhaseTabs
+            active={timer.phase}
+            onChange={phase => {
+              stopCompletionAlert();
+              dispatch({ type: "SET_PHASE", phase });
+            }}
+          />
 
           <div className="mt-6">
             <VialTimer state={timer} dispatch={dispatch} />

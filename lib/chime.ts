@@ -20,12 +20,31 @@ function playTone(ctx: AudioContext, frequency: number, startTime: number, durat
   oscillator.stop(startTime + duration + 0.05);
 }
 
-/** Soft two-note ascending chime (A5 -> E6) played when a timer session ends. */
-export function playChime(): void {
+/** Bright bell "ting" (like a pharmacy counter pickup bell) played once. */
+export function playPickupBell(): void {
   const ctx = getAudioContext();
   if (!ctx) return;
   if (ctx.state === "suspended") void ctx.resume();
   const now = ctx.currentTime;
-  playTone(ctx, 880.0, now, 0.35, 0.12); // A5
-  playTone(ctx, 1318.5, now + 0.14, 0.4, 0.1); // E6, slightly delayed
+  playTone(ctx, 1568.0, now, 0.9, 0.14); // G6 fundamental — the main ring
+  playTone(ctx, 3729.3, now, 0.4, 0.05); // inharmonic overtone — metallic shimmer
+}
+
+const ALERT_REPEAT_INTERVAL_MS = 4000;
+
+let alertIntervalId: ReturnType<typeof setInterval> | null = null;
+
+/** Rings the pickup bell immediately, then every ALERT_REPEAT_INTERVAL_MS until stopped. */
+export function startCompletionAlert(): void {
+  stopCompletionAlert();
+  playPickupBell();
+  alertIntervalId = setInterval(playPickupBell, ALERT_REPEAT_INTERVAL_MS);
+}
+
+/** Silences a ringing completion alert. Safe to call when nothing is ringing. */
+export function stopCompletionAlert(): void {
+  if (alertIntervalId !== null) {
+    clearInterval(alertIntervalId);
+    alertIntervalId = null;
+  }
 }

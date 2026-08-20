@@ -60,37 +60,84 @@ describe("chime", () => {
   afterEach(() => {
     setWindowAudioContext(originalAudioContext);
     vi.resetModules();
+    vi.useRealTimers();
   });
 
-  it("does not throw when AudioContext is unsupported", async () => {
-    setWindowAudioContext(undefined);
-    vi.resetModules();
-    const { playChime } = await import("./chime");
-    expect(() => playChime()).not.toThrow();
+  describe("playPickupBell", () => {
+    it("does not throw when AudioContext is unsupported", async () => {
+      setWindowAudioContext(undefined);
+      vi.resetModules();
+      const { playPickupBell } = await import("./chime");
+      expect(() => playPickupBell()).not.toThrow();
+    });
+
+    it("reuses a single AudioContext across calls", async () => {
+      const { MockAudioContext, getConstructCount } = createMockAudioContext();
+      setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
+      vi.resetModules();
+      const { playPickupBell } = await import("./chime");
+
+      playPickupBell();
+      playPickupBell();
+
+      expect(getConstructCount()).toBe(1);
+    });
+
+    it("plays two tones per call", async () => {
+      const { MockAudioContext, oscillators } = createMockAudioContext();
+      setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
+      vi.resetModules();
+      const { playPickupBell } = await import("./chime");
+
+      playPickupBell();
+
+      expect(oscillators).toHaveLength(2);
+      expect(oscillators[0].start).toHaveBeenCalled();
+      expect(oscillators[1].start).toHaveBeenCalled();
+    });
   });
 
-  it("reuses a single AudioContext across calls", async () => {
-    const { MockAudioContext, getConstructCount } = createMockAudioContext();
-    setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
-    vi.resetModules();
-    const { playChime } = await import("./chime");
+  describe("startCompletionAlert / stopCompletionAlert", () => {
+    it("rings immediately and again on every repeat interval until stopped", async () => {
+      vi.useFakeTimers();
+      const { MockAudioContext, oscillators } = createMockAudioContext();
+      setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
+      vi.resetModules();
+      const { startCompletionAlert, stopCompletionAlert } = await import("./chime");
 
-    playChime();
-    playChime();
+      startCompletionAlert();
+      expect(oscillators).toHaveLength(2); // immediate ring
 
-    expect(getConstructCount()).toBe(1);
-  });
+      vi.advanceTimersByTime(4000);
+      expect(oscillators).toHaveLength(4); // one repeat
 
-  it("plays two tones per call", async () => {
-    const { MockAudioContext, oscillators } = createMockAudioContext();
-    setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
-    vi.resetModules();
-    const { playChime } = await import("./chime");
+      vi.advanceTimersByTime(4000);
+      expect(oscillators).toHaveLength(6); // keeps ringing, no cap
 
-    playChime();
+      stopCompletionAlert();
+      vi.advanceTimersByTime(10000);
+      expect(oscillators).toHaveLength(6); // silenced
+    });
 
-    expect(oscillators).toHaveLength(2);
-    expect(oscillators[0].start).toHaveBeenCalled();
-    expect(oscillators[1].start).toHaveBeenCalled();
+    it("does not throw when stopped with nothing ringing", async () => {
+      vi.resetModules();
+      const { stopCompletionAlert } = await import("./chime");
+      expect(() => stopCompletionAlert()).not.toThrow();
+    });
+
+    it("starting a new alert clears any previous repeat schedule", async () => {
+      vi.useFakeTimers();
+      const { MockAudioContext, oscillators } = createMockAudioContext();
+      setWindowAudioContext(MockAudioContext as unknown as typeof AudioContext);
+      vi.resetModules();
+      const { startCompletionAlert } = await import("./chime");
+
+      startCompletionAlert();
+      startCompletionAlert();
+      const countAfterRestart = oscillators.length;
+
+      vi.advanceTimersByTime(4000);
+      expect(oscillators).toHaveLength(countAfterRestart + 2); // exactly one repeat fired, not two
+    });
   });
 });

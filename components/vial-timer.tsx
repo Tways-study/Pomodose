@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
 import { EASE_OUT } from "@/lib/motion";
-import { playChime } from "@/lib/chime";
+import { startCompletionAlert, stopCompletionAlert } from "@/lib/chime";
 import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
 import { setRunningTitle, resetTitle, flashCompletionTitle } from "@/lib/document-title";
 
@@ -41,7 +41,7 @@ export function VialTimer({ state, dispatch }: Props) {
     const id = setInterval(() => {
       const elapsed = Math.floor((Date.now() - (state.startedAt ?? Date.now())) / 1000);
       if (elapsed >= state.total) {
-        playChime();
+        startCompletionAlert();
         justCompletedRef.current = true;
         flashCompletionTitle();
         dispatch({ type: "COMPLETE" });
@@ -67,7 +67,10 @@ export function VialTimer({ state, dispatch }: Props) {
     }
   }, [state.status, state.phase, state.remaining]);
 
-  useEffect(() => () => resetTitle(), []);
+  useEffect(() => () => {
+    resetTitle();
+    stopCompletionAlert();
+  }, []);
 
   // --- Liquid level ----------------------------------------------------------
   const ratio = state.total > 0 ? state.remaining / state.total : 0;
@@ -263,14 +266,20 @@ export function VialTimer({ state, dispatch }: Props) {
       {/* Controls */}
       <div className="flex items-center gap-3 mt-6">
         <motion.button
-          onClick={() => dispatch(primary.action)}
+          onClick={() => {
+            stopCompletionAlert();
+            dispatch(primary.action);
+          }}
           whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className="px-6 py-2.5 rounded-full bg-ink text-paper text-sm font-medium hover:opacity-90 transition-opacity duration-200"
         >
           {primary.label}
         </motion.button>
         <motion.button
-          onClick={() => dispatch({ type: "RESET" })}
+          onClick={() => {
+            stopCompletionAlert();
+            dispatch({ type: "RESET" });
+          }}
           whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className="px-5 py-2.5 rounded-full border border-line text-ink-soft text-sm font-medium hover:text-ink hover:border-ink-soft transition-colors duration-200"
         >
