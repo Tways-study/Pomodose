@@ -43,3 +43,8 @@ next-env.d.ts
 # worktrees
 /.worktrees
 .gstack/
+
+# AI-tooling working docs (specs/plans/design-skill state) — not app source
+/docs/superpowers/
+/plans/
+/.impeccable/
