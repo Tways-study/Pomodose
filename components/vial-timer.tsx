@@ -143,7 +143,10 @@ export function VialTimer({ state, dispatch }: Props) {
 
       {/* Prominent Readout Display (100% visible with zero line overlap) */}
       <div className="flex flex-col items-center mb-4">
-        <span className="font-serif timer-display text-5xl font-semibold tabular-nums text-ink">
+        <span
+          className="font-serif timer-display text-6xl tabular-nums text-ink tracking-[-0.02em]"
+          style={{ fontVariationSettings: '"opsz" 72, "wght" 500' }}
+        >
           {formatTime(state.remaining)}
         </span>
         <span
@@ -275,7 +278,9 @@ export function VialTimer({ state, dispatch }: Props) {
             stopCompletionAlert();
             dispatch(primary.action);
           }}
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           style={isRunning ? { backgroundColor: phaseAccent.base } : undefined}
           className={`px-6 py-2.5 rounded-full text-sm font-medium transition-colors duration-500${
             isRunning ? " text-ink" : " bg-ink text-paper hover:opacity-90"

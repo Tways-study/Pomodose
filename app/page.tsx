@@ -19,6 +19,7 @@ import { PHASE_ACCENT }        from "@/lib/phase-theme";
 import { RxField }             from "@/components/rx-field";
 import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
+import { EASE_OUT }            from "@/lib/motion";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -71,6 +72,15 @@ export default function Home() {
   const isRunning = timer.status === "running";
   const isFocusRunning = isRunning && timer.phase === "focus";
   const phaseAccent = PHASE_ACCENT[timer.phase];
+
+  // Staggered entrance for the four content blocks on mount — mirrors the
+  // login page's blur-lift reveal. Runs once on mount; timer ticks and
+  // running-state changes never replay it.
+  const reveal = (delay: number) => ({
+    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14, filter: "blur(5px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    transition: { duration: reduceMotion ? 0.3 : 0.55, delay, ease: EASE_OUT },
+  });
 
   // Made a full pass louder after a live feel-check: solid-color rings and
   // full-viewport coverage instead of faint low-alpha tints, because the
@@ -159,7 +169,8 @@ export default function Home() {
       <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
 
       {/* Header */}
-      <header
+      <motion.header
+        {...reveal(0)}
         className="relative flex flex-wrap items-end justify-between gap-4 border-b pb-5 mb-10 transition-[border-color] duration-500 ease-out"
         style={{ borderBottomColor: headerBorderColor }}
       >
@@ -211,13 +222,13 @@ export default function Home() {
           animate={{ opacity: headerGlowOpacity }}
           transition={headerGlowTransition}
         />
-      </header>
+      </motion.header>
 
       {/* Main grid */}
       <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-8 lg:gap-14 max-w-xl mx-auto lg:max-w-none">
 
         {/* Left: timer + quote */}
-        <section className="flex flex-col items-center text-center">
+        <motion.section {...reveal(0.08)} className="flex flex-col items-center text-center">
           <PhaseTabs
             active={timer.phase}
             isRunning={isRunning}
@@ -235,10 +246,10 @@ export default function Home() {
             advanceSignal={timer.dailyDoses}
             paused={timer.status === "running"}
           />
-        </section>
+        </motion.section>
 
         {/* Right: goals + progress */}
-        <aside className="flex flex-col gap-5">
+        <motion.aside {...reveal(0.14)} className="flex flex-col gap-5">
           <div
             className="bg-paper border border-line rounded-card p-6 transition-[box-shadow] duration-700 ease-out"
             style={{ boxShadow: isRunning ? cardShadowRunning : cardShadowIdle }}
@@ -259,10 +270,10 @@ export default function Home() {
             isRunning={isRunning}
             isFocusRunning={isFocusRunning}
           />
-        </aside>
+        </motion.aside>
       </main>
 
-      <footer className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
+      <motion.footer {...reveal(0.2)} className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
         <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
         <div className="flex items-center gap-4">
           <ChimeVolume />
@@ -271,13 +282,13 @@ export default function Home() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Help and tips"
-              className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[10px] hover:text-ink hover:border-ink transition-colors duration-150"
+              className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-[11px] hover:text-ink hover:border-ink transition-colors duration-150"
             >
               ?
             </button>
           </span>
         </div>
-      </footer>
+      </motion.footer>
 
       <DoseyChat
         stats={{
