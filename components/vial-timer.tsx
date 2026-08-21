@@ -8,6 +8,7 @@ import { EASE_OUT } from "@/lib/motion";
 import { startCompletionAlert, stopCompletionAlert } from "@/lib/chime";
 import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
 import { setRunningTitle, resetTitle, flashCompletionTitle } from "@/lib/document-title";
+import { PHASE_ACCENT } from "@/lib/phase-theme";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -94,6 +95,7 @@ export function VialTimer({ state, dispatch }: Props) {
 
   // --- "Session is running" ambient halo ---------------------------------
   const isRunning = state.status === "running";
+  const phaseAccent = PHASE_ACCENT[state.phase];
   const haloOpacity = reduceMotion
     ? (isRunning ? 0.4 : 0)
     : (isRunning ? [0.3, 0.55, 0.3] : 0);
@@ -144,7 +146,10 @@ export function VialTimer({ state, dispatch }: Props) {
         <span className="font-serif timer-display text-5xl font-semibold tabular-nums text-ink">
           {formatTime(state.remaining)}
         </span>
-        <span className="text-ink-soft text-xs tracking-widest uppercase mt-1">
+        <span
+          className={`text-xs tracking-widest uppercase mt-1 transition-colors duration-500${isRunning ? "" : " text-ink-soft"}`}
+          style={{ color: isRunning ? phaseAccent.deep : undefined }}
+        >
           {PHASE_LABEL[state.phase]}
         </span>
       </div>
@@ -271,7 +276,10 @@ export function VialTimer({ state, dispatch }: Props) {
             dispatch(primary.action);
           }}
           whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-          className="px-6 py-2.5 rounded-full bg-ink text-paper text-sm font-medium hover:opacity-90 transition-opacity duration-200"
+          style={isRunning ? { backgroundColor: phaseAccent.base } : undefined}
+          className={`px-6 py-2.5 rounded-full text-sm font-medium transition-colors duration-500${
+            isRunning ? " text-ink" : " bg-ink text-paper hover:opacity-90"
+          }`}
         >
           {primary.label}
         </motion.button>

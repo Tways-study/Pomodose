@@ -16,7 +16,7 @@ import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
 import { PHASE_ACCENT }        from "@/lib/phase-theme";
-import { WispField }           from "@/components/wisp-field";
+import { RxField }             from "@/components/rx-field";
 import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
 
@@ -155,7 +155,7 @@ export default function Home() {
           scale: secondaryDriftTransition,
         }}
       />
-      <WispField accent={phaseAccent} active={isRunning} />
+      <RxField accent={phaseAccent} active={isRunning} />
       <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
 
       {/* Header */}
