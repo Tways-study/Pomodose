@@ -23,6 +23,7 @@ export function GoalList({ onProgressChange }: Props) {
   // query re-fires, the server throws "Not authenticated", and Convex's
   // useQuery re-throws that during render, crashing into the error boundary.
   const goalsResult = useQuery(api.goals.list, isAuthenticated ? { date } : "skip");
+  const isLoading = goalsResult === undefined;
   const goals = useMemo(() => goalsResult ?? [], [goalsResult]);
   const addGoal = useMutation(api.goals.add);
   const toggleGoal = useMutation(api.goals.toggle);
@@ -83,14 +84,27 @@ export function GoalList({ onProgressChange }: Props) {
 
       {/* List */}
       <ul className="flex flex-col gap-2">
-        <AnimatePresence initial={false}>
-          {goals.map(g => (
-            <GoalItem key={g._id} goal={{ id: g._id, text: g.text, done: g.done, createdAt: g.createdAt }} onToggle={toggle} onDelete={remove} />
-          ))}
-        </AnimatePresence>
+        {isLoading ? (
+          [58, 75, 42].map((w, i) => (
+            <li
+              key={i}
+              className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-xl animate-pulse"
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <div className="flex-none w-5 h-5 rounded-md bg-line" />
+              <div className="h-2.5 rounded-full bg-line" style={{ width: `${w}%` }} />
+            </li>
+          ))
+        ) : (
+          <AnimatePresence initial={false}>
+            {goals.map(g => (
+              <GoalItem key={g._id} goal={{ id: g._id, text: g.text, done: g.done, createdAt: g.createdAt }} onToggle={toggle} onDelete={remove} />
+            ))}
+          </AnimatePresence>
+        )}
       </ul>
 
-      {goals.length === 0 && (
+      {!isLoading && goals.length === 0 && (
         <p className="text-center text-sm italic text-ink-soft py-4">
           No goals prescribed yet. Add one above.
         </p>
