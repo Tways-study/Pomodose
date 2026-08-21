@@ -16,7 +16,7 @@ import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
 import { PHASE_ACCENT }        from "@/lib/phase-theme";
-import { BubbleField }         from "@/components/bubble-field";
+import { WispField }           from "@/components/wisp-field";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -136,7 +136,7 @@ export default function Home() {
           scale: secondaryDriftTransition,
         }}
       />
-      <BubbleField accent={phaseAccent} active={isRunning} />
+      <WispField accent={phaseAccent} active={isRunning} />
       <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
 
       {/* Header */}
