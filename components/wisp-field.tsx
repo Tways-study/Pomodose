@@ -53,7 +53,7 @@ export function WispField({ accent, active }: Props) {
             background: `linear-gradient(to top, transparent 0%, ${accent.base}55 35%, ${accent.base}22 75%, transparent 100%)`,
             filter: `blur(${w.blur}px)`,
           }}
-          initial={false}
+          initial={{ opacity: 0, x: 0, y: 0, scaleX: 1, scaleY: 1 }}
           animate={
             active
               ? {

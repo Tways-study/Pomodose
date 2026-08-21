@@ -114,7 +114,7 @@ export default function Home() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0 transition-[background] duration-700 ease-out"
         style={{ background: `radial-gradient(120% 90% at 10% 105%, ${phaseAccent.base} 0%, transparent 62%)` }}
-        initial={false}
+        initial={{ opacity: 0, x: 0, y: 0, scale: 1 }}
         animate={{ opacity: ambientOpacity, ...ambientDrift }}
         transition={{
           opacity: ambientOpacityTransition,
@@ -127,7 +127,7 @@ export default function Home() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0 transition-[background] duration-700 ease-out"
         style={{ background: `radial-gradient(100% 80% at 92% -6%, ${phaseAccent.deep} 0%, transparent 60%)` }}
-        initial={false}
+        initial={{ opacity: 0, x: 0, y: 0, scale: 1 }}
         animate={{ opacity: secondaryOpacity, ...secondaryDrift }}
         transition={{
           opacity: secondaryOpacityTransition,
@@ -188,7 +188,7 @@ export default function Home() {
             background: `linear-gradient(90deg, transparent 0%, ${phaseAccent.base} 50%, transparent 100%)`,
             filter: "blur(6px)",
           }}
-          initial={false}
+          initial={{ opacity: 0 }}
           animate={{ opacity: headerGlowOpacity }}
           transition={headerGlowTransition}
         />

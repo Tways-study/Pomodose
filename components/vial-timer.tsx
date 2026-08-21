@@ -174,7 +174,7 @@ export function VialTimer({ state, dispatch }: Props) {
             d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH}
             className="fill-lilac"
             filter="url(#vial-glow)"
-            initial={false}
+            initial={{ opacity: 0 }}
             animate={{ opacity: haloOpacity }}
             transition={haloTransition}
           />
@@ -198,7 +198,7 @@ export function VialTimer({ state, dispatch }: Props) {
               x={0}
               width={180}
               className="fill-lilac"
-              initial={false}
+              initial={{ y, height }}
               animate={{ y, height }}
               transition={liquidTransition}
             />
@@ -207,7 +207,7 @@ export function VialTimer({ state, dispatch }: Props) {
               rx={meniscusRx}
               ry={3.5}
               className="fill-lilac-deep"
-              initial={false}
+              initial={{ cy: y, opacity: 0 }}
               animate={{ cy: y, opacity: clamped > 0 && clamped < 1 ? 0.9 : 0 }}
               transition={liquidTransition}
             />
