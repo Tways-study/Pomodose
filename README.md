@@ -57,6 +57,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ```bash
 npm run dev         # start dev server (localhost:3000)
 npm run build        # production build
+npm start            # run the production build (after npm run build)
 npm run lint         # eslint (flat config, eslint-config-next)
 npm run typecheck    # tsc --noEmit
 npm test             # vitest run (single run, used in CI)
@@ -70,3 +71,7 @@ CI (`.github/workflows/ci.yml`) runs lint → typecheck → test → build in th
 ## Architecture
 
 See [`CLAUDE.md`](./CLAUDE.md) for a detailed breakdown of state flow, the timer's timestamp-driven design, goal persistence, and the Dosey chat proxy.
+
+## Showcase assets
+
+`showcase-assets/` holds marketing screenshots (portfolio card + Google Play phone/tablet listings) captured from a running local instance. Regenerate them by signing in to a dev account and screenshotting the desired viewport sizes; they aren't produced by any script.
