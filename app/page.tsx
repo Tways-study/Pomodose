@@ -17,6 +17,7 @@ import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
 import { PHASE_ACCENT }        from "@/lib/phase-theme";
 import { WispField }           from "@/components/wisp-field";
+import { ChimeVolume }         from "@/components/chime-volume";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -245,7 +246,10 @@ export default function Home() {
 
       <footer className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
         <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
-        <span>Pomodose · v1</span>
+        <div className="flex items-center gap-4">
+          <ChimeVolume />
+          <span>Pomodose · v1</span>
+        </div>
       </footer>
 
       <DoseyChat

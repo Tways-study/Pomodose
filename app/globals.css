@@ -19,3 +19,52 @@
   .font-serif { font-family: var(--font-serif), Georgia, serif; }
   .font-sans  { font-family: var(--font-sans), system-ui, sans-serif; }
 }
+
+/* Chime volume slider — styled to match the graduated measurement marks on the vial */
+.chime-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 96px;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    theme('colors.lilac') var(--fill, 70%),
+    theme('colors.line') var(--fill, 70%)
+  );
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+.chime-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: theme('colors.ink');
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.chime-slider:hover::-webkit-slider-thumb { transform: scale(1.2); }
+.chime-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid theme('colors.lilac-deep');
+  outline-offset: 2px;
+}
+.chime-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: theme('colors.ink');
+  border: none;
+  cursor: pointer;
+}
+.chime-slider::-moz-range-track {
+  height: 2px;
+  background: theme('colors.line');
+  border-radius: 1px;
+}
+.chime-slider::-moz-range-progress {
+  height: 2px;
+  background: theme('colors.lilac');
+  border-radius: 1px;
+}
