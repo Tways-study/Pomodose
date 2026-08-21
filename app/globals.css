@@ -24,22 +24,22 @@
 .chime-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 96px;
-  height: 2px;
+  width: 140px;
+  height: 3px;
   background: linear-gradient(
     to right,
     theme('colors.lilac') var(--fill, 70%),
     theme('colors.line') var(--fill, 70%)
   );
-  border-radius: 1px;
+  border-radius: 1.5px;
   outline: none;
   cursor: pointer;
 }
 .chime-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: theme('colors.ink');
   cursor: pointer;
@@ -51,20 +51,20 @@
   outline-offset: 2px;
 }
 .chime-slider::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: theme('colors.ink');
   border: none;
   cursor: pointer;
 }
 .chime-slider::-moz-range-track {
-  height: 2px;
+  height: 3px;
   background: theme('colors.line');
-  border-radius: 1px;
+  border-radius: 1.5px;
 }
 .chime-slider::-moz-range-progress {
-  height: 2px;
+  height: 3px;
   background: theme('colors.lilac');
-  border-radius: 1px;
+  border-radius: 1.5px;
 }
