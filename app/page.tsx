@@ -2,7 +2,7 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
@@ -18,6 +18,7 @@ import { useAddressTerm }      from "@/components/address-term-provider";
 import { PHASE_ACCENT }        from "@/lib/phase-theme";
 import { WispField }           from "@/components/wisp-field";
 import { ChimeVolume }         from "@/components/chime-volume";
+import { HelpModal }           from "@/components/help-modal";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -27,6 +28,23 @@ export default function Home() {
   const [goalsTotal, setGoalsTotal] = useState(0);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("pomodose:onboarding-seen")) {
+      // Intentional: post-mount localStorage check to avoid SSR mismatch.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsFirstVisit(true);
+      setShowHelp(true);
+    }
+  }, []);
+
+  function closeHelp() {
+    setShowHelp(false);
+    setIsFirstVisit(false);
+    localStorage.setItem("pomodose:onboarding-seen", "1");
+  }
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -248,7 +266,16 @@ export default function Home() {
         <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
         <div className="flex items-center gap-4">
           <ChimeVolume />
-          <span>Pomodose · v1</span>
+          <span className="flex items-center gap-2">
+            Pomodose · v1
+            <button
+              onClick={() => setShowHelp(true)}
+              aria-label="Help and tips"
+              className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[10px] hover:text-ink hover:border-ink transition-colors duration-150"
+            >
+              ?
+            </button>
+          </span>
         </div>
       </footer>
 
@@ -262,6 +289,7 @@ export default function Home() {
         }}
       />
       </div>
+      <HelpModal open={showHelp} isFirstVisit={isFirstVisit} onClose={closeHelp} />
     </>
   );
 }
