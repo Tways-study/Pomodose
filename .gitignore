@@ -50,3 +50,6 @@ next-env.d.ts
 /.impeccable/
 .claude/
 .playwright-mcp/
+
+# generated marketing screenshots
+/showcase-assets/
