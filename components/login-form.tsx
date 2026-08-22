@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
+import { ConvexError } from "convex/values";
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -55,8 +56,26 @@ function AlertMark() {
 // provider (node_modules/@convex-dev/auth/dist/providers/Password.js) and the
 // scaffolded reset email provider (convex/BrevoOTPPasswordReset.ts) — these are
 // the actual identifiers those throw, not guesses.
+//
+// convex/BrevoOTPPasswordReset.ts throws `ConvexError`, not a plain `Error` —
+// verified empirically against the lovely-blackbird-165 dev deployment via the
+// real client SDK (ConvexHttpClient, the same code the browser sync client is
+// built on): `err.message` arrives polluted with Convex's own
+// "[Request ID: ...] Server Error" boilerplate (and per Convex's docs, on a
+// *prod* deployment that's ALL `.message` contains — no substring survives to
+// match against). `err.data`, by contrast, arrives as the exact string passed
+// to `ConvexError(...)`, untouched, in both dev and prod — that's the whole
+// point of `ConvexError`. So a `ConvexError`'s `.data` must be read first;
+// `.message` substring-matching is kept only as the fallback path for the
+// framework's own plain `Error` throws (Password.js), which aren't ours to
+// convert and still arrive as an unwrapped message.
 function friendlyError(err: unknown, name: string, mode: Mode): string {
-  const message = err instanceof Error ? err.message : "";
+  const message =
+    err instanceof ConvexError && typeof err.data === "string"
+      ? err.data
+      : err instanceof Error
+        ? err.message
+        : "";
   if (message.includes("already exists")) {
     return `Looks like you already have an account with that email, ${name}. Try signing in instead.`;
   }

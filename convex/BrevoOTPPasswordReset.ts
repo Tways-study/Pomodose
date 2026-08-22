@@ -25,6 +25,7 @@
  * message below.
  */
 import { Email } from "@convex-dev/auth/providers/Email";
+import { ConvexError } from "convex/values";
 
 /**
  * Thrown when a password reset is requested but the Brevo env vars haven't
@@ -58,7 +59,7 @@ export const BrevoOTPPasswordReset = Email({
     const apiKey = process.env.BREVO_API_KEY;
     const senderEmail = process.env.BREVO_SENDER_EMAIL;
     if (!apiKey || !senderEmail) {
-      throw new Error(NOT_CONFIGURED_MESSAGE);
+      throw new ConvexError(NOT_CONFIGURED_MESSAGE);
     }
 
     const subject = "Your Apothecary password reset code";
@@ -81,7 +82,7 @@ export const BrevoOTPPasswordReset = Email({
 
     if (!response.ok) {
       const responseText = await response.text();
-      throw new Error(`Failed to send password reset email: ${responseText}`);
+      throw new ConvexError(`Failed to send password reset email: ${responseText}`);
     }
   },
 });
