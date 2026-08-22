@@ -23,6 +23,14 @@ const TIPS = [
     title: "The bell",
     body: "A pharmacy counter bell chimes when each session ends — and keeps ringing until you acknowledge it. Adjust the volume in the footer.",
   },
+  {
+    title: "The counter note",
+    body: "A small note appears near the header when something's worth flagging — a dose dispensed, a refill waiting, or a gentle warning if you've skipped one too many breaks in a row.",
+  },
+  {
+    title: "Desktop notifications",
+    body: "Turn on \u201cNotify\u201d in the footer to get a desktop notification when a session ends while the tab is out of view.",
+  },
 ];
 
 interface Props {
