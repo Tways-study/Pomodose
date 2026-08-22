@@ -24,6 +24,8 @@ export const initialTimerState: TimerState = {
   startedAt: null,
   focusCycle: 0,
   dailyDoses: 0,
+  dosesSinceBreak: 0,
+  firstDoseAt: null,
 };
 
 export function timerReducer(state: TimerState, action: TimerAction): TimerState {
@@ -32,9 +34,15 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
       const total = durationFor(action.phase);
       return { ...state, phase: action.phase, status: "idle", remaining: total, total, startedAt: null };
     }
-    case "START":
+    case "START": {
       if (state.status !== "idle") return state;
-      return { ...state, status: "running", startedAt: Date.now() };
+      const now = Date.now();
+      // Marks the very first focus session of this page session — used by
+      // the "long-stretch" burnout heuristic. Set once and never overwritten.
+      const firstDoseAt =
+        state.phase === "focus" && state.firstDoseAt === null ? now : state.firstDoseAt;
+      return { ...state, status: "running", startedAt: now, firstDoseAt };
+    }
 
     case "PAUSE":
       if (state.status !== "running") return state;
@@ -62,13 +70,14 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
       if (state.phase === "focus") {
         const focusCycle = state.focusCycle + 1;
         const dailyDoses = state.dailyDoses + 1;
+        const dosesSinceBreak = state.dosesSinceBreak + 1;
         const nextPhase: Phase = focusCycle % SETTINGS.CYCLE_LENGTH === 0 ? "long" : "short";
         const total = durationFor(nextPhase);
-        return { ...state, phase: nextPhase, status: "idle", remaining: total, total, startedAt: null, focusCycle, dailyDoses };
+        return { ...state, phase: nextPhase, status: "idle", remaining: total, total, startedAt: null, focusCycle, dailyDoses, dosesSinceBreak };
       }
-      // rest complete → return to focus
+      // rest complete → return to focus; a break was taken, so the grind streak resets
       const total = durationFor("focus");
-      return { ...state, phase: "focus", status: "idle", remaining: total, total, startedAt: null };
+      return { ...state, phase: "focus", status: "idle", remaining: total, total, startedAt: null, dosesSinceBreak: 0 };
     }
 
     default:

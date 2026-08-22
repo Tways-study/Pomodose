@@ -13,6 +13,8 @@ describe("timerReducer", () => {
       startedAt: null,
       focusCycle: 0,
       dailyDoses: 0,
+      dosesSinceBreak: 0,
+      firstDoseAt: null,
     });
   });
 
@@ -27,6 +29,26 @@ describe("timerReducer", () => {
     it("is a no-op when not idle", () => {
       const running: TimerState = { ...initialTimerState, status: "running" };
       expect(timerReducer(running, { type: "START" })).toBe(running);
+    });
+
+    it("sets firstDoseAt once, on the first focus START of the page session", () => {
+      vi.spyOn(Date, "now").mockReturnValue(500);
+      const next = timerReducer(initialTimerState, { type: "START" });
+      expect(next.firstDoseAt).toBe(500);
+    });
+
+    it("does not overwrite an existing firstDoseAt on a later START", () => {
+      vi.spyOn(Date, "now").mockReturnValue(9999);
+      const idleAfterFirstDose: TimerState = { ...initialTimerState, firstDoseAt: 500 };
+      const next = timerReducer(idleAfterFirstDose, { type: "START" });
+      expect(next.firstDoseAt).toBe(500);
+    });
+
+    it("does not set firstDoseAt when starting a break phase", () => {
+      vi.spyOn(Date, "now").mockReturnValue(1234);
+      const idleOnBreak: TimerState = { ...initialTimerState, phase: "short" };
+      const next = timerReducer(idleOnBreak, { type: "START" });
+      expect(next.firstDoseAt).toBeNull();
     });
   });
 
@@ -111,6 +133,22 @@ describe("timerReducer", () => {
       expect(next.focusCycle).toBe(1);
       expect(next.dailyDoses).toBe(1);
       expect(next.remaining).toBe(SETTINGS.SHORT_BREAK);
+    });
+
+    it("increments dosesSinceBreak across consecutive focus completions", () => {
+      const first = timerReducer(initialTimerState, { type: "COMPLETE" });
+      expect(first.dosesSinceBreak).toBe(1);
+
+      // Simulate completing another focus session without an intervening break.
+      const backToFocus: TimerState = { ...first, phase: "focus" };
+      const second = timerReducer(backToFocus, { type: "COMPLETE" });
+      expect(second.dosesSinceBreak).toBe(2);
+    });
+
+    it("resets dosesSinceBreak to 0 when a break completes", () => {
+      const onBreakAfterStreak: TimerState = { ...initialTimerState, phase: "short", dosesSinceBreak: 3 };
+      const next = timerReducer(onBreakAfterStreak, { type: "COMPLETE" });
+      expect(next.dosesSinceBreak).toBe(0);
     });
 
     it("advances to a long break after every CYCLE_LENGTH focus sessions", () => {

@@ -9,6 +9,8 @@ export interface TimerState {
   startedAt: number | null;  // Date.now() snapshot when last started
   focusCycle: number;  // how many focus sessions completed (mod 4 = position toward long break)
   dailyDoses: number;
+  dosesSinceBreak: number;    // consecutive focus completions with no break taken between them
+  firstDoseAt: number | null; // Date.now() snapshot of the first focus START this page session
 }
 
 export interface Goal {
@@ -45,3 +47,26 @@ export interface ChatRateLimitError {
   error: string;
   resetAt: string;
 }
+
+// --- Themed notification micro-copy ---
+
+export type NotificationEvent =
+  | "focus-complete"
+  | "short-complete"
+  | "long-complete"
+  | "break-unstarted"
+  | "paused-too-long"
+  | "no-antidote"
+  | "overdose"
+  | "long-stretch"
+  | "late-hour"
+  | "first-dose"
+  | "cycle-complete"
+  | "goals-cleared";
+
+export interface NotificationVariant {
+  headline: string; // <= 28 chars after %NAME% substitution -> tab title + OS notification title
+  note: string;      // one short sentence -> in-page note, OS body, Dosey chat message
+}
+
+export type BurnoutLevel = "overdose" | "no-antidote" | "long-stretch" | "late-hour";

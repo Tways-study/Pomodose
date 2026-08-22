@@ -1,5 +1,7 @@
 import { ADDRESS_TOKEN } from "./address-terms";
 
+export { shuffledOrder } from "./shuffle";
+
 export type Quote = { text: string; author: string };
 
 export const QUOTES: readonly Quote[] = [
@@ -19,13 +21,3 @@ export const QUOTES: readonly Quote[] = [
   { text: "A calm mind is the best instrument you own. Tend to it.", author: "— a soft reminder" },
   { text: "You've handled harder than this chapter. Begin.", author: "— I believe in you" },
 ] as const;
-
-/** Fisher-Yates shuffle — ensures all quotes are seen before any repeats. */
-export function shuffledOrder(length: number): number[] {
-  const order = Array.from({ length }, (_, i) => i);
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-  return order;
-}

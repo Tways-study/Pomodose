@@ -7,8 +7,9 @@ import type { TimerAction } from "@/lib/timer-machine";
 import { EASE_OUT } from "@/lib/motion";
 import { startCompletionAlert, stopCompletionAlert } from "@/lib/chime";
 import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
-import { setRunningTitle, resetTitle, flashCompletionTitle } from "@/lib/document-title";
+import { setRunningTitle, resetTitle } from "@/lib/document-title";
 import { PHASE_ACCENT } from "@/lib/phase-theme";
+import { useNotify } from "@/components/notification-provider";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -35,6 +36,7 @@ export function VialTimer({ state, dispatch }: Props) {
   const [vessel, setVessel] = useState<"flask" | "cylinder">("flask");
   const reduceMotion = useReducedMotion();
   const justCompletedRef = useRef(false);
+  const notify = useNotify();
 
   // --- Countdown tick: timestamp-delta driven so backgrounded tabs stay true ---
   useEffect(() => {
@@ -44,14 +46,18 @@ export function VialTimer({ state, dispatch }: Props) {
       if (elapsed >= state.total) {
         startCompletionAlert();
         justCompletedRef.current = true;
-        flashCompletionTitle();
+        // The provider owns the tab title from here — it flashes the
+        // headline for whichever themed variant it picks for this event.
+        notify(
+          state.phase === "focus" ? "focus-complete" : state.phase === "short" ? "short-complete" : "long-complete",
+        );
         dispatch({ type: "COMPLETE" });
       } else {
         dispatch({ type: "TICK" });
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [state.status, state.startedAt, state.total, dispatch]);
+  }, [state.status, state.startedAt, state.total, state.phase, notify, dispatch]);
 
   // --- Tab title: live countdown while running; hand off to the completion
   // flash (already started above) instead of stomping it when idle is reached

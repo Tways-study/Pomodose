@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flashCompletionTitle, resetTitle, setRunningTitle } from "./document-title";
 
 const DEFAULT_TITLE = "Pomodose — Study Companion";
-const FLASH_TITLE = "⏰ Time's up! — Pomodose";
+const HEADLINE = "Dose dispensed";
+const FLASH_TITLE = `${HEADLINE} — Pomodose`;
 
 function setHidden(hidden: boolean) {
   Object.defineProperty(document, "hidden", { value: hidden, configurable: true });
@@ -31,7 +32,7 @@ describe("document-title", () => {
 
   it("sets the flash title once and does not start an interval when the tab is visible", () => {
     vi.useFakeTimers();
-    flashCompletionTitle();
+    flashCompletionTitle(HEADLINE);
     expect(document.title).toBe(FLASH_TITLE);
 
     vi.advanceTimersByTime(5000);
@@ -41,7 +42,7 @@ describe("document-title", () => {
   it("alternates the title on an interval when the tab is hidden", () => {
     vi.useFakeTimers();
     setHidden(true);
-    flashCompletionTitle();
+    flashCompletionTitle(HEADLINE);
     expect(document.title).toBe(FLASH_TITLE);
 
     vi.advanceTimersByTime(1000);
@@ -54,7 +55,7 @@ describe("document-title", () => {
   it("stops flashing and restores the default title once the tab regains focus", () => {
     vi.useFakeTimers();
     setHidden(true);
-    flashCompletionTitle();
+    flashCompletionTitle(HEADLINE);
     vi.advanceTimersByTime(1000);
     expect(document.title).toBe(DEFAULT_TITLE);
 
@@ -69,12 +70,18 @@ describe("document-title", () => {
   it("resetTitle clears an active flash and restores the default title", () => {
     vi.useFakeTimers();
     setHidden(true);
-    flashCompletionTitle();
+    flashCompletionTitle(HEADLINE);
 
     resetTitle();
     expect(document.title).toBe(DEFAULT_TITLE);
 
     vi.advanceTimersByTime(3000);
     expect(document.title).toBe(DEFAULT_TITLE);
+  });
+
+  it("uses a different event's headline verbatim in the flash title", () => {
+    vi.useFakeTimers();
+    flashCompletionTitle("Full cycle");
+    expect(document.title).toBe("Full cycle — Pomodose");
   });
 });

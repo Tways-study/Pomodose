@@ -19,6 +19,9 @@ import { PHASE_ACCENT }        from "@/lib/phase-theme";
 import { RxField }             from "@/components/rx-field";
 import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
+import { NotificationProvider } from "@/components/notification-provider";
+import { CounterNote }         from "@/components/counter-note";
+import { OsNotificationToggle } from "@/components/os-notification-toggle";
 import { EASE_OUT }            from "@/lib/motion";
 
 export default function Home() {
@@ -138,7 +141,7 @@ export default function Home() {
   const cardShadowRunning = `0 1px 0 white inset, 0 0 0 2px ${phaseAccent.base}, 0 16px 40px -10px ${phaseAccent.deep}90`;
 
   return (
-    <>
+    <NotificationProvider timer={timer} goalsDone={goalsDone} goalsTotal={goalsTotal}>
       <motion.div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0 transition-[background] duration-700 ease-out"
@@ -200,7 +203,7 @@ export default function Home() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-xl bg-clay/25 px-3 py-2 text-xs text-ink"
+                className="rounded-xl border border-clay-deep bg-clay/60 px-3 py-2 text-xs text-ink"
                 role="alert"
               >
                 {signOutError}
@@ -223,6 +226,8 @@ export default function Home() {
           transition={headerGlowTransition}
         />
       </motion.header>
+
+      <CounterNote />
 
       {/* Main grid */}
       <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-8 lg:gap-14 max-w-xl mx-auto lg:max-w-none">
@@ -277,6 +282,7 @@ export default function Home() {
         <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
         <div className="flex items-center gap-4">
           <ChimeVolume />
+          <OsNotificationToggle />
           <span className="flex items-center gap-2">
             Pomodose · v1
             <button
@@ -301,6 +307,6 @@ export default function Home() {
       />
       </div>
       <HelpModal open={showHelp} isFirstVisit={isFirstVisit} onClose={closeHelp} />
-    </>
+    </NotificationProvider>
   );
 }

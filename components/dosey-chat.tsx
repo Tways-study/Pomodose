@@ -9,6 +9,7 @@ import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
 import { todayKey } from "@/lib/date";
 import { api } from "@/convex/_generated/api";
 import { useAddressTerm } from "@/components/address-term-provider";
+import { useLatestNotification } from "@/components/notification-provider";
 import { EASE_OUT } from "@/lib/motion";
 import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
@@ -80,9 +81,11 @@ export function DoseyChat({ stats }: Props) {
   const reduceMotion = useReducedMotion();
   const name = useAddressTerm();
   const { isAuthenticated } = useConvexAuth();
+  const latestNotification = useLatestNotification();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const appendedNotificationIdRef = useRef<number | null>(null);
   // Skip while unauthenticated (including the moment sign-out clears the
   // token but this component hasn't unmounted yet) — otherwise this reactive
   // query re-fires, the server throws "Not authenticated", and Convex's
@@ -117,6 +120,19 @@ export function DoseyChat({ stats }: Props) {
       inputRef.current?.focus();
     }
   }, [open]);
+
+  // Surfaces themed notifications (timer completions, break nudges, burnout
+  // alerts, milestones) as a Dosey chat line. Skipped while a response is
+  // streaming — appending here would otherwise clobber the in-flight
+  // assistant message the streaming loop above is still writing into the
+  // last array slot. If a notification lands mid-stream it isn't lost: this
+  // effect re-runs (and appends) the moment isStreaming flips back to false.
+  useEffect(() => {
+    if (!latestNotification || isStreaming) return;
+    if (appendedNotificationIdRef.current === latestNotification.id) return;
+    appendedNotificationIdRef.current = latestNotification.id;
+    setMessages((prev) => [...prev, { role: "model", content: latestNotification.variant.note }]);
+  }, [latestNotification, isStreaming]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -274,7 +290,7 @@ export function DoseyChat({ stats }: Props) {
                             key={s}
                             onClick={() => send(s)}
                             whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-                            className="rounded-xl border border-line bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
+                            className="rounded-xl border border-line-strong bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
                           >
                             {s}
                           </motion.button>
@@ -318,7 +334,7 @@ export function DoseyChat({ stats }: Props) {
               )}
 
               {error && (
-                <p className="rounded-xl bg-clay/25 px-3 py-2 text-sm text-ink" role="alert">
+                <p className="rounded-xl border border-clay-deep bg-clay/60 px-3 py-2 text-sm text-ink" role="alert">
                   {error}
                 </p>
               )}
@@ -336,7 +352,7 @@ export function DoseyChat({ stats }: Props) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
                   placeholder={limitedUntil ? "Dosey's resting…" : "Ask Dosey…"}
-                  className="flex-1 rounded-xl border border-line bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
+                  className="flex-1 rounded-xl border border-line-strong bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
                 />
                 <motion.button
                   onClick={() => send(input)}

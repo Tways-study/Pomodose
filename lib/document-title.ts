@@ -2,7 +2,6 @@ import { formatTime, PHASE_LABEL } from "@/lib/timer-format";
 import type { Phase } from "@/types";
 
 const DEFAULT_TITLE = "Pomodose — Study Companion"; // matches app/layout.tsx's metadata.title
-const FLASH_TITLE = "⏰ Time's up! — Pomodose";
 const FLASH_INTERVAL_MS = 1000;
 
 let flashIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -33,16 +32,17 @@ export function resetTitle(): void {
   stopFlashing();
 }
 
-/** Call exactly once, at the moment a session completes. */
-export function flashCompletionTitle(): void {
+/** Call exactly once, at the moment a session completes, with that event's themed headline. */
+export function flashCompletionTitle(headline: string): void {
   if (typeof document === "undefined") return;
   stopFlashing();
-  document.title = FLASH_TITLE;
+  const flashTitle = `${headline} — Pomodose`;
+  document.title = flashTitle;
   if (document.hidden) {
     let showingFlash = true;
     flashIntervalId = setInterval(() => {
       showingFlash = !showingFlash;
-      document.title = showingFlash ? FLASH_TITLE : DEFAULT_TITLE;
+      document.title = showingFlash ? flashTitle : DEFAULT_TITLE;
     }, FLASH_INTERVAL_MS);
     document.addEventListener("visibilitychange", handleVisibilityChange);
   }
