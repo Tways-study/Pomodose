@@ -2,7 +2,6 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { LoginForm } from "@/components/login-form";
-import { AddressName } from "@/components/address-term-provider";
 import { VialMark } from "@/components/vial-mark";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -42,10 +41,6 @@ export default function LoginPage() {
         >
           <LoginForm />
         </motion.div>
-
-        <motion.p className="mt-4 text-center text-xs text-ink-soft" {...enter(0.16)}>
-          Trouble getting in? Use &quot;Forgot password?&quot; on the sign-in form, <AddressName />.
-        </motion.p>
       </div>
     </div>
   );

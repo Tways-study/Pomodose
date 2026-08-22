@@ -70,7 +70,7 @@ export function GoalList({ onProgressChange }: Props) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
           placeholder="e.g. Review pharmacokinetics ch.4"
-          className="flex-1 bg-paper-2 border border-line rounded-xl px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow]"
+          className="flex-1 bg-paper-2 border border-line-strong rounded-xl px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow]"
         />
         <motion.button
           onClick={add}

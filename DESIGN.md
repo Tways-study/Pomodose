@@ -7,12 +7,14 @@ colors:
   ink: "#2E2433"
   ink-soft: "#6B5E6F"
   lilac: "#C9B6E4"
-  lilac-deep: "#9B7FC4"
+  lilac-deep: "#8465B0"
   amber: "#D9B36B"
   amber-deep: "#B98A3E"
   sage: "#A8B89A"
   clay: "#E0B4A8"
+  clay-deep: "#A96552"
   line: "#DED5C8"
+  line-strong: "#948066"
 typography:
   display:
     fontFamily: "Fraunces, Georgia, serif"
@@ -98,22 +100,24 @@ A warm, low-saturation palette — paper and ink, lilac tincture, sage for compl
 
 ### Primary
 - **Lilac** (#C9B6E4): the tincture accent — vial liquid, phase-active states, primary interactive accents (add-goal button, chat trigger). Used deliberately, not everywhere.
-- **Lilac Deep** (#9B7FC4): hover/active state for lilac elements, the focus-ring color app-wide, and the vial's meniscus line.
+- **Lilac Deep** (#8465B0): hover/active state for lilac elements, the focus-ring color app-wide, and the vial's meniscus line. Darkened from #9B7FC4 so the focus ring clears WCAG 1.4.11's 3:1 on both surfaces (3.02:1 -> 4.21:1 on paper, 2.79:1 -> 3.89:1 on paper-2).
 
 ### Neutral
 - **Paper** (#F6F2EC): the base background. Warm off-white, never stark white.
 - **Paper Deep** (#EFE9DF): secondary surface — inactive tab pills, input fields, goal-item rows, suggestion chips. One step warmer/darker than Paper.
 - **Ink** (#2E2433): primary text and the one dark UI surface (the primary "Begin dose" button background).
 - **Ink Soft** (#6B5E6F): secondary/muted text — labels, timestamps, placeholder copy, inactive tab text.
-- **Line** (#DED5C8): all borders and dividers app-wide. One border color, used consistently.
+- **Line** (#DED5C8): borders and dividers on the `paper` surface — cards, panels, dividers, tab tracks.
+- **Line Strong** (#948066): the same border rule on the `paper-2` surface. `line` measures only 1.20:1 there, below WCAG 1.4.11's 3:1 for a UI component boundary, which left text inputs reading as unbordered blocks. Applies to interactive controls filled with paper-2 (text inputs, suggestion chips) — not to static paper-2 containers like goal rows or the tab track, which keep `line`.
 
 ### Secondary
 - **Sage** (#A8B89A): completion state only — a checked goal's checkmark button and strikethrough decoration. Never used decoratively elsewhere.
-- **Clay** (#E0B4A8): the one warm/warning note — delete-button hover, inline error banners (at low opacity, `bg-clay/25`). Reserved for "something needs attention," never a primary color.
+- **Clay** (#E0B4A8): the one warm/warning note — delete-button hover, and the fill of inline error banners at `bg-clay/60`. Reserved for "something needs attention," never a primary color.
+- **Clay Deep** (#A96552): the border on error banners and the border of a field that failed validation. `clay/25` on paper measured 1.038:1 against the paper-2 input fill — an error banner was visually indistinguishable from a text field. The border, not the fill, is what makes an error read as an error.
 - **Amber** (#D9B36B) / **Amber Deep** (#B98A3E): the second tincture, reserved exclusively for running-state phase chrome (page wash, header sweep, dashboard-card glow, active-tab dot, dose-ring) during short/long breaks — focus sessions stay lilac. Never decorative, never used on the vial itself. Introduced in `plans/003-whole-ui-running-state.md` as a scoped exception to the Rare Accent Rule below.
 
 ### Named Rules
-**The One Border Rule.** Every border in the app is `border-line` (#DED5C8) at 1px. No exceptions, no secondary border colors — this is what keeps dozens of small surfaces (cards, inputs, pills, panels) feeling like one system.
+**The One Border Rule.** Every border in the app is 1px and comes from the line ramp — `border-line` (#DED5C8) on the `paper` surface, `border-line-strong` (#948066) on the `paper-2` surface. Two values, one rule: the border is always the same *step down* from whatever it sits on. The single-value version of this rule (`border-line` everywhere) is what made inputs invisible, since #DED5C8 on #EFE9DF is 1.20:1. No third border color.
 
 **The Rare Accent Rule.** Lilac is the only saturated-ish color in the palette and appears on a minority of any given screen — the vial liquid, one or two buttons, active states. If lilac starts covering more than a small fraction of a view, pull back.
 

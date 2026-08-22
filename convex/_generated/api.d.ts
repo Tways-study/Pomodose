@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as BrevoOTPPasswordReset from "../BrevoOTPPasswordReset.js";
 import type * as auth from "../auth.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
@@ -20,6 +21,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  BrevoOTPPasswordReset: typeof BrevoOTPPasswordReset;
   auth: typeof auth;
   goals: typeof goals;
   http: typeof http;
