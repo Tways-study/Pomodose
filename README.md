@@ -1,6 +1,28 @@
+<div align="center">
+
 # Pomodose
 
-A pharmacist-themed Pomodoro timer, daily goal tracker, and AI chat companion. Work sessions are "Doses," breaks are "Refills" and "Antidotes," and Dosey — your study companion — is on hand to talk through your progress.
+<hr width="50%">
+
+*"Rest is part of the prescription, not a break from it."*
+
+A Pomodoro timer, daily goal tracker, and AI study companion — built as a gift for a
+pharmacist grinding through long solo study sessions, so the work feels structured,
+measured, and a little less lonely. Work sessions are "Doses," breaks are "Refills"
+and "Antidotes," and Dosey — the study companion — is on hand to talk through progress.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind_CSS](https://img.shields.io/badge/Tailwind_CSS-v3-38BDF8?logo=tailwindcss&logoColor=white)
+![Convex](https://img.shields.io/badge/Convex-1-EE342F?logo=convex&logoColor=white)
+![License](https://img.shields.io/badge/License-None-lightgrey)
+
+<img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind" alt="Tech stack" />
+
+</div>
+
+---
 
 Everything lives on a single page (`app/page.tsx`); there's no routing beyond authentication and the chat API.
 
