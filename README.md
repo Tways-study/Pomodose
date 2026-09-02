@@ -97,3 +97,63 @@ See [`CLAUDE.md`](./CLAUDE.md) for a detailed breakdown of state flow, the timer
 ## Showcase assets
 
 `showcase-assets/` holds marketing screenshots (portfolio card + Google Play phone/tablet listings) captured from a running local instance. Regenerate them by signing in to a dev account and screenshotting the desired viewport sizes; they aren't produced by any script.
+
+## Changelog
+
+Dated by when the work landed on `main`. No version tags yet — this is a personal
+project, not a release train. Newest first.
+
+### 2026-09-02
+- Completed focus/break sessions now persist to Convex, so today's dose count and
+  cycle position survive a page reload instead of resetting to zero.
+
+### 2026-08-22
+- Recovered friendly, on-brand error messages in production by reading `ConvexError`
+  data instead of the framework's raw error text.
+- Added password reset via Brevo transactional email (OTP-based).
+- Added OS-level desktop notifications, burnout tracking, and desktop-alert nudges
+  for skipped breaks and long unbroken study stretches.
+- Added help-modal tips explaining the counter note and desktop notifications.
+- Added marketing showcase screenshots (portfolio card, Google Play listings).
+
+### 2026-08-21
+- Gave the whole UI phase-tinted running-state chrome, not just the vial — page
+  wash, header glow, and card shadows now shift color with the active phase.
+- Added a floating Rx-symbol ambient background for running sessions (replacing
+  an earlier bubble/wisp field).
+- Added a chime volume widget to the footer.
+- Added first-visit onboarding and a persistent help modal.
+- Added skeleton loading rows to the goal list while it fetches.
+- Premium visual polish pass: entrance reveal animation, display numerals,
+  paper-grain texture, and pressed-state feedback on buttons.
+
+### 2026-08-20
+- Added a breathing running indicator to the vial and page background.
+- Full craft pass on the login/signup page: entrance motion, typography, elevation.
+- Made the timer-completion sound repeat until acknowledged instead of playing once.
+- Fixed sign-out crashing into the error boundary.
+
+### 2026-08-18 – 2026-08-19
+- Hardened the sign-out flow and added a themed client-side error boundary.
+- Improved layout balance and visual hierarchy across desktop and mobile.
+- Added press feedback and fixed motion/design-token inconsistencies app-wide.
+- Added a completion chime when a timer session ends.
+- Added a live countdown in the browser tab title, flashing on completion.
+
+### 2026-07-24 – 2026-07-25
+- Renamed phases and breaks to the pharmacy theme ("Doses," "Refills," "Antidotes")
+  and swapped the generic "Doc" address term for rotating pharmacist-flavored names.
+- Simplified auth to password-only, removing the email-OTP verification flow —
+  a better fit for a personal, single-user gift app.
+- Made the address term (the name Pomodose calls you) randomize per page load
+  instead of cycling sequentially.
+- Patched flagged dependency vulnerabilities.
+
+### 2026-07-01 – 2026-07-02
+- Initial Next.js app scaffold and CI pipeline (lint, typecheck, test).
+- Added Dosey, the AI chat companion, with rate limiting and token budgeting.
+- Wired the Convex backend: real auth and a persistent goal database.
+- Shipped an initial email-verification and password-reset flow (later replaced
+  by the password-only approach above), with security hardening for CSPRNG OTP
+  generation, email validation, goal-text length caps, and an account-enumeration
+  fix on the forgot-password flow.
