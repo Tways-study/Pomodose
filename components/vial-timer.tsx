@@ -10,6 +10,9 @@ import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
 import { setRunningTitle, resetTitle } from "@/lib/document-title";
 import { PHASE_ACCENT } from "@/lib/phase-theme";
 import { useNotify } from "@/components/notification-provider";
+import { useConvexAuth, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { todayKey } from "@/lib/date";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -37,6 +40,8 @@ export function VialTimer({ state, dispatch }: Props) {
   const reduceMotion = useReducedMotion();
   const justCompletedRef = useRef(false);
   const notify = useNotify();
+  const { isAuthenticated } = useConvexAuth();
+  const logSession = useMutation(api.sessions.log);
 
   // --- Countdown tick: timestamp-delta driven so backgrounded tabs stay true ---
   useEffect(() => {
@@ -51,13 +56,26 @@ export function VialTimer({ state, dispatch }: Props) {
         notify(
           state.phase === "focus" ? "focus-complete" : state.phase === "short" ? "short-complete" : "long-complete",
         );
+        // Persist the finished session so the day's counters survive a reload.
+        // Deliberately fire-and-forget: a failed write must never block the
+        // phase transition or the completion alert. The in-page counters stay
+        // correct for this session either way; only the reload survives it.
+        if (isAuthenticated) {
+          void logSession({
+            phase: state.phase,
+            durationSeconds: state.total,
+            date: todayKey(),
+          }).catch((err) => {
+            console.error("Failed to log completed session", err);
+          });
+        }
         dispatch({ type: "COMPLETE" });
       } else {
         dispatch({ type: "TICK" });
       }
     }, 1000);
     return () => clearInterval(id);
-  }, [state.status, state.startedAt, state.total, state.phase, notify, dispatch]);
+  }, [state.status, state.startedAt, state.total, state.phase, notify, dispatch, isAuthenticated, logSession]);
 
   // --- Tab title: live countdown while running; hand off to the completion
   // flash (already started above) instead of stomping it when idle is reached

@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as goals from "../goals.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as sessions from "../sessions.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   goals: typeof goals;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  sessions: typeof sessions;
 }>;
 
 /**

@@ -170,4 +170,50 @@ describe("timerReducer", () => {
       expect(next.dailyDoses).toBe(2); // breaks do not add a dose
     });
   });
+
+  describe("HYDRATE", () => {
+    it("seeds the day's counters from persisted sessions", () => {
+      const next = timerReducer(initialTimerState, {
+        type: "HYDRATE",
+        dailyDoses: 5,
+        focusCycle: 5,
+      });
+      expect(next.dailyDoses).toBe(5);
+      expect(next.focusCycle).toBe(5);
+    });
+
+    it("leaves the cycle position consistent with the hydrated count", () => {
+      const next = timerReducer(initialTimerState, {
+        type: "HYDRATE",
+        dailyDoses: SETTINGS.CYCLE_LENGTH + 1,
+        focusCycle: SETTINGS.CYCLE_LENGTH + 1,
+      });
+      expect(next.focusCycle % SETTINGS.CYCLE_LENGTH).toBe(1);
+    });
+
+    it("does not disturb a session already in flight", () => {
+      const running: TimerState = {
+        ...initialTimerState,
+        status: "running",
+        startedAt: Date.now(),
+        remaining: 900,
+      };
+      const next = timerReducer(running, { type: "HYDRATE", dailyDoses: 3, focusCycle: 3 });
+      expect(next.status).toBe("running");
+      expect(next.startedAt).toBe(running.startedAt);
+      expect(next.remaining).toBe(900);
+      expect(next.phase).toBe(running.phase);
+      expect(next.dailyDoses).toBe(3);
+    });
+
+    it("hydrating to zero is a no-op on the counters", () => {
+      const next = timerReducer(initialTimerState, {
+        type: "HYDRATE",
+        dailyDoses: 0,
+        focusCycle: 0,
+      });
+      expect(next.dailyDoses).toBe(0);
+      expect(next.focusCycle).toBe(0);
+    });
+  });
 });

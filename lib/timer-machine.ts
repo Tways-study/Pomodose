@@ -14,7 +14,11 @@ export type TimerAction =
   | { type: "RESET" }
   | { type: "TICK" }           // dispatched by a 1s interval in the component
   | { type: "COMPLETE" }
-  | { type: "SET_PHASE"; phase: Phase };
+  | { type: "SET_PHASE"; phase: Phase }
+  // Seeds the day's counters from persisted sessions on load (see convex/sessions.ts).
+  // Counters only — never touches phase/status/remaining, so it can't disturb a
+  // session already in flight when the query resolves.
+  | { type: "HYDRATE"; dailyDoses: number; focusCycle: number };
 
 export const initialTimerState: TimerState = {
   phase: "focus",
@@ -79,6 +83,9 @@ export function timerReducer(state: TimerState, action: TimerAction): TimerState
       const total = durationFor("focus");
       return { ...state, phase: "focus", status: "idle", remaining: total, total, startedAt: null, dosesSinceBreak: 0 };
     }
+
+    case "HYDRATE":
+      return { ...state, dailyDoses: action.dailyDoses, focusCycle: action.focusCycle };
 
     default:
       return state;

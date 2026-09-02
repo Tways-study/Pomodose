@@ -2,7 +2,10 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
+import { useConvexAuth, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { todayKey } from "@/lib/date";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
@@ -34,6 +37,26 @@ export default function Home() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
+
+  // --- Restore today's counters from persisted sessions -------------------
+  // The timer reducer keeps dailyDoses/focusCycle in page state only, so a
+  // reload used to reset them to zero mid-day. Seeded once, on the first
+  // resolved query: after that the reducer owns the counters for this page
+  // session, so an offline write can't clobber a count the user just earned.
+  const { isAuthenticated } = useConvexAuth();
+  const todaySessions = useQuery(
+    api.sessions.listForDate,
+    isAuthenticated ? { date: todayKey() } : "skip",
+  );
+  const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    if (hydratedRef.current || todaySessions === undefined) return;
+    hydratedRef.current = true;
+    const focusCount = todaySessions.filter((s) => s.phase === "focus").length;
+    if (focusCount === 0) return;
+    dispatch({ type: "HYDRATE", dailyDoses: focusCount, focusCycle: focusCount });
+  }, [todaySessions]);
 
   useEffect(() => {
     if (!localStorage.getItem("pomodose:onboarding-seen")) {
