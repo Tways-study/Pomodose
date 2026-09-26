@@ -139,17 +139,18 @@ A warm, low-saturation palette — paper and ink, lilac tincture, sage for compl
 
 ## 4. Elevation
 
-Pomodose is nearly flat — surfaces are distinguished mainly by the paper/paper-2 tone shift and the single `border-line` rule, not by drop shadows. Where shadows do appear, they're soft, warm-tinted (`rgba(46,36,51,...)`, ink at low opacity, never pure black), and paired with a 1px white inset highlight that reads as a gentle top-edge sheen rather than a lifted card.
+Pomodose is quietly layered — surfaces are distinguished mainly by the paper/paper-2 tone shift and the single `border-line` rule, with depth built from two or three soft, stacked shadows (a tight contact shadow plus a wide, faint ambient one) rather than a single drop shadow. Every shadow is warm-tinted (`rgba(46,36,51,...)`, ink at low opacity, never pure black) and paired with a 1px white inset highlight that reads as a gentle top-edge sheen. All shadow values live as tokens in `tailwind.config.ts` (`shadow-card`, `shadow-panel`, `shadow-fab`, `shadow-press`); do not write shadow strings inline.
 
 ### Shadow Vocabulary
-- **card** (`0 1px 0 white inset, 0 8px 26px -18px rgba(46,36,51,.10)`): the resting elevation for the goals card and the regimen-progress card — barely-there depth, mostly the white inset sheen.
-- **panel** (`0 1px 0 white inset, 0 18px 50px -24px rgba(46,36,51,.35)`): the open Dosey chat panel — the app's one genuinely "lifted" surface, since it floats over the page.
-- **floating-action** (`0 8px 26px -12px rgba(46,36,51,.45)`): the fixed "Ask Dosey" trigger button — the strongest shadow in the system, justified because it's a floating, fixed-position control that must read as clickable above everything else.
+- **card** (`shadow-card`): the resting elevation for the goals card and the regimen-progress card — a contact shadow and a wide ambient one, plus the white inset sheen.
+- **panel** (`shadow-panel`): the open Dosey chat panel, the help modal and the login card: the app's genuinely "lifted" surfaces.
+- **fab** (`shadow-fab`): the fixed "Ask Dosey" trigger button, the strongest shadow in the system, justified because it's a floating, fixed-position control that must read as clickable above everything else.
+- **press** (`shadow-press`): primary pill buttons (Begin/Resume, sign in, help close). Small and tight so a button reads as a physical key.
 
 ### Named Rules
 **The Whisper Shadow Rule.** Every shadow in this system uses `rgba(46,36,51,...)` (the ink color) at low opacity, never black, and is paired with a `0 1px 0 white inset` highlight. A shadow that reads as heavy or neutral-gray is off-system.
 
-`plans/003-whole-ui-running-state.md` introduces one sanctioned second shadow-tint: a phase-colored glow (lilac or amber, see Colors → Amber) layered under the whisper shadow on the two dashboard cards, strictly gated to `status === "running"` and toggled via a CSS transition, never a continuous loop. This is the only place a non-ink shadow color appears in the system — treat any other use as off-system.
+`plans/003-whole-ui-running-state.md` introduces one sanctioned second shadow-tint: a phase-colored glow (lilac or amber, see Colors → Amber) on the two dashboard cards, strictly gated to `status === "running"` and toggled via a CSS transition, never a continuous loop. It is built by `runningShadow()` in `lib/phase-theme.ts` as a 1px accent hairline plus a wide, soft glow (the earlier hard 2px ring was retired as too loud). The active phase tab carries the same hairline and a slow breathing glow. This is the only place a non-ink shadow color appears in the system — treat any other use as off-system.
 
 ## 5. Components
 
@@ -161,18 +162,18 @@ Pomodose is nearly flat — surfaces are distinguished mainly by the paper/paper
 
 ### Chips / Tabs
 - **Style:** `PhaseTabs` is a `paper-2` pill container (`rounded-full`, `border-line`, `p-1`) holding individual pill buttons.
-- **State:** active tab is `bg-paper` with `text-ink` and a faint `shadow-sm`; inactive tabs are transparent with `text-ink-soft`, hovering to `text-ink`. Selection reads as "lifted out of the track," not a color change.
+- **State:** the active tab is a single shared-layout pill (`layoutId`, `SPRING_UI`) that slides between tabs, `bg-paper` with a soft layered shadow; inactive tabs are transparent with `text-ink-soft`, hovering to `text-ink`. Selection reads as "lifted out of the track," not a color change.
 
 ### Cards / Containers
-- **Corner Style:** 18px (`rounded-card`) for the two dashboard cards (goals, regimen progress); 12px (`rounded-xl`) for the chat panel's transcript bubbles and goal-item rows.
+- **Corner Style:** 18px (`rounded-card`) for the two dashboard cards (goals, regimen progress); 12px (`rounded-control`) for goal-item rows, inputs and suggestion chips; the chat transcript bubbles use 18px with a 6px tail corner.
 - **Background:** `paper` for top-level cards sitting on the page; `paper-2` for content rows nested inside a card (goal items, suggestion chips, input fields) — the two-tone system is how nesting reads without adding borders-on-borders.
 - **Shadow Strategy:** see Elevation → `card` token.
 - **Border:** 1px `border-line` on every card and nested row.
 - **Internal Padding:** `p-6` (24px) for top-level cards; `px-3.5 py-3` for goal-item rows.
 
 ### Inputs / Fields
-- **Style:** `paper-2` background, `border-line` 1px border, `rounded-xl` (12px), `text-sm` Spline Sans, `placeholder:text-ink-soft`.
-- **Focus:** border shifts to `lilac-deep`, plus a soft `ring-2 ring-lilac/30` glow — no harsh outline, the lilac ring is the only focus treatment besides the app-wide `:focus-visible` outline.
+- **Style:** `paper-2` background, `border-line` 1px border, `rounded-control` (12px), `text-sm` Spline Sans, `placeholder:text-ink-soft`.
+- **Focus:** border shifts to `lilac-deep`, plus a soft `ring-[3px] ring-lilac/25` glow — no harsh outline, the lilac ring is the only focus treatment besides the app-wide `:focus-visible` outline.
 - **Disabled:** `opacity-60`, no other visual change.
 
 ### Navigation
@@ -197,3 +198,11 @@ A hand-drawn SVG vial (glass body + neck + cap), never a circular progress ring.
 - **Don't** add gamified productivity chrome — streak counters, badges, confetti, achievement toasts. This app tracks doses and goals plainly, without game mechanics.
 - **Don't** introduce a second border color or a neutral/black shadow color. Amber (running-state phase chrome only, see Colors → Amber) and the one phase-tinted card-glow shadow (see Elevation → Named Rules) are sanctioned exceptions from `plans/003-whole-ui-running-state.md` — don't add further accents or shadow tints beyond those without a new plan entry.
 - **Don't** build a sidebar-nav-plus-stat-cards dashboard layout. Pomodose is one page; new surfaces should extend it, not fork into a different information architecture.
+
+## 7. Materials and Motion
+
+**Frosted surfaces.** The Dosey panel, help modal and login card use a translucent paper fill (`bg-paper/90`) with `backdrop-blur-xl`, a white hairline border and the `panel` shadow. This is a web approximation of a translucent material, not a platform effect. The `.glass` utility in `app/globals.css` is the reusable form and collapses to solid `paper` under `prefers-reduced-transparency` or when `backdrop-filter` is unsupported. Text on these surfaces must still clear 4.5:1.
+
+**Springs.** `lib/motion.ts` holds the presets. `SPRING_UI` (stiffness 400, damping 30) is for presses, hovers and small indicators such as the tab pill. `SPRING_SOFT` (stiffness 260, damping 26) is for panels and larger surfaces entering. `EASE_OUT` stays for fades, the vial liquid and blur-lift reveals. Press feedback is a `scale` of 0.96 to 0.98; hover on primary buttons is a 1px lift, never a scale-up.
+
+**Reduced motion.** framer-motion components gate on `useReducedMotion()`. CSS-driven animations (Tailwind `animate-*`) are collapsed by the global `prefers-reduced-motion` block in `app/globals.css`.

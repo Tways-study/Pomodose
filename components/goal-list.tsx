@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { GoalItem } from "./goal-item";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
+import { SPRING_UI } from "@/lib/motion";
 import type { Id } from "@/convex/_generated/dataModel";
 
 interface Props {
@@ -70,13 +71,14 @@ export function GoalList({ onProgressChange }: Props) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
           placeholder="e.g. Review pharmacokinetics ch.4"
-          className="flex-1 bg-paper-2 border border-line-strong rounded-xl px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow]"
+          className="flex-1 bg-paper-2 border border-line-strong rounded-control px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow]"
         />
         <motion.button
           onClick={add}
           aria-label="Add goal"
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-          className="flex-none w-10 rounded-xl bg-lilac text-ink text-xl font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200"
+          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+          transition={SPRING_UI}
+          className="flex-none w-10 rounded-control bg-lilac text-ink text-xl font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200"
         >
           +
         </motion.button>
@@ -88,7 +90,7 @@ export function GoalList({ onProgressChange }: Props) {
           [58, 75, 42].map((w, i) => (
             <li
               key={i}
-              className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-xl animate-pulse"
+              className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-control animate-pulse"
               style={{ animationDelay: `${i * 100}ms` }}
             >
               <div className="flex-none w-5 h-5 rounded-md bg-line" />

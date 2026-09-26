@@ -1,8 +1,8 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
 import { SETTINGS } from "@/lib/settings";
-import { EASE_OUT } from "@/lib/motion";
-import { PHASE_ACCENT } from "@/lib/phase-theme";
+import { EASE_OUT, SPRING_SOFT } from "@/lib/motion";
+import { PHASE_ACCENT, runningShadow } from "@/lib/phase-theme";
 import type { Phase } from "@/types";
 
 interface Props {
@@ -22,16 +22,15 @@ export function RegimenProgress({
   const pct = goalsTotal > 0 ? (goalsDone / goalsTotal) * 100 : 0;
   const accent = PHASE_ACCENT[phase];
 
-  // Running-state card treatment: a solid-color 2px ring plus a real glow
+  // Running-state card treatment: an accent hairline plus a soft glow
   // spill beneath, binary on/off via CSS transition (not a loop). Matches
   // the goal card's treatment in app/page.tsx.
-  const shadowIdle = "0 1px 0 white inset, 0 8px 26px -18px rgba(46,36,51,.10)";
-  const shadowRunning = `0 1px 0 white inset, 0 0 0 2px ${accent.base}, 0 16px 40px -10px ${accent.deep}90`;
+  const shadowRunning = runningShadow(accent);
 
   return (
     <section
-      className="bg-paper border border-line rounded-card p-6 transition-[box-shadow] duration-700 ease-out"
-      style={{ boxShadow: isRunning ? shadowRunning : shadowIdle }}
+      className="bg-paper border border-line rounded-card shadow-card p-6 transition-[box-shadow] duration-700 ease-out"
+      style={isRunning ? { boxShadow: shadowRunning } : undefined}
     >
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-serif font-semibold text-lg tracking-tight">Dose regimen</h2>
@@ -59,7 +58,7 @@ export function RegimenProgress({
                 <motion.div
                   aria-hidden
                   className="absolute -inset-2 rounded-full pointer-events-none"
-                  style={{ boxShadow: `0 0 0 2px ${PHASE_ACCENT.focus.base}, 0 0 20px 4px ${PHASE_ACCENT.focus.deep}cc` }}
+                  style={{ boxShadow: `0 0 0 1.5px ${PHASE_ACCENT.focus.base}, 0 0 18px 3px ${PHASE_ACCENT.focus.deep}88` }}
                   initial={false}
                   animate={{
                     opacity: reduceMotion ? 0.9 : [0.5, 1, 0.5],
@@ -74,7 +73,7 @@ export function RegimenProgress({
               )}
               <motion.div
                 animate={{ scale: i < cyclePosition ? 1.06 : 1 }}
-                transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 20 }}
+                transition={reduceMotion ? { duration: 0 } : SPRING_SOFT}
                 className={[
                   "w-6 h-6 rounded-full border-[1.5px] border-lilac-deep transition-colors duration-300",
                   i < cyclePosition ? "bg-lilac" : "bg-transparent",

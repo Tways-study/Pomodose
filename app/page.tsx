@@ -18,14 +18,14 @@ import { timerReducer, initialTimerState } from "@/lib/timer-machine";
 import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
-import { PHASE_ACCENT }        from "@/lib/phase-theme";
+import { PHASE_ACCENT, runningShadow } from "@/lib/phase-theme";
 import { RxField }             from "@/components/rx-field";
 import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
 import { NotificationProvider } from "@/components/notification-provider";
 import { CounterNote }         from "@/components/counter-note";
 import { OsNotificationToggle } from "@/components/os-notification-toggle";
-import { EASE_OUT }            from "@/lib/motion";
+import { EASE_OUT, SPRING_UI } from "@/lib/motion";
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -149,7 +149,7 @@ export default function Home() {
   // Header: the border itself recolors (not just a thin sweep underneath),
   // plus an under-glow — the header edge should read as unmistakably
   // different while running, not just faintly shimmering.
-  const headerBorderColor = isRunning ? phaseAccent.base : "#DED5C8";
+  const headerBorderColor = isRunning ? phaseAccent.base : undefined;
   const headerGlowOpacity = reduceMotion
     ? (isRunning ? 0.7 : 0)
     : (isRunning ? [0.45, 0.85, 0.45] : 0);
@@ -157,11 +157,10 @@ export default function Home() {
     ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
     : { duration: 0.4, ease: "easeOut" as const };
 
-  // Running-state dashboard-card treatment: a solid-color 2px ring (not a
-  // faint low-alpha tint) plus a real glow spill beneath — binary on/off
-  // via CSS transition.
-  const cardShadowIdle = "0 1px 0 white inset, 0 8px 26px -18px rgba(46,36,51,.10)";
-  const cardShadowRunning = `0 1px 0 white inset, 0 0 0 2px ${phaseAccent.base}, 0 16px 40px -10px ${phaseAccent.deep}90`;
+  // Running-state dashboard-card treatment: accent hairline plus a wide soft
+  // glow (runningShadow), binary on/off via CSS transition. Idle falls back to
+  // the shadow-card class, so the inline style is only set while running.
+  const cardShadowRunning = runningShadow(phaseAccent);
 
   return (
     <NotificationProvider timer={timer} goalsDone={goalsDone} goalsTotal={goalsTotal}>
@@ -197,7 +196,7 @@ export default function Home() {
       {/* Header */}
       <motion.header
         {...reveal(0)}
-        className="relative flex flex-wrap items-end justify-between gap-4 border-b pb-5 mb-10 transition-[border-color] duration-500 ease-out"
+        className="relative flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 mb-10 transition-[border-color] duration-500 ease-out"
         style={{ borderBottomColor: headerBorderColor }}
       >
         <div className="flex items-center gap-3.5">
@@ -212,13 +211,15 @@ export default function Home() {
             Daily Prescription &nbsp;
             <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
           </p>
-          <button
+          <motion.button
             onClick={handleSignOut}
             disabled={signingOut}
-            className="text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60"
+            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+            transition={SPRING_UI}
+            className="rounded-full px-3 py-1 text-xs text-ink-soft hover:text-ink hover:bg-paper-2 transition-colors disabled:opacity-60"
           >
             {signingOut ? "Signing out…" : "Sign out"}
-          </button>
+          </motion.button>
           <AnimatePresence>
             {signOutError && (
               <motion.p
@@ -279,8 +280,8 @@ export default function Home() {
         {/* Right: goals + progress */}
         <motion.aside {...reveal(0.14)} className="flex flex-col gap-5">
           <div
-            className="bg-paper border border-line rounded-card p-6 transition-[box-shadow] duration-700 ease-out"
-            style={{ boxShadow: isRunning ? cardShadowRunning : cardShadowIdle }}
+            className="bg-paper border border-line rounded-card shadow-card p-6 transition-[box-shadow] duration-700 ease-out"
+            style={isRunning ? { boxShadow: cardShadowRunning } : undefined}
           >
             <GoalList
               onProgressChange={(done, total) => {
@@ -311,7 +312,7 @@ export default function Home() {
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Help and tips"
-              className="w-6 h-6 rounded-full border border-current flex items-center justify-center text-[11px] hover:text-ink hover:border-ink transition-colors duration-150"
+              className="w-8 h-8 rounded-full border border-current flex items-center justify-center text-[11px] hover:text-ink hover:border-ink active:scale-95 transition-[color,border-color,transform] duration-150"
             >
               ?
             </button>

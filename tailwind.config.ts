@@ -28,6 +28,16 @@ const config: Config = {
       },
       borderRadius: {
         card: "18px",
+        control: "12px",
+      },
+      // Layered, ink-tinted shadows (never black) with a 1px top highlight.
+      // `running` is the neutral fallback; phase-tinted glow comes from
+      // runningShadow() in lib/phase-theme.ts.
+      boxShadow: {
+        card:  "0 1px 0 rgba(255,255,255,.7) inset, 0 1px 2px rgba(46,36,51,.04), 0 10px 28px -16px rgba(46,36,51,.14)",
+        panel: "0 1px 0 rgba(255,255,255,.7) inset, 0 2px 6px rgba(46,36,51,.06), 0 28px 60px -22px rgba(46,36,51,.34)",
+        fab:   "0 1px 0 rgba(255,255,255,.35) inset, 0 2px 6px rgba(46,36,51,.10), 0 12px 28px -10px rgba(46,36,51,.40)",
+        press: "0 1px 0 rgba(255,255,255,.35) inset, 0 1px 2px rgba(46,36,51,.14), 0 6px 14px -8px rgba(46,36,51,.30)",
       },
     },
   },

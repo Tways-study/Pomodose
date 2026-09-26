@@ -1,6 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
+import { SPRING_SOFT, SPRING_UI } from "@/lib/motion";
 
 const TIPS = [
   {
@@ -66,7 +67,7 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink/30 backdrop-blur-md"
             onClick={onClose}
             aria-hidden
           />
@@ -76,11 +77,11 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="help-title"
-            className="relative bg-paper border border-line rounded-card shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
-            initial={{ y: 20, scale: 0.97 }}
-            animate={{ y: 0, scale: 1 }}
-            exit={{ y: 8, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="relative bg-paper/95 backdrop-blur-xl border border-white/60 rounded-card shadow-panel max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            initial={{ y: 16, scale: 0.96, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 8, scale: 0.98, opacity: 0, transition: { duration: 0.15 } }}
+            transition={SPRING_SOFT}
           >
             <div className="p-6 sm:p-8">
               {/* Header */}
@@ -120,12 +121,14 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
               </ol>
 
               {/* CTA */}
-              <button
+              <motion.button
                 onClick={onClose}
-                className="mt-8 w-full rounded-xl bg-lilac hover:bg-lilac-deep hover:text-paper text-ink text-sm font-medium py-3 transition-colors duration-200"
+                whileTap={{ scale: 0.98 }}
+                transition={SPRING_UI}
+                className="mt-8 w-full rounded-control bg-lilac hover:bg-lilac-deep hover:text-paper text-ink text-sm font-medium py-3 shadow-press transition-colors duration-200"
               >
                 {isFirstVisit ? "Begin my regimen" : "Close"}
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

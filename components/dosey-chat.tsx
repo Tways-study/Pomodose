@@ -10,7 +10,7 @@ import { todayKey } from "@/lib/date";
 import { api } from "@/convex/_generated/api";
 import { useAddressTerm } from "@/components/address-term-provider";
 import { useLatestNotification } from "@/components/notification-provider";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_OUT, SPRING_SOFT, SPRING_UI } from "@/lib/motion";
 import type { ChatMessage, ChatRateLimitError, DoseyStats } from "@/types";
 
 interface Props {
@@ -208,9 +208,10 @@ export function DoseyChat({ stats }: Props) {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close Dosey" : "Ask Dosey"}
         aria-expanded={open}
-        whileHover={reduceMotion ? undefined : { scale: 1.05 }}
-        whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-lilac px-4 py-3 text-ink shadow-[0_8px_26px_-12px_rgba(46,36,51,.45)] hover:bg-lilac-deep hover:text-paper transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-lilac-deep focus:ring-offset-2 focus:ring-offset-paper"
+        whileHover={reduceMotion ? undefined : { y: -1 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.97, y: 0 }}
+        transition={SPRING_UI}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-lilac px-4 py-3 text-ink shadow-fab hover:bg-lilac-deep hover:text-paper transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-lilac-deep focus:ring-offset-2 focus:ring-offset-paper"
       >
         <motion.span
           className="flex h-7 w-7 items-center justify-center rounded-full bg-paper"
@@ -227,12 +228,12 @@ export function DoseyChat({ stats }: Props) {
           <motion.div
             role="dialog"
             aria-label="Dosey chat"
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: EASE_OUT }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98, transition: { duration: 0.18, ease: EASE_OUT } }}
+            transition={reduceMotion ? { duration: 0.2 } : SPRING_SOFT}
             style={{ originX: 1, originY: 1 }}
-            className="fixed bottom-24 right-6 z-50 flex h-[520px] max-h-[calc(100vh-8rem)] w-[360px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-card border border-line bg-paper shadow-[0_1px_0_white_inset,0_18px_50px_-24px_rgba(46,36,51,.35)]"
+            className="fixed bottom-24 right-6 z-50 flex h-[520px] max-h-[calc(100vh-8rem)] w-[360px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-card border border-white/60 bg-paper/90 backdrop-blur-xl shadow-panel"
           >
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-line px-4 py-3">
@@ -289,8 +290,9 @@ export function DoseyChat({ stats }: Props) {
                           <motion.button
                             key={s}
                             onClick={() => send(s)}
-                            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-                            className="rounded-xl border border-line-strong bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
+                            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+                            transition={SPRING_UI}
+                            className="rounded-control border border-line-strong bg-paper-2 px-3 py-2 text-left text-sm text-ink hover:border-lilac-deep transition-colors"
                           >
                             {s}
                           </motion.button>
@@ -309,8 +311,8 @@ export function DoseyChat({ stats }: Props) {
                   <div
                     className={
                       m.role === "user"
-                        ? "max-w-[80%] rounded-2xl rounded-br-sm bg-lilac px-3.5 py-2 text-sm text-ink"
-                        : "max-w-[85%] rounded-2xl rounded-bl-sm bg-paper-2 px-3.5 py-2 text-sm text-ink whitespace-pre-wrap"
+                        ? "max-w-[80%] rounded-[18px] rounded-br-[6px] bg-lilac px-3.5 py-2 text-sm text-ink"
+                        : "max-w-[85%] rounded-[18px] rounded-bl-[6px] bg-paper-2 px-3.5 py-2 text-sm text-ink whitespace-pre-wrap"
                     }
                   >
                     {m.content || (reduceMotion ? (
@@ -352,14 +354,15 @@ export function DoseyChat({ stats }: Props) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
                   placeholder={limitedUntil ? "Dosey's resting…" : "Ask Dosey…"}
-                  className="flex-1 rounded-xl border border-line-strong bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-2 focus:ring-lilac/30 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
+                  className="flex-1 rounded-control border border-line-strong bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
                 />
                 <motion.button
                   onClick={() => send(input)}
                   disabled={isStreaming || !!limitedUntil || !input.trim()}
                   aria-label="Send message"
-                  whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-                  className="flex-none rounded-xl bg-lilac px-4 text-ink font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200 disabled:opacity-40 disabled:hover:bg-lilac disabled:hover:text-ink"
+                  whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                  transition={SPRING_UI}
+                  className="flex-none rounded-control bg-lilac px-4 text-ink font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200 disabled:opacity-40 disabled:hover:bg-lilac disabled:hover:text-ink"
                 >
                   ↑
                 </motion.button>

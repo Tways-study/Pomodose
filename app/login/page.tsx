@@ -36,7 +36,7 @@ export default function LoginPage() {
         </motion.div>
 
         <motion.div
-          className="bg-paper border border-line rounded-card p-6 sm:p-8 shadow-[0_1px_0_white_inset,0_18px_50px_-24px_rgba(46,36,51,.35)]"
+          className="bg-paper/90 backdrop-blur-xl border border-white/60 rounded-card p-6 sm:p-8 shadow-panel"
           {...enter(0.09)}
         >
           <LoginForm />

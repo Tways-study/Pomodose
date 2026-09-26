@@ -26,9 +26,46 @@
   :focus-visible { outline: 2px solid theme('colors.lilac-deep'); outline-offset: 3px; }
 }
 
+@layer base {
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  h1, h2, h3 { text-wrap: balance; }
+}
+
 @layer utilities {
   .font-serif { font-family: var(--font-serif), Georgia, serif; }
   .font-sans  { font-family: var(--font-sans), system-ui, sans-serif; }
+
+  /* Frosted paper surface. A web approximation of a translucent material
+     (not an official platform effect): blur + saturation over the wash, a
+     white hairline and inner highlight for the edge. Falls back to solid paper
+     when transparency is reduced or backdrop-filter is unsupported. */
+  .glass {
+    background-color: rgb(246 242 236 / 0.72);
+    border: 1px solid rgb(255 255 255 / 0.55);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    backdrop-filter: blur(20px) saturate(160%);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background-color: theme('colors.paper'); border-color: theme('colors.line'); }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass {
+      background-color: theme('colors.paper');
+      border-color: theme('colors.line');
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}
+
+/* CSS-driven animations (Tailwind animate-*) are not covered by framer's
+   useReducedMotion, so collapse them here. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
 
 /* Chime volume slider — styled to match the graduated measurement marks on the vial */

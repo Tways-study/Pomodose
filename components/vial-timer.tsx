@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type Dispatch } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_OUT, SPRING_UI } from "@/lib/motion";
 import { startCompletionAlert, stopCompletionAlert } from "@/lib/chime";
 import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
 import { setRunningTitle, resetTitle } from "@/lib/document-title";
@@ -141,10 +141,11 @@ export function VialTimer({ state, dispatch }: Props) {
       <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-5 border border-line">
         <motion.button
           onClick={() => setVessel("flask")}
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+          transition={SPRING_UI}
           className={`px-3 py-1 rounded-full transition-colors duration-200 ${
             vessel === "flask"
-              ? "bg-paper text-ink font-medium shadow-sm"
+              ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
               : "text-ink-soft hover:text-ink"
           }`}
           aria-label="Switch to Flask view"
@@ -153,10 +154,11 @@ export function VialTimer({ state, dispatch }: Props) {
         </motion.button>
         <motion.button
           onClick={() => setVessel("cylinder")}
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+          transition={SPRING_UI}
           className={`px-3 py-1 rounded-full transition-colors duration-200 ${
             vessel === "cylinder"
-              ? "bg-paper text-ink font-medium shadow-sm"
+              ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
               : "text-ink-soft hover:text-ink"
           }`}
           aria-label="Switch to Graduated Cylinder view"
@@ -302,12 +304,12 @@ export function VialTimer({ state, dispatch }: Props) {
             stopCompletionAlert();
             dispatch(primary.action);
           }}
-          whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          whileHover={reduceMotion ? undefined : { y: -1 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.98, y: 0 }}
+          transition={SPRING_UI}
           style={isRunning ? { backgroundColor: phaseAccent.base } : undefined}
           className={`px-6 py-2.5 rounded-full text-sm font-medium transition-colors duration-500${
-            isRunning ? " text-ink" : " bg-ink text-paper hover:opacity-90"
+            isRunning ? " text-ink shadow-press" : " bg-ink text-paper shadow-press hover:bg-ink/90"
           }`}
         >
           {primary.label}
@@ -317,7 +319,8 @@ export function VialTimer({ state, dispatch }: Props) {
             stopCompletionAlert();
             dispatch({ type: "RESET" });
           }}
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+          transition={SPRING_UI}
           className="px-5 py-2.5 rounded-full border border-line text-ink-soft text-sm font-medium hover:text-ink hover:border-ink-soft transition-colors duration-200"
         >
           Reset

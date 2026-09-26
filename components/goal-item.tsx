@@ -1,7 +1,7 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Goal } from "@/types";
-import { EASE_OUT } from "@/lib/motion";
+import { EASE_OUT, SPRING_UI } from "@/lib/motion";
 
 interface Props {
   goal: Goal;
@@ -18,13 +18,14 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.25, ease: EASE_OUT }}
-      className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-xl"
+      className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-control"
     >
       {/* Checkmark button */}
       <motion.button
         aria-label={goal.done ? "Mark incomplete" : "Mark complete"}
         onClick={() => onToggle(goal.id)}
-        whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+        transition={SPRING_UI}
         className={[
           "flex-none w-5 h-5 rounded-md border-2 relative transition-colors duration-200",
           goal.done
@@ -58,7 +59,8 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
       <motion.button
         aria-label="Remove goal"
         onClick={() => onDelete(goal.id)}
-        whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+        transition={SPRING_UI}
         className="flex-none text-ink-soft hover:text-clay text-lg leading-none opacity-50 hover:opacity-100 transition-opacity duration-150"
       >
         ×
