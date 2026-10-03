@@ -3,79 +3,60 @@
 @tailwind utilities;
 
 @layer base {
-  html { font-family: var(--font-sans), system-ui, sans-serif; }
+  html {
+    font-family: var(--font-body), ui-rounded, system-ui, sans-serif;
+    scrollbar-color: theme('colors.line-strong') transparent;
+    scrollbar-width: thin;
+  }
   body {
-    background:
-      radial-gradient(120% 80% at 80% -10%, #F0E7F7 0%, transparent 45%),
-      theme('colors.paper');
+    background-color: theme('colors.ground');
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  /* Apothecary paper grain — felt, not seen. Static texture (no depth/shadow),
-     sits behind the z-10 content and the React-rendered background washes. */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  /* Tabular figures on timer display only */
-  .timer-display { font-variant-numeric: tabular-nums; }
-  /* Visible focus ring */
-  :focus-visible { outline: 2px solid theme('colors.lilac-deep'); outline-offset: 3px; }
-}
-
-@layer base {
-  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   h1, h2, h3 { text-wrap: balance; }
+  /* Visible focus ring */
+  :focus-visible {
+    outline: 3px solid theme('colors.ink');
+    outline-offset: 3px;
+  }
+  ::selection { background: theme('colors.gum-lilac'); color: theme('colors.ink'); }
+  input, textarea { caret-color: theme('colors.ink'); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.line-strong');
+    border-radius: 9999px;
+  }
 }
 
 @layer utilities {
-  .font-serif { font-family: var(--font-serif), Georgia, serif; }
-  .font-sans  { font-family: var(--font-sans), system-ui, sans-serif; }
+  .font-display { font-family: var(--font-display), ui-rounded, system-ui, sans-serif; }
+  .font-body    { font-family: var(--font-body), ui-rounded, system-ui, sans-serif; }
+  .display-label {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .digits {
+    font-family: var(--font-display);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
 
-  /* Frosted paper surface. A web approximation of a translucent material
-     (not an official platform effect): blur + saturation over the wash, a
-     white hairline and inner highlight for the edge. Falls back to solid paper
-     when transparency is reduced or backdrop-filter is unsupported. */
-  .glass {
-    background-color: rgb(246 242 236 / 0.72);
-    border: 1px solid rgb(255 255 255 / 0.55);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    backdrop-filter: blur(20px) saturate(160%);
+  /* Decorative row of soft round dots. */
+  .dots-divider {
+    border-top: 3px dotted theme('colors.line-soft');
   }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .glass { background-color: theme('colors.paper'); border-color: theme('colors.line'); }
-  }
-  @media (prefers-reduced-transparency: reduce) {
-    .glass {
-      background-color: theme('colors.paper');
-      border-color: theme('colors.line');
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
-}
 
-/* Running-state ambient washes (colors set inline from PHASE_ACCENT). Opacity-only
-   breathe, two cadences and opposite phase so the layers never move in lockstep. */
-.ambient-wash {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease-out, background 0.7s ease-out;
-}
-.ambient-wash.is-running { will-change: opacity; }
-.ambient-a.is-running { animation: ambient-breathe-a 3.5s ease-in-out infinite; }
-.ambient-b.is-running { animation: ambient-breathe-b 4.5s ease-in-out infinite; }
-@keyframes ambient-breathe-a { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.42; } }
-@keyframes ambient-breathe-b { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.14; } }
-@media (prefers-reduced-motion: reduce) {
-  .ambient-a.is-running { animation: none; opacity: 0.32; }
-  .ambient-b.is-running { animation: none; opacity: 0.24; }
+  /* Soft diagonal stripes for break segments; color follows currentColor. */
+  .hatch {
+    background-image: repeating-linear-gradient(
+      45deg,
+      currentColor 0 3px,
+      transparent 3px 7px
+    );
+  }
 }
 
 /* CSS-driven animations (Tailwind animate-*) are not covered by framer's
@@ -88,51 +69,54 @@
   }
 }
 
-/* Chime volume slider — styled to match the graduated measurement marks on the vial */
+/* Chime volume slider: a soft pill track with a round ink thumb. */
 .chime-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 140px;
-  height: 3px;
+  height: 6px;
   background: linear-gradient(
     to right,
-    theme('colors.lilac') var(--fill, 70%),
-    theme('colors.line') var(--fill, 70%)
+    theme('colors.gum-lilac') var(--fill, 70%),
+    theme('colors.line-soft') var(--fill, 70%)
   );
-  border-radius: 1.5px;
+  border-radius: 9999px;
   outline: none;
   cursor: pointer;
 }
 .chime-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
   background: theme('colors.ink');
+  border: 3px solid theme('colors.surface');
+  box-sizing: content-box;
   cursor: pointer;
   transition: transform 0.1s ease;
 }
-.chime-slider:hover::-webkit-slider-thumb { transform: scale(1.2); }
+.chime-slider:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .chime-slider:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid theme('colors.lilac-deep');
+  outline: 3px solid theme('colors.ink');
   outline-offset: 2px;
 }
 .chime-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
   background: theme('colors.ink');
-  border: none;
+  border: 3px solid theme('colors.surface');
+  box-sizing: content-box;
   cursor: pointer;
 }
 .chime-slider::-moz-range-track {
-  height: 3px;
-  background: theme('colors.line');
-  border-radius: 1.5px;
+  height: 6px;
+  background: theme('colors.line-soft');
+  border-radius: 9999px;
 }
 .chime-slider::-moz-range-progress {
-  height: 3px;
-  background: theme('colors.lilac');
-  border-radius: 1.5px;
+  height: 6px;
+  background: theme('colors.gum-lilac');
+  border-radius: 9999px;
 }

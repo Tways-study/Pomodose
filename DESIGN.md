@@ -1,208 +1,307 @@
 ---
 name: Pomodose
-description: A measured-dose focus timer, goal tracker, and AI study companion for a pharmacist.
+description: A pharmacy made of gumdrops and gelcaps. A measured-dose focus timer, goal tracker, and AI study companion in soft pastel stickers.
 colors:
-  paper: "#F6F2EC"
-  paper-2: "#EFE9DF"
-  ink: "#2E2433"
-  ink-soft: "#6B5E6F"
-  lilac: "#C9B6E4"
-  lilac-deep: "#8465B0"
-  amber: "#D9B36B"
-  amber-deep: "#B98A3E"
-  sage: "#A8B89A"
-  clay: "#E0B4A8"
-  clay-deep: "#A96552"
-  line: "#DED5C8"
-  line-strong: "#948066"
+  ground: "#F8DFCF"
+  surface: "#FFFCF8"
+  surface-2: "#FBEFE6"
+  ink: "#3A2F45"
+  ink-soft: "#6E6178"
+  line-soft: "#E8D3C4"
+  line-strong: "#8A7A86"
+  gum-sky: "#A8D4FF"
+  gum-mint: "#B4E5C4"
+  gum-apricot: "#FFB88A"
+  gum-butter: "#FFE28A"
+  gum-rose: "#FFB3C7"
+  gum-lilac: "#CDBBFF"
+  alert: "#B42318"
+  dosey-lilac: "#B9A4F5"
+  dosey-cream: "#FFF1DC"
+  dosey-sprout: "#7CC38A"
+  dosey-tomato: "#FF7A6B"
+  dosey-blush: "#FF9FB2"
 typography:
   display:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "clamp(1.5rem, 3vw, 1.875rem)"
-    fontWeight: 500
-    lineHeight: 1.1
-    letterSpacing: "-0.01em"
+    fontFamily: "Fredoka, ui-rounded, system-ui, sans-serif"
+    fontSize: "1.875rem"
+    fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: "normal"
+  title:
+    fontFamily: "Fredoka, ui-rounded, system-ui, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 600
+    lineHeight: 1.55
+    letterSpacing: "normal"
   timer:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "3.75rem"
-    fontWeight: 500
+    fontFamily: "Fredoka, ui-rounded, system-ui, sans-serif"
+    fontSize: "clamp(3.75rem, 8vw, 4.5rem)"
+    fontWeight: 600
     lineHeight: 1
     letterSpacing: "normal"
+    fontFeature: "tnum"
   body:
-    fontFamily: "Spline Sans, system-ui, sans-serif"
-    fontSize: "0.875rem"
+    fontFamily: "Nunito, ui-rounded, system-ui, sans-serif"
+    fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "normal"
+  body-small:
+    fontFamily: "Nunito, ui-rounded, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.43
+    letterSpacing: "normal"
   label:
-    fontFamily: "Spline Sans, system-ui, sans-serif"
-    fontSize: "0.75rem"
+    fontFamily: "Fredoka, ui-rounded, system-ui, sans-serif"
+    fontSize: "0.875rem"
     fontWeight: 500
-    lineHeight: 1.2
-    letterSpacing: "0.18em"
+    lineHeight: 1.43
+    letterSpacing: "normal"
 rounded:
+  control: "18px"
+  bubble: "28px"
   pill: "9999px"
-  md: "12px"
-  card: "18px"
+spacing:
+  sm: "8px"
+  md: "16px"
+  card-x: "20px"
+  card-x-wide: "24px"
+  grid-gap: "40px"
 components:
   button-primary:
     backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
+    textColor: "{colors.surface}"
     rounded: "{rounded.pill}"
-    padding: "10px 24px"
-  button-primary-hover:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
-  button-ghost:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink-soft}"
+    typography: "{typography.label}"
+    padding: "12px 24px"
+    height: "48px"
+  button-secondary:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.pill}"
-    padding: "10px 20px"
-  button-accent:
-    backgroundColor: "{colors.lilac}"
+    typography: "{typography.label}"
+    padding: "12px 20px"
+    height: "48px"
+  button-secondary-hover:
+    backgroundColor: "{colors.gum-lilac}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-  button-accent-hover:
-    backgroundColor: "{colors.lilac-deep}"
-    textColor: "{colors.paper}"
-  input-field:
-    backgroundColor: "{colors.paper-2}"
+  sticker-focus:
+    backgroundColor: "{colors.gum-sky}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.md}"
-    padding: "10px 14px"
-  card-surface:
-    backgroundColor: "{colors.paper}"
+    rounded: "{rounded.pill}"
+    padding: "4px 12px"
+  sticker-short-break:
+    backgroundColor: "{colors.gum-mint}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.card}"
+    rounded: "{rounded.pill}"
+    padding: "4px 12px"
+  sticker-long-break:
+    backgroundColor: "{colors.gum-apricot}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    padding: "4px 12px"
+  card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.bubble}"
     padding: "24px"
+  input:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "12px 16px"
+  digit-cell:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+  chat-bubble-user:
+    backgroundColor: "{colors.gum-lilac}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.bubble}"
+    padding: "10px 16px"
+  chat-bubble-dosey:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.bubble}"
+    padding: "10px 16px"
 ---
 
 # Design System: Pomodose
 
-## 1. Overview
+## Overview
 
-**Creative North Star: "The Apothecary's Counter"**
+**Creative North Star: "The Gelcap Pastel"**
 
-Pomodose is built as a personal gift — a Pomodoro timer, daily goal list, and AI companion themed around a pharmacist's daily dosing ritual. The system reads like a well-kept apothecary counter: warm paper, glass and lilac tincture, careful measurement marks, a steady hand. Every session is called a "dose"; the signature timer is drawn as a filling/draining glass vial, never a generic circular progress ring. Copy speaks directly and gently to "Doc" rather than at "the user."
+A pharmacy made of gumdrops and gelcaps. The page is a soft peach ground; content sits on cream cards with generous bubble corners; every piece of meaning is a pastel sticker that has been pressed onto the surface. Everything is rounded, friendly, and a little squishy, so the app feels like a gift and not like a dashboard. Text is always plum-black `ink` on every pastel, so the sweetness never costs legibility.
 
-This system explicitly rejects the generic SaaS login/dashboard template — no cold corporate auth forms, no centered-card-on-gradient boilerplate, no gamified streak badges or confetti, nothing clinical or hospital-sterile. It is one calm page, not a multi-panel dashboard, and any new surface (including an access gate) should feel like it was drawn by the same hand as the vial timer and the goal list, not bolted on from a component library.
+Pharmacy survives as vocabulary, not as styling. "Rx #0003", "SIG:", "Qty 4 doses · refills 2", "Dose", "Refill", "Antidote", "Dosing instructions" are copy. The surfaces that carry them are soft, filled, and round, never hard-edged label stock.
+
+Density is calm: one sticky timer card beside a stack of tinted-header cards, big touch targets (44px minimum, 48px for primary actions), and a mascot, Dosey, who peeks, emerges, and answers questions.
 
 **Key Characteristics:**
-- Warm, editorial, apothecary-calm — gentle precision over corporate efficiency.
-- One consistent voice: short, sincere, addressed to "Doc."
-- A restrained, muted palette; no saturated "productivity app" colors.
-- Fraunces serif for moments of personality (headings, the timer readout, italic asides); Spline Sans for everything functional.
-- Soft, low-contrast elevation — shadows are a whisper, not a drop shadow.
+- Peach ground, cream surfaces, plum-black ink; six pastel "gum" stickers each carrying one meaning.
+- Two rounded faces: Fredoka for display, labels, and digits; Nunito for reading text.
+- Soft filled pills for text buttons; a 2px outline only where WCAG 1.4.11 needs a visible boundary (text inputs, the unchecked goal checkbox).
+- Shallow, warm, layered shadows with a white top-edge highlight; no hard offset shadows.
+- Motion split by tool: GSAP for scroll and the mascot, Framer Motion for micro-interactions; every path has a reduced-motion fallback.
 
-## 2. Colors
+## Colors
 
-A warm, low-saturation palette — paper and ink, lilac tincture, sage for completion, clay as the one warm warning note. Nothing here is fully saturated; every color reads as "measured."
+A peach-and-cream ground with a pastel confectionery accent set where each hue means exactly one thing.
 
 ### Primary
-- **Lilac** (#C9B6E4): the tincture accent — vial liquid, phase-active states, primary interactive accents (add-goal button, chat trigger). Used deliberately, not everywhere.
-- **Lilac Deep** (#8465B0): hover/active state for lilac elements, the focus-ring color app-wide, and the vial's meniscus line. Darkened from #9B7FC4 so the focus ring clears WCAG 1.4.11's 3:1 on both surfaces (3.02:1 -> 4.21:1 on paper, 2.79:1 -> 3.89:1 on paper-2).
+- **Plum-Black Ink** (`{colors.ink}`): all text, the primary button fill, the focus ring, the done checkmark, the slider thumb. It is the only dark color; 9.8:1 on ground, 12.3:1 on surface.
+
+### Secondary (the gum stickers; text on every one is `ink`)
+- **Sky Gum** (`{colors.gum-sky}`): Dose / focus. Focus phase sticker and active tab, completed focus segments in the cycle strip, the "Dose cycle" card header.
+- **Mint Gum** (`{colors.gum-mint}`): Refill / short break, and done. Short-break sticker and segments, the checked goal circle, the "Today's goals" header, calm completion notes.
+- **Apricot Gum** (`{colors.gum-apricot}`): Antidote / long break, and warnings. Long-break sticker and segment, burnout notes.
+- **Butter Gum** (`{colors.gum-butter}`): nudges. The "Doses today" pill, the vessel cap, nudge notes, the "Study note" header.
+- **Rose Gum** (`{colors.gum-rose}`): remove and undo. Remove-goal hover fill, the hand-drawn strike through a finished goal.
+- **Lilac Gum** (`{colors.gum-lilac}`): Dosey and chat. Dosey trigger, user chat bubbles, selected vessel toggle, the chime slider fill, hover tint on secondary pills, text selection, the glass tint of the vessel.
+
+### Tertiary
+- **Alert Red** (`{colors.alert}`): error text and error borders only (6.4:1 on surface). Never a decorative color.
 
 ### Neutral
-- **Paper** (#F6F2EC): the base background. Warm off-white, never stark white.
-- **Paper Deep** (#EFE9DF): secondary surface — inactive tab pills, input fields, goal-item rows, suggestion chips. One step warmer/darker than Paper.
-- **Ink** (#2E2433): primary text and the one dark UI surface (the primary "Begin dose" button background).
-- **Ink Soft** (#6B5E6F): secondary/muted text — labels, timestamps, placeholder copy, inactive tab text.
-- **Line** (#DED5C8): borders and dividers on the `paper` surface — cards, panels, dividers, tab tracks.
-- **Line Strong** (#948066): the same border rule on the `paper-2` surface. `line` measures only 1.20:1 there, below WCAG 1.4.11's 3:1 for a UI component boundary, which left text inputs reading as unbordered blocks. Applies to interactive controls filled with paper-2 (text inputs, suggestion chips) — not to static paper-2 containers like goal rows or the tab track, which keep `line`.
+- **Peach Ground** (`{colors.ground}`): the page, the browser theme color, the manifest background.
+- **Cream Surface** (`{colors.surface}`): cards, modal, chat panel, input-less pills in the footer.
+- **Shell Cream** (`{colors.surface-2}`): inset wells: tab track, goal rows, input fills, digit cells, secondary buttons, Dosey's reply bubble.
+- **Ink Soft** (`{colors.ink-soft}`): secondary text; 5.6:1 on surface, only 4.5:1 on ground, so use it on surfaces and never on the bare ground.
+- **Soft Line** (`{colors.line-soft}`): decorative hairlines and the dotted divider; never a control boundary.
+- **Strong Line** (`{colors.line-strong}`): the interactive boundary (3.6:1): text-input outline, unchecked checkbox outline, scrollbar thumb.
 
-### Secondary
-- **Sage** (#A8B89A): completion state only — a checked goal's checkmark button and strikethrough decoration. Never used decoratively elsewhere.
-- **Clay** (#E0B4A8): the one warm/warning note — delete-button hover, and the fill of inline error banners at `bg-clay/60`. Reserved for "something needs attention," never a primary color.
-- **Clay Deep** (#A96552): the border on error banners and the border of a field that failed validation. `clay/25` on paper measured 1.038:1 against the paper-2 input fill — an error banner was visually indistinguishable from a text field. The border, not the fill, is what makes an error read as an error.
-- **Amber** (#D9B36B) / **Amber Deep** (#B98A3E): the second tincture, reserved exclusively for running-state phase chrome (page wash, header sweep, dashboard-card glow, active-tab dot, dose-ring) during short/long breaks — focus sessions stay lilac. Never decorative, never used on the vial itself. Introduced in `plans/003-whole-ui-running-state.md` as a scoped exception to the Rare Accent Rule below.
+### Dosey palette (the mascot only)
+Dosey Lilac (`{colors.dosey-lilac}`) body and the vessel liquid, Dosey Cream (`{colors.dosey-cream}`) belly, Dosey Sprout (`{colors.dosey-sprout}`) leaves, Dosey Tomato (`{colors.dosey-tomato}`) fruit, Dosey Blush (`{colors.dosey-blush}`) cheeks. These are the mascot's three semantic colors plus a cheek accent; they are not general UI colors, except that the timer liquid reuses Dosey Lilac.
 
 ### Named Rules
-**The One Border Rule.** Every border in the app is 1px and comes from the line ramp — `border-line` (#DED5C8) on the `paper` surface, `border-line-strong` (#948066) on the `paper-2` surface. Two values, one rule: the border is always the same *step down* from whatever it sits on. The single-value version of this rule (`border-line` everywhere) is what made inputs invisible, since #DED5C8 on #EFE9DF is 1.20:1. No third border color.
+**The One Meaning Rule.** Each gum color means one thing (sky = dose, mint = refill or done, apricot = antidote or warning, butter = nudge, rose = remove, lilac = Dosey). Do not use a gum color decoratively or for a second meaning.
 
-**The Rare Accent Rule.** Lilac is the only saturated-ish color in the palette and appears on a minority of any given screen — the vial liquid, one or two buttons, active states. If lilac starts covering more than a small fraction of a view, pull back.
+**The Ink-On-Pastel Rule.** Text on any gum or surface fill is `ink`. Never white text on a pastel, never `ink-soft` on the bare ground.
 
-## 3. Typography
+**The Boundary Rule.** A control that needs a visible edge for non-text contrast gets a 2px `line-strong` outline. Soft pills with a text label and a distinct fill need none.
 
-**Display Font:** Fraunces (with Georgia, serif fallback)
-**Body Font:** Spline Sans (with system-ui, sans-serif fallback)
+## Typography
 
-**Character:** Fraunces is a variable serif with real personality — used for the app title, the timer's numeric readout, panel headers ("Dosey"), and italicized voice moments (quotes, footer line). Spline Sans stays clean and quiet everywhere functional (body copy, buttons, labels, inputs) so Fraunces reads as a deliberate accent rather than the whole voice. Never Inter, Roboto, or a system sans as the primary typeface — that would flatten the personality this system depends on.
+**Display Font:** Fredoka (with ui-rounded, system-ui, sans-serif), variable weight, loaded via next/font as `--font-display`.
+**Body Font:** Nunito (with ui-rounded, system-ui, sans-serif), variable weight, as `--font-body`.
+
+**Character:** Two rounded faces that read as one family: Fredoka is chunky and candy-label, Nunito is gentle and readable at length. Fredoka carries anything that is a name, a button, or a number; Nunito carries anything that is a sentence.
 
 ### Hierarchy
-- **Display** (font-medium 500, `clamp(1.5rem, 3vw, 1.875rem)` / text-2xl–3xl, tight tracking `-0.01em`): the app title ("Pomodose") and panel headers. Fraunces.
-- **Timer** (font-medium 500, 3.75rem / text-6xl, `opsz` 72, tabular-nums): the time readout sitting directly above the vessel — the single largest, most prominent text in the app. Fraunces, `.timer-display` tabular figures so digits don't jitter.
-- **Body** (regular 400, 0.875rem / text-sm, 1.5 line-height): goal text, chat messages, buttons, general copy. Spline Sans. Cap prose at a comfortable line length inside the 360px chat panel and the goal cards.
-- **Label** (medium 500, 0.75rem / text-xs, 0.18em tracking, uppercase): phase labels under the timer, section eyebrows ("Goals", "Progress"), the "Rx — Take as needed" quote-card tag. Spline Sans, always uppercase with wide tracking — the one place tracked-uppercase is used, and used consistently.
+- **Display** (Fredoka 600, 1.875rem, 1.2): the "Pomodose" wordmark heading on the app and login (login is the same size).
+- **Title** (Fredoka 600, 1.125rem / 1.25rem for the Rx label's "Pomodose Pharmacy", 1.5rem for form and help headings): card header titles, dialog titles.
+- **Timer** (Fredoka 600, 3.75rem, 4.5rem from the `sm` breakpoint, tabular numerals): the countdown, each character in its own fixed-width cell. A 1.5rem variant sits in the sticky bar.
+- **Body** (Nunito 400, 1rem): goal text, chat input, the Dosey speech bubble.
+- **Body Small** (Nunito 400, 0.875rem; `ink-soft` on surfaces): SIG line, qty and refills line, helper copy, errors. 0.75rem is used only for the tab hint.
+- **Label** (Fredoka 500, 0.875rem to 1rem): buttons, pills, tabs, stickers. The Doses-today count is Fredoka 600 at 1.5rem.
 
 ### Named Rules
-**The Fraunces-for-Feeling Rule.** Fraunces appears only where the app is being personal or precise (the timer number, headings, italic asides) — never in dense functional UI like button labels or input placeholders. Spline Sans carries function; Fraunces carries feeling.
+**The Tabular Rule.** Every changing number uses tabular figures (`.digits`) inside fixed-width cells, so the countdown never jitters.
 
-## 4. Elevation
+**The Two Faces Rule.** Only Fredoka and Nunito. No third family and no system display face in components.
 
-Pomodose is quietly layered — surfaces are distinguished mainly by the paper/paper-2 tone shift and the single `border-line` rule, with depth built from two or three soft, stacked shadows (a tight contact shadow plus a wide, faint ambient one) rather than a single drop shadow. Every shadow is warm-tinted (`rgba(46,36,51,...)`, ink at low opacity, never pure black) and paired with a 1px white inset highlight that reads as a gentle top-edge sheen. All shadow values live as tokens in `tailwind.config.ts` (`shadow-card`, `shadow-panel`, `shadow-fab`, `shadow-press`); do not write shadow strings inline.
+## Layout
+
+A single main page, max width 1240px, side padding 16px (32px from `sm`), top padding 32px (48px from `sm`). On large screens (`lg`) a two-column grid, 5fr / 7fr with a 40px gap: the left column is the sticky Rx label (timer card) at `top-6`; the right column is a stack of cards with 24px vertical rhythm, offset 90px down so the left card's mascot peek has headroom. Below `lg` it is a single column with 24px gap, and a sticky timer bar pins to the top (mobile only) once the Rx label has scrolled out of view. Card padding is 20px (24px from `sm`); header bands 14px vertical.
+
+Controls hold a 44px minimum hit area (goal check and remove, sign out, help, chat close) and 48px for primary actions, tabs, and footer pills. Footer is a hairline-topped row of chime, notification toggle, version, and help.
+
+Layers via named z-index tokens: `base` 0, `content` 10, `sticky` 20 (phase sticker, sticky bar), `overlay` 30, `modal` 50 (chat FAB, chat panel, help modal).
+
+The login page is one centered column, max width 24rem on the ground: Dosey and the wordmark above a single surface card.
+
+## Elevation & Depth
+
+Hybrid: tonal layering first (ground, then cream surface, then shell-cream wells), with shallow warm shadows that all carry a 1px white inner top highlight, so surfaces read like soft gel, not like floating paper. Shadows are tinted warm brown or plum, never neutral black.
 
 ### Shadow Vocabulary
-- **card** (`shadow-card`): the resting elevation for the goals card and the regimen-progress card — a contact shadow and a wide ambient one, plus the white inset sheen.
-- **panel** (`shadow-panel`): the open Dosey chat panel, the help modal and the login card: the app's genuinely "lifted" surfaces.
-- **fab** (`shadow-fab`): the fixed "Ask Dosey" trigger button, the strongest shadow in the system, justified because it's a floating, fixed-position control that must read as clickable above everything else.
-- **press** (`shadow-press`): primary pill buttons (Begin/Resume, sign in, help close). Small and tight so a button reads as a physical key.
+- **Soft** (`box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 10px 24px -12px rgba(150,90,60,.30)`; class `shadow-soft`): cards, chat panel, help modal, sticky bar, footer pills.
+- **Gum** (`0 1px 0 rgba(255,255,255,.7) inset, 0 3px 8px -3px rgba(150,90,60,.35)`; `shadow-gum`): stickers, icon bubbles, secondary pills, tab thumb, notes.
+- **Pop** (`0 1px 0 rgba(255,255,255,.55) inset, 0 6px 14px -6px rgba(58,47,69,.45)`; `shadow-pop`): the ink primary buttons and the Dosey trigger only.
 
 ### Named Rules
-**The Whisper Shadow Rule.** Every shadow in this system uses `rgba(46,36,51,...)` (the ink color) at low opacity, never black, and is paired with a `0 1px 0 white inset` highlight. A shadow that reads as heavy or neutral-gray is off-system.
+**The Gel Highlight Rule.** Every shadow includes the white inset top edge. Do not write a shadow string inline; use `shadow-soft`, `shadow-gum`, or `shadow-pop`.
 
-`plans/003-whole-ui-running-state.md` introduces one sanctioned second shadow-tint: a phase-colored glow (lilac or amber, see Colors → Amber) on the two dashboard cards, strictly gated to `status === "running"` and toggled via a CSS transition, never a continuous loop. It is built by `runningShadow()` in `lib/phase-theme.ts` as a 1px accent hairline plus a wide, soft glow (the earlier hard 2px ring was retired as too loud). The active phase tab carries the same hairline and a slow breathing glow. This is the only place a non-ink shadow color appears in the system — treat any other use as off-system.
+**The Soft-Only Rule.** Shadows are diffuse and offset downward by a few pixels with negative spread. No hard offset or zero-blur shadows.
 
-## 5. Components
+## Shapes
+
+A three-step radius scale: `control` 18px (inputs, goal rows, digit cells, the Dosey bubble, inner stages), `bubble` 28px (every card, dialog, notes, chat bubbles), `pill` 9999px (all buttons, tabs, stickers, icon bubbles, checkboxes, cycle segments). Chat bubbles use `bubble` with one corner dropped to `control` at the speaker's tail corner. Header bands round the card's top corners to match.
+
+Hairline 1px `line-soft` borders outline cards; the dotted 3px `line-soft` divider separates label sections. Break segments may use the diagonal-stripe `.hatch` utility, though the build currently fills segments solidly.
+
+Dosey follows mascot rules: flat outline-free shapes, about five large rounded shapes, three semantic colors, a big head with tiny wide-set eyes, blunt tips, upright posture. Below 40px the rig automatically switches to the `face` variant.
+
+## Components
 
 ### Buttons
-- **Shape:** fully rounded pill (`rounded-full`, 9999px) for all standalone action buttons; `rounded-md`/`rounded-xl` (12px) only for compact icon-adjacent buttons like the add-goal "+".
-- **Primary** (`button-primary`): ink background (#2E2433), paper text, pill shape, `px-6 py-2.5`. Used for the single most important action per view — "Begin dose" / "Pause" / "Resume". Hover: `opacity: 0.9`, no color shift.
-- **Ghost** (`button-ghost`): transparent background, `border-line`, `text-ink-soft`. Used for secondary actions like "Reset". Hover: text and border shift to `ink` / `ink-soft`.
-- **Accent** (`button-accent`): lilac background, ink text, used for the goal add button and the chat send button. Hover: `lilac-deep` background with paper text — the accent deepens rather than fading.
+- **Shape:** pill (9999px), minimum 48px high (44px in the sticky bar, vessel toggle, and sign-out).
+- **Primary:** ink fill, surface-colored Fredoka 500 label, `shadow-pop`, 12px by 24px padding, optional 18px stroke-2.25 lucide icon; hover lifts 2px only on fine-pointer hover devices.
+- **Secondary:** `surface-2` fill, ink label, `shadow-gum`; hover washes to `gum-lilac` at 40%.
+- **Pressed:** Framer `whileTap` scale 0.88 to 0.96 with `SPRING_BOUNCY`; removed under reduced motion.
+- **Text-labelled buttons carry no outline;** icon-only buttons are 44px transparent circles that fill on hover (surface-2, or gum-rose for remove).
 
-### Chips / Tabs
-- **Style:** `PhaseTabs` is a `paper-2` pill container (`rounded-full`, `border-line`, `p-1`) holding individual pill buttons.
-- **State:** the active tab is a single shared-layout pill (`layoutId`, `SPRING_UI`) that slides between tabs, `bg-paper` with a soft layered shadow; inactive tabs are transparent with `text-ink-soft`, hovering to `text-ink`. Selection reads as "lifted out of the track," not a color change.
+### Stickers and Chips
+- **Style:** pill, `ink` text, Fredoka 500 at 0.875rem, `shadow-gum`, background from the gum role. The phase sticker (`PHASE_STICKER_CLASS`) is the same fill used by the active tab thumb and the sticky bar badge. On the Rx label it sits rotated 3 degrees at the card corner.
+- **Neutral chips:** the Rx number and the date are `surface-2` pills in `ink-soft`.
 
-### Cards / Containers
-- **Corner Style:** 18px (`rounded-card`) for the two dashboard cards (goals, regimen progress); 12px (`rounded-control`) for goal-item rows, inputs and suggestion chips; the chat transcript bubbles use 18px with a 6px tail corner.
-- **Background:** `paper` for top-level cards sitting on the page; `paper-2` for content rows nested inside a card (goal items, suggestion chips, input fields) — the two-tone system is how nesting reads without adding borders-on-borders.
-- **Shadow Strategy:** see Elevation → `card` token.
-- **Border:** 1px `border-line` on every card and nested row.
-- **Internal Padding:** `p-6` (24px) for top-level cards; `px-3.5 py-3` for goal-item rows.
+### Cards / Containers (LabelCard)
+- **Corner Style:** `bubble` 28px, 1px `line-soft` border, `surface` fill, `shadow-soft`.
+- **Header band:** a role-tinted row (the gum color at 25%) with a 36px pill icon bubble (the full gum color, `shadow-gum`, ink 18px icon) and a Fredoka 600 title. Roles: goals mint, dose cycle sky, study note butter, Meet Dosey lilac.
+- **Body padding:** 20px (24px from `sm`).
 
 ### Inputs / Fields
-- **Style:** `paper-2` background, `border-line` 1px border, `rounded-control` (12px), `text-sm` Spline Sans, `placeholder:text-ink-soft`.
-- **Focus:** border shifts to `lilac-deep`, plus a soft `ring-[3px] ring-lilac/25` glow — no harsh outline, the lilac ring is the only focus treatment besides the app-wide `:focus-visible` outline.
-- **Disabled:** `opacity-60`, no other visual change.
+- **Style:** `surface-2` fill, 2px `line-strong` outline, `control` radius, 12px by 16px padding, Nunito 1rem, ink caret and text, `ink-soft` placeholder.
+- **Focus:** border turns `ink` and a 4px `gum-lilac` 60% ring appears.
+- **Error:** border and text turn `alert`; inline message in `alert` plus an `alert`-bordered note with icon for form-level errors. Disabled drops to 60% opacity.
 
-### Navigation
-There is no traditional nav — Pomodose is a single page. The closest equivalent is `PhaseTabs` (documented above under Chips/Tabs) and the fixed-position "Ask Dosey" trigger button (bottom-right, pill-shaped, lilac background, floats with a slow vertical bob animation).
+### Navigation (Phase Tabs)
+A pill track (`surface-2`, 6px padding) with three 48px pill options: Dose / Refill / Antidote, each with a Nunito hint (Focus, Short break, Long break). The active option has a shared gum thumb (`layoutId`, `SPRING_UI`) in the phase's color; inactive text is `ink-soft`.
 
-### Signature Component: The Vial Timer
-A hand-drawn SVG vessel (a flask by default, or a graduated cylinder via the small Flask/Cylinder selector above the readout), never a circular progress ring. Liquid is a clipped `<rect>` animated between fixed `VIAL_TOP`/`VIAL_BOTTOM` coordinates via Framer Motion (tween, 0.8s, `[0.22, 1, 0.36, 1]` ease), with a meniscus ellipse at the liquid surface (the cylinder adds graduation marks). During focus sessions the liquid drains; during breaks it inverts to "top up." The time readout sits above the glass in Fraunces tabular numerals. Space starts/pauses the timer when focus isn't in a field or dialog. This is the single most distinctive element in the app — never replace it with a generic ring, bar, or numeric-only countdown.
+### Vial Timer (signature)
+A gummy glass vessel, switchable between a flask and a graduated cylinder, in a 180 by 230 SVG, 200px wide. The glass is a 25% `gum-lilac` tint; the liquid is Dosey Lilac scaled from the bottom with a 1-second linear tween (focus drains, breaks refill); a faint meniscus, static flat bubbles, and a gloss stripe sit inside the clip. The cap is butter. The cylinder adds ink-soft graduations and "mL". The countdown above it is one soft `surface-2` cell per digit. The liquid color is fixed and is not driven by the phase color. Not a progress ring.
 
-## 6. Do's and Don'ts
+### Goal Row
+A `surface-2` row, 56px minimum height. The unchecked checkbox is a 28px circle with a 2px `line-strong` outline (WCAG 1.4.11); checked it fills mint with a hand-drawn ink check that draws itself, and a wavy rose strike draws across the text. Remove is a 44px circle that fills rose on hover.
+
+### Dose Cycle Strip
+A 36px row of pill segments sized by true duration (focus 25, short 5, long 15 in the build's settings): done focus segments sky, upcoming focus segments `surface-2`, short breaks mint, the long break apricot, and a 4px `ink/15` ring on the active segment.
+
+### Notes (Counter Note, Quote Card)
+Counter notes are full-width `bubble` strips in apricot (burnout), butter (nudges), or mint (celebration), `shadow-gum`, with a dismiss circle. The Study note quote is Fredoka 1.25rem on the card body.
+
+### Dosey Chat
+A lilac pill trigger (`shadow-pop`) bottom-right; a 360px panel on desktop and a bottom sheet on phones (80dvh), `bubble` top corners, `line-soft` header and composer dividers. User bubbles lilac, Dosey bubbles `surface-2`. Suggestions are secondary pills. Composer input follows the standard input rule; send is a 44px ink circle.
+
+### Dosey Mascot
+One rig with three variants: `full` (Meet Dosey, login), `peek` (head over the Rx label's top edge, 120 by 96 slot), `face` (under 40px, chat trigger). Meet Dosey crops the body into the stage's lower-left corner and scrubs the body, sprout, leaves, and tomatoes in on scroll; eyes follow the pointer; poking cycles speech lines in a bubble with a small tail.
+
+### Help Modal and Form Controls
+The help modal is a `bubble` card over an `ink/40` scrim with a list of 40px colored icon bubbles per tip. The chime slider is a 6px pill track filled lilac with a round ink thumb ringed in surface; the notification toggle and chime are `surface` pills with `shadow-soft`.
+
+### Motion
+GSAP (`lib/gsap.ts`) owns scroll reveals (12px rise, 0.4s, 0.06s stagger, `power3.out`, one-shot at top 88%) and the mascot timeline; hidden start states exist only inside `withMotion`, so reduced-motion and no-JS users see everything. Framer owns micro-interactions: `SPRING_UI` (stiffness 400, damping 30), `SPRING_SOFT` (260, 26) for panels, `SPRING_BOUNCY` (520, 18) for presses, and `EASE_OUT` cubic-bezier(0.22, 1, 0.36, 1) for entrances. A global reduced-motion media rule collapses CSS animations and transitions. Never animate one element with both libraries.
+
+## Do's and Don'ts
 
 ### Do:
-- **Do** use `border-line` (#DED5C8) as the only border color, everywhere, at 1px.
-- **Do** keep Fraunces for feeling (headings, the timer, italic voice moments) and Spline Sans for function (buttons, inputs, body copy).
-- **Do** use the `rgba(46,36,51,...)` ink-tinted whisper shadow + white inset highlight for any new elevated surface.
-- **Do** speak to the user as "Doc" in short, warm, specific lines — never generic SaaS copy ("Welcome back!", "Sign in to continue").
-- **Do** keep any new surface (including a login/access gate) on this one calm page's visual register: paper background, a single centered card at most, pill or 12–18px-radius shapes, lilac as the one accent.
+- **Do** put `ink` text on every pastel and every surface; use `ink-soft` only on `surface` or `surface-2`.
+- **Do** give each gum color its single meaning (sky dose, mint refill or done, apricot antidote or warning, butter nudge, rose remove, lilac Dosey).
+- **Do** keep text-labelled buttons as soft filled pills with no outline, and give text inputs and the unchecked checkbox a 2px `line-strong` outline.
+- **Do** use 44px minimum hit areas, 48px for primary actions, and a 3px ink focus ring with 3px offset on every focusable element.
+- **Do** write pharmacy vocabulary as copy ("Rx #", "SIG", "Qty", "refills", "Antidote") on soft rounded surfaces.
+- **Do** use `shadow-soft`, `shadow-gum`, `shadow-pop`, the three radii, and the named z-index tokens instead of inline values.
+- **Do** keep Dosey flat and outline-free with about five large rounded shapes, three semantic colors, a big head, tiny wide-set eyes, and blunt tips; use the `face` variant under 40px.
+- **Do** give every animation a reduced-motion path and keep hidden start states inside `withMotion`.
 
 ### Don't:
-- **Don't** use a circular SVG ring, bar, or generic progress component for anything timer-related — the vial is the signature mark.
-- **Don't** use Inter, Roboto, Arial, or any system-default sans as a primary typeface.
-- **Don't** build a generic SaaS login screen: no centered-white-card-on-gradient template, no "Sign in to your account" boilerplate copy, no cold corporate sans-serif auth form.
-- **Don't** add gamified productivity chrome — streak counters, badges, confetti, achievement toasts. This app tracks doses and goals plainly, without game mechanics.
-- **Don't** introduce a second border color or a neutral/black shadow color. Amber (running-state phase chrome only, see Colors → Amber) and the one phase-tinted card-glow shadow (see Elevation → Named Rules) are sanctioned exceptions from `plans/003-whole-ui-running-state.md` — don't add further accents or shadow tints beyond those without a new plan entry.
-- **Don't** build a sidebar-nav-plus-stat-cards dashboard layout. Pomodose is one page; new surfaces should extend it, not fork into a different information architecture.
-
-## 7. Materials and Motion
-
-**Frosted surfaces.** The Dosey panel, help modal and login card use a translucent paper fill (`bg-paper/90`) with `backdrop-blur-xl`, a white hairline border and the `panel` shadow. This is a web approximation of a translucent material, not a platform effect. The `.glass` utility in `app/globals.css` is the reusable form and collapses to solid `paper` under `prefers-reduced-transparency` or when `backdrop-filter` is unsupported. Text on these surfaces must still clear 4.5:1.
-
-**Springs.** `lib/motion.ts` holds the presets. `SPRING_UI` (stiffness 400, damping 30) is for presses, hovers and small indicators such as the tab pill. `SPRING_SOFT` (stiffness 260, damping 26) is for panels and larger surfaces entering. `EASE_OUT` stays for fades, the vial liquid and blur-lift reveals. Press feedback is a `scale` of 0.96 to 0.98; hover on primary buttons is a 1px lift, never a scale-up.
-
-**Reduced motion.** framer-motion components gate on `useReducedMotion()`. CSS-driven animations (Tailwind `animate-*`) are collapsed by the global `prefers-reduced-motion` block in `app/globals.css`.
+- **Don't** put a hard, zero-blur, or offset shadow on anything; shadows stay soft and warm.
+- **Don't** use a third typeface, a system display face, or a hard-edged ruled "label stock" look; Rx wording is copy only.
+- **Don't** drive the vessel liquid from the phase color; it stays Dosey Lilac.
+- **Don't** replace the vial with a circular progress ring.
+- **Don't** use white text on pastels or `ink-soft` on the bare peach ground.
+- **Don't** use `line-soft` as a control boundary; it is decorative only.
+- **Don't** reveal content from a hidden state outside `withMotion`, or let GSAP and Framer animate the same element.

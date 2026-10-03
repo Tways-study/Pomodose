@@ -1,13 +1,13 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
 import type { Phase } from "@/types";
-import { PHASE_ACCENT } from "@/lib/phase-theme";
-import { SPRING_UI } from "@/lib/motion";
+import { PHASE_STICKER_CLASS } from "@/lib/phase-theme";
+import { SPRING_BOUNCY, SPRING_UI } from "@/lib/motion";
 
-const PHASES: { id: Phase; label: string }[] = [
-  { id: "focus", label: "Dose" },
-  { id: "short", label: "Refill" },
-  { id: "long",  label: "Antidote" },
+const PHASES: { id: Phase; label: string; hint: string; name: string }[] = [
+  { id: "focus", label: "Dose", hint: "Focus", name: "focus session" },
+  { id: "short", label: "Refill", hint: "Short break", name: "short break" },
+  { id: "long",  label: "Antidote", hint: "Long break", name: "long break" },
 ];
 
 interface Props {
@@ -16,38 +16,27 @@ interface Props {
   onChange: (phase: Phase) => void;
 }
 
-const IDLE_PILL_SHADOW = "0 1px 0 rgba(255,255,255,.8) inset, 0 1px 2px rgba(46,36,51,.10), 0 3px 8px -4px rgba(46,36,51,.18)";
-
-export function PhaseTabs({ active, isRunning, onChange }: Props) {
+export function PhaseTabs({ active, onChange }: Props) {
   const reduceMotion = useReducedMotion();
-  const accent = PHASE_ACCENT[active];
-  // The pill is a single shared-layout element that slides between tabs. While
-  // running it carries a hairline accent ring and a soft breathing glow.
-  const peakShadow = `${IDLE_PILL_SHADOW}, 0 0 0 1px ${accent.base}, 0 0 16px 2px ${accent.deep}55`;
-  const pillAnimate = reduceMotion
-    ? { boxShadow: isRunning ? peakShadow : IDLE_PILL_SHADOW }
-    : { boxShadow: isRunning ? [IDLE_PILL_SHADOW, peakShadow, IDLE_PILL_SHADOW] : IDLE_PILL_SHADOW };
-  const pillTransition = !reduceMotion && isRunning
-    ? { boxShadow: { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }, layout: SPRING_UI }
-    : { boxShadow: { duration: 0.3, ease: "easeOut" as const }, layout: SPRING_UI };
 
   return (
     <div
       role="group"
       aria-label="Session type"
-      className="inline-flex bg-paper-2 border border-line rounded-full p-1 gap-0.5"
+      className="flex w-full bg-surface-2 rounded-pill p-1.5 gap-1"
     >
-      {PHASES.map(({ id, label }) => {
+      {PHASES.map(({ id, label, hint, name }) => {
         const isActive = active === id;
         return (
           <motion.button
             key={id}
             aria-pressed={isActive}
+            aria-label={`${label} — ${name}`}
             onClick={() => onChange(id)}
             whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-            transition={SPRING_UI}
+            transition={SPRING_BOUNCY}
             className={[
-              "relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200",
+              "relative flex-1 min-h-[48px] cursor-pointer rounded-pill px-2 py-1 font-display text-base font-medium transition-colors duration-200",
               isActive ? "text-ink" : "text-ink-soft hover:text-ink",
             ].join(" ")}
           >
@@ -55,13 +44,14 @@ export function PhaseTabs({ active, isRunning, onChange }: Props) {
               <motion.span
                 layoutId="phase-pill"
                 aria-hidden
-                className="absolute inset-0 rounded-full bg-paper"
-                initial={false}
-                animate={pillAnimate}
-                transition={pillTransition}
+                className={`absolute inset-0 rounded-pill shadow-gum ${PHASE_STICKER_CLASS[id]}`}
+                transition={reduceMotion ? { duration: 0 } : SPRING_UI}
               />
             )}
-            <span className="relative">{label}</span>
+            <span className="relative flex flex-col items-center leading-tight">
+              <span>{label}</span>
+              <span className={`font-body text-xs font-normal ${isActive ? "text-ink" : "text-ink-soft"}`}>{hint}</span>
+            </span>
           </motion.button>
         );
       })}

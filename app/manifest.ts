@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Pomodose — Study Companion",
     short_name: "Pomodose",
-    description: "A measured-dose focus timer for the pharmacist in your life.",
+    description: "A measured-dose focus timer and study companion for pharmacy students and pharmacists.",
     start_url: "/",
     display: "standalone",
-    background_color: "#F6F2EC",
-    theme_color: "#F6F2EC",
+    background_color: "#F8DFCF",
+    theme_color: "#F8DFCF",
     icons: [{ src: "/icon.png", sizes: "512x512", type: "image/png" }],
   };
 }

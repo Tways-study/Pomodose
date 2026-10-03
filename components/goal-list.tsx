@@ -1,12 +1,14 @@
 "use client";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { CircleAlert, Plus, Undo2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GoalItem } from "./goal-item";
 import { useAddressTerm } from "@/components/address-term-provider";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
-import { EASE_OUT, SPRING_UI } from "@/lib/motion";
+import { GOAL_EXAMPLES } from "@/lib/goal-examples";
+import { EASE_OUT, SPRING_BOUNCY } from "@/lib/motion";
 import type { Id } from "@/convex/_generated/dataModel";
 
 interface Props {
@@ -137,12 +139,7 @@ export function GoalList({ onProgressChange }: Props) {
       };
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-serif font-semibold text-lg tracking-tight">Today&apos;s regimen</h2>
-        <span className="text-xs tracking-widest uppercase text-ink-soft">Goals</span>
-      </div>
-
+    <div>
       {/* Input row */}
       <div className="flex gap-2 mb-4">
         <input
@@ -155,18 +152,19 @@ export function GoalList({ onProgressChange }: Props) {
             if (error) setError(null);
           }}
           onKeyDown={e => e.key === "Enter" && void add()}
-          placeholder="e.g. Review pharmacokinetics ch.4"
-          className="flex-1 bg-paper-2 border border-line-strong rounded-control px-3.5 py-2.5 text-base sm:text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow]"
+          placeholder="e.g. Review ch.4 kinetics"
+          className="min-w-0 flex-1 min-h-[48px] bg-surface-2 border-2 border-line-strong rounded-control px-4 py-3 text-base font-body text-ink placeholder:text-ink-soft focus:border-ink focus:ring-4 focus:ring-gum-lilac/60 outline-none transition-[border-color,box-shadow]"
         />
         <motion.button
+          type="button"
           onClick={() => void add()}
           disabled={adding}
           aria-label="Add goal"
-          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          transition={SPRING_UI}
-          className="flex-none w-10 rounded-control bg-lilac text-ink text-xl font-medium hover:bg-lilac-deep hover:text-paper transition-colors duration-200 disabled:opacity-60"
+          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          transition={SPRING_BOUNCY}
+          className="flex h-12 w-12 flex-none cursor-pointer items-center justify-center rounded-pill bg-ink text-surface shadow-pop transition-transform [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 disabled:opacity-60"
         >
-          +
+          <Plus size={20} strokeWidth={2.25} aria-hidden />
         </motion.button>
       </div>
 
@@ -177,15 +175,16 @@ export function GoalList({ onProgressChange }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="mb-4 rounded-xl border border-clay-deep bg-clay/60 px-3 py-2 text-sm text-ink"
+            className="mb-4 flex items-start gap-2 rounded-control border-2 border-alert bg-surface px-3 py-2 text-sm text-alert"
             role="alert"
           >
-            {error}
+            <CircleAlert size={16} strokeWidth={2.25} className="mt-0.5 flex-none" aria-hidden />
+            <span>{error}</span>
           </motion.p>
         )}
       </AnimatePresence>
 
-      {/* Undo strip — same paper-strip register as CounterNote, not a toast. */}
+      {/* Undo strip: a rose sticker, not a toast. */}
       <AnimatePresence>
         {lastRemoved && (
           <motion.div
@@ -196,20 +195,20 @@ export function GoalList({ onProgressChange }: Props) {
             exit="exit"
             transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: EASE_OUT }}
             role="status"
-            className="mb-4 flex items-center justify-between gap-4 rounded-card border border-line bg-paper-2 px-4 py-2.5"
+            className="mb-4 flex items-center justify-between gap-4 rounded-bubble bg-gum-rose px-4 py-2.5 text-ink shadow-gum"
           >
             <div className="min-w-0">
-              <span className="block font-serif italic text-xs tracking-widest uppercase text-lilac-deep">
-                Rx — Removed
-              </span>
-              <p className="font-serif italic text-sm text-ink">Goal set aside, {name}.</p>
+              <span className="block font-display text-sm font-semibold">Removed</span>
+              <p className="font-body text-sm">Goal set aside, {name}.</p>
             </div>
             <motion.button
+              type="button"
               onClick={undo}
-              whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-              transition={SPRING_UI}
-              className="flex-none rounded-full px-3 py-2 text-sm font-medium text-lilac-deep hover:underline underline-offset-2"
+              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+              transition={SPRING_BOUNCY}
+              className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-pill bg-surface px-4 font-display text-sm font-medium text-ink shadow-gum transition-colors duration-150 hover:bg-surface-2"
             >
+              <Undo2 size={16} strokeWidth={2.25} aria-hidden />
               Undo
             </motion.button>
           </motion.div>
@@ -222,11 +221,11 @@ export function GoalList({ onProgressChange }: Props) {
           [58, 75, 42].map((w, i) => (
             <li
               key={i}
-              className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-control animate-pulse"
+              className="flex min-h-[56px] items-center gap-3 rounded-control bg-surface-2 px-3 animate-pulse"
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className="flex-none w-5 h-5 rounded-md bg-line" />
-              <div className="h-2.5 rounded-full bg-line" style={{ width: `${w}%` }} />
+              <div className="h-7 w-7 flex-none rounded-pill bg-line-soft" />
+              <div className="h-2.5 rounded-pill bg-line-soft" style={{ width: `${w}%` }} />
             </li>
           ))
         ) : (
@@ -239,10 +238,52 @@ export function GoalList({ onProgressChange }: Props) {
       </ul>
 
       {!isLoading && goals.length === 0 && (
-        <p className="text-center text-sm italic text-ink-soft py-4">
-          No goals prescribed yet. Add one above.
-        </p>
+        <div className="py-4 text-center">
+          <p className="font-display text-base font-semibold text-ink">Nothing on the list yet</p>
+          <p className="mt-1 font-body text-sm text-ink-soft">
+            Add a goal above, or start with an example.
+          </p>
+          <ul className="mt-3 flex flex-wrap justify-center gap-2" aria-label="Example goals">
+            {GOAL_EXAMPLES.map((example) => (
+              <li key={example}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInput(example);
+                    inputRef.current?.focus();
+                  }}
+                  className="flex min-h-[48px] cursor-pointer items-center gap-1.5 rounded-pill bg-surface-2 px-4 font-display text-sm font-medium text-ink shadow-gum transition-colors hover:bg-gum-lilac/40"
+                >
+                  <Plus size={16} strokeWidth={2.25} aria-hidden />
+                  {example}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
-    </section>
+
+      {/* Goal tally lives here, at the foot of the card */}
+      <div className="mt-5">
+        <p className="font-display text-sm font-medium text-ink">
+          {doneCount} of {totalCount} done
+        </p>
+        <div
+          className="mt-2 h-3 overflow-hidden rounded-pill bg-surface-2"
+          role="progressbar"
+          aria-label="Goals done"
+          aria-valuemin={0}
+          aria-valuemax={totalCount}
+          aria-valuenow={doneCount}
+        >
+          <motion.div
+            className="h-full w-full origin-left rounded-pill bg-gum-mint"
+            initial={false}
+            animate={{ scaleX: totalCount > 0 ? doneCount / totalCount : 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.6, ease: EASE_OUT }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

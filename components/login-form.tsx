@@ -2,9 +2,11 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ConvexError } from "convex/values";
+import { CircleAlert, Eye, EyeOff } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { SPRING_BOUNCY } from "@/lib/motion";
 import { useAddressTerm } from "@/components/address-term-provider";
 import { PasswordStrengthMeter } from "@/components/password-strength-meter";
 
@@ -15,42 +17,6 @@ type FieldErrors = Partial<Record<"email" | "password" | "confirmPassword" | "co
 
 /** Mirrors the 8-character floor the Convex Password provider enforces server-side. */
 const MIN_PASSWORD_LENGTH = 8;
-
-function EyeIcon({ open }: { open: boolean }) {
-  return open ? (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <path
-        d="M1.5 9S4 3.5 9 3.5 16.5 9 16.5 9 14 14.5 9 14.5 1.5 9 1.5 9Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="9" cy="9" r="2.25" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  ) : (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
-      <path
-        d="M2.5 2.5l13 13M7.4 7.55A2.25 2.25 0 0 0 9 11.25c.55 0 1.05-.2 1.44-.53M5.2 5.1C3.2 6.3 1.5 9 1.5 9s2.5 5.5 7.5 5.5c1.4 0 2.6-.4 3.6-.98M12.9 12.9C14.6 11.75 16.5 9 16.5 9s-1.05-2.35-3.15-3.9"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/** Leading mark on the error banner, so the message reads as an alert and not a field. */
-function AlertMark() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="mt-0.5 flex-none">
-      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M8 4.75v3.75" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-      <circle cx="8" cy="11" r=".85" fill="currentColor" />
-    </svg>
-  );
-}
 
 // Framework error strings, matched verbatim against @convex-dev/auth's Password
 // provider (node_modules/@convex-dev/auth/dist/providers/Password.js) and the
@@ -155,22 +121,19 @@ function validate(
   return errors;
 }
 
-const labelTextClass = "text-xs font-medium tracking-[.14em] uppercase text-ink-soft";
+const labelTextClass = "font-body text-sm font-semibold text-ink";
 const labelClass = `block mb-1.5 ${labelTextClass}`;
-// border-line-strong, not border-line: on the paper-2 input fill, `line` measures
-// 1.20:1 — under WCAG 1.4.11's 3:1 for a component boundary — which left the fields
-// reading as unbordered blocks. See the token comment in tailwind.config.ts.
 const inputClass =
-  "w-full rounded-control border bg-paper-2 px-3.5 py-2.5 text-base sm:text-sm placeholder:text-ink-soft focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60";
-const inputRestClass = "border-line-strong focus:border-lilac-deep";
-const inputInvalidClass = "border-clay-deep focus:border-clay-deep";
+  "w-full rounded-control border-2 bg-surface-2 px-4 py-3 font-body text-base text-ink placeholder:text-ink-soft focus:ring-4 focus:ring-gum-lilac/60 outline-none transition-[border-color,box-shadow] disabled:opacity-60";
+const inputRestClass = "border-line-strong focus:border-ink";
+const inputInvalidClass = "border-alert focus:border-alert";
 // No disabled-until-valid state: the button stays live so a failed submit can say
-// what is actually missing. The only disabled case left is the in-flight one, which
-// keeps the full ink fill (13.3:1) and reports itself through the label.
+// what is actually missing. The only disabled case left is the in-flight one.
 const submitClass =
-  "mt-1 w-full rounded-full bg-ink px-6 py-2.5 text-sm font-medium text-paper shadow-press hover:bg-ink/90 active:scale-[0.98] transition-[background-color,transform] duration-150 disabled:cursor-wait";
-const backLinkClass = "text-center text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60";
-const fieldErrorClass = "mt-1.5 text-xs text-clay-deep";
+  "mt-1 flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-pill bg-ink px-6 py-3 font-display text-base font-medium text-surface shadow-pop disabled:cursor-wait";
+const backLinkClass =
+  "min-h-[44px] cursor-pointer text-center font-body text-sm text-ink underline decoration-gum-lilac decoration-2 underline-offset-4 disabled:opacity-60";
+const fieldErrorClass = "mt-1.5 font-body text-sm text-alert";
 
 const MODE_COPY: Record<Mode, { submitLabel: string; submittingLabel: string }> = {
   login: { submitLabel: "Sign in", submittingLabel: "Signing in…" },
@@ -297,13 +260,13 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="mb-5 text-center">
-        <h2 className="font-serif font-medium text-2xl tracking-[-0.01em]">
+        <h2 className="font-display text-2xl font-semibold">
           {mode === "register" && `Set up your dose log, ${addressName}`}
           {mode === "login" && `Welcome back, ${addressName}`}
           {mode === "reset-request" && `Reset your password, ${addressName}`}
           {mode === "reset-verify" && `Enter your code, ${addressName}`}
         </h2>
-        <p className="mt-1.5 text-sm text-ink-soft">
+        <p className="mt-1.5 font-body text-sm text-ink-soft">
           {mode === "register" && "Create an account to keep your regimen close."}
           {mode === "login" && "Sign in to pick up where you left off."}
           {mode === "reset-request" && "We'll email a code to get you back in."}
@@ -360,7 +323,7 @@ export function LoginForm() {
                 clearFieldError("email");
               }}
               className={`${inputClass} ${fieldErrors.email ? inputInvalidClass : inputRestClass}`}
-              placeholder="doc@apothecary.com"
+              placeholder="you@pharmacy.edu"
             />
             {fieldErrors.email && (
               <p id={`${emailId}-error`} className={fieldErrorClass}>
@@ -415,7 +378,7 @@ export function LoginForm() {
                   type="button"
                   onClick={() => switchMode("reset-request")}
                   disabled={isSubmitting}
-                  className="text-xs text-ink-soft hover:text-ink transition-colors disabled:opacity-60"
+                  className="cursor-pointer font-body text-sm text-ink underline decoration-gum-lilac decoration-2 underline-offset-4 disabled:opacity-60"
                 >
                   Forgot password?
                 </button>
@@ -439,15 +402,14 @@ export function LoginForm() {
                 className={`${inputClass} ${fieldErrors.password ? inputInvalidClass : inputRestClass} pr-11`}
                 placeholder="••••••••"
               />
-              <motion.button
+              <button
                 type="button"
                 onClick={() => setReveal((v) => !v)}
                 aria-label={reveal ? "Hide password" : "Show password"}
-                whileTap={reduceMotion ? undefined : { scale: 0.95 }}
-                className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-soft hover:text-ink transition-colors"
+                className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-pill text-ink-soft transition-colors hover:text-ink"
               >
-                <EyeIcon open={reveal} />
-              </motion.button>
+                {reveal ? <EyeOff size={20} strokeWidth={2.25} aria-hidden /> : <Eye size={20} strokeWidth={2.25} aria-hidden />}
+              </button>
             </div>
             {fieldErrors.password && (
               <p id={`${passwordId}-error`} className={fieldErrorClass}>
@@ -516,10 +478,10 @@ export function LoginForm() {
         {error && (
           <p
             id={errorId}
-            className="flex items-start gap-2 rounded-xl border border-clay-deep bg-clay/60 px-3 py-2 text-sm text-ink"
+            className="flex items-start gap-2 rounded-control border-2 border-alert bg-surface px-3.5 py-2.5 font-body text-sm text-ink"
             role="alert"
           >
-            <AlertMark />
+            <CircleAlert size={16} strokeWidth={2.25} aria-hidden className="mt-0.5 flex-none text-alert" />
             <span>{error}</span>
           </p>
         )}
@@ -527,55 +489,52 @@ export function LoginForm() {
         <motion.button
           type="submit"
           disabled={isSubmitting}
-          whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           className={submitClass}
+          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          transition={SPRING_BOUNCY}
         >
           {isSubmitting ? submittingLabel : submitLabel}
         </motion.button>
 
         {mode === "login" && (
-          <motion.button
+          <button
             type="button"
             onClick={() => switchMode("register")}
             disabled={isSubmitting}
-            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
             className={backLinkClass}
           >
             {`New here? Create an account, ${addressName}.`}
-          </motion.button>
+          </button>
         )}
         {mode === "register" && (
-          <motion.button
+          <button
             type="button"
             onClick={() => switchMode("login")}
             disabled={isSubmitting}
-            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
             className={backLinkClass}
           >
             Already have an account? Sign in.
-          </motion.button>
+          </button>
         )}
         {mode === "reset-request" && (
-          <motion.button
+          <button
             type="button"
             onClick={() => switchMode("login")}
             disabled={isSubmitting}
-            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
             className={backLinkClass}
           >
             Back to sign in.
-          </motion.button>
+          </button>
         )}
         {mode === "reset-verify" && (
-          <motion.button
+          <button
             type="button"
             onClick={() => switchMode("reset-request")}
             disabled={isSubmitting}
-            whileTap={reduceMotion ? undefined : { scale: 0.95 }}
             className={backLinkClass}
           >
             Use a different email.
-          </motion.button>
+          </button>
         )}
       </div>
     </form>

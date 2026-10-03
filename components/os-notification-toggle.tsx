@@ -1,4 +1,5 @@
 "use client";
+import { Bell, BellOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getPermission, isEnabled, isSupported, requestPermission, setEnabled } from "@/lib/os-notification";
 
@@ -39,12 +40,17 @@ export function OsNotificationToggle() {
     <button
       onClick={toggle}
       aria-pressed={enabled}
-      className={`flex items-center gap-2 rounded-full border border-line px-4 py-2 text-xs transition-colors duration-150 ${
-        enabled ? "bg-lilac/25 text-ink" : "bg-paper-2/70 text-ink-soft hover:text-ink"
-      }`}
+      className="flex min-h-[48px] cursor-pointer items-center gap-2 rounded-pill bg-surface px-4 text-ink shadow-soft transition-colors duration-150 hover:bg-surface-2"
     >
-      <span className="font-serif italic">Notify</span>
-      <span>{enabled ? "On" : "Off"}</span>
+      {enabled ? <Bell size={18} strokeWidth={2.25} aria-hidden /> : <BellOff size={18} strokeWidth={2.25} aria-hidden />}
+      <span className="font-display text-sm font-medium text-ink">Notify</span>
+      <span
+        className={`rounded-pill px-2.5 py-0.5 font-display text-xs font-medium text-ink ${
+          enabled ? "bg-gum-mint" : "bg-surface-2"
+        }`}
+      >
+        {enabled ? "On" : "Off"}
+      </span>
     </button>
   );
 }

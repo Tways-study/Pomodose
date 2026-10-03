@@ -20,4 +20,10 @@ export const QUOTES: readonly Quote[] = [
   { text: "Be patient with the process the way you are precise with the dose.", author: `— for you, ${ADDRESS_TOKEN}` },
   { text: "A calm mind is the best instrument you own. Tend to it.", author: "— a soft reminder" },
   { text: "You've handled harder than this chapter. Begin.", author: "— I believe in you" },
+  { text: "Spaced repetition beats cramming: review a little, then again tomorrow.", author: "— study note" },
+  { text: "Quiz yourself before you reread. Recall is the real revision.", author: "— study note" },
+  { text: "A bad practice-exam score is data, not a verdict. Adjust the plan.", author: "— study note" },
+  { text: "Sleep is when the pharmacology sticks. Protect it.", author: "— study note" },
+  { text: "You are allowed to be a student. Nobody learns the whole formulary in a week.", author: `— for you, ${ADDRESS_TOKEN}` },
+  { text: "Be as kind to yourself during exams as you'd be to a patient who's nervous.", author: `— for you, ${ADDRESS_TOKEN}` },
 ] as const;
