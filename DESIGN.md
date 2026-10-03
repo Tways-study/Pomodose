@@ -24,8 +24,8 @@ typography:
     letterSpacing: "-0.01em"
   timer:
     fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "2.25rem"
-    fontWeight: 600
+    fontSize: "3.75rem"
+    fontWeight: 500
     lineHeight: 1
     letterSpacing: "normal"
   body:
@@ -130,7 +130,7 @@ A warm, low-saturation palette — paper and ink, lilac tincture, sage for compl
 
 ### Hierarchy
 - **Display** (font-medium 500, `clamp(1.5rem, 3vw, 1.875rem)` / text-2xl–3xl, tight tracking `-0.01em`): the app title ("Pomodose") and panel headers. Fraunces.
-- **Timer** (font-semibold 600, 2.25rem / text-4xl, tabular-nums): the vial's centered time readout — the single largest, most prominent text in the app. Fraunces, `.timer-display` tabular figures so digits don't jitter.
+- **Timer** (font-medium 500, 3.75rem / text-6xl, `opsz` 72, tabular-nums): the time readout sitting directly above the vessel — the single largest, most prominent text in the app. Fraunces, `.timer-display` tabular figures so digits don't jitter.
 - **Body** (regular 400, 0.875rem / text-sm, 1.5 line-height): goal text, chat messages, buttons, general copy. Spline Sans. Cap prose at a comfortable line length inside the 360px chat panel and the goal cards.
 - **Label** (medium 500, 0.75rem / text-xs, 0.18em tracking, uppercase): phase labels under the timer, section eyebrows ("Goals", "Progress"), the "Rx — Take as needed" quote-card tag. Spline Sans, always uppercase with wide tracking — the one place tracked-uppercase is used, and used consistently.
 
@@ -180,7 +180,7 @@ Pomodose is quietly layered — surfaces are distinguished mainly by the paper/p
 There is no traditional nav — Pomodose is a single page. The closest equivalent is `PhaseTabs` (documented above under Chips/Tabs) and the fixed-position "Ask Dosey" trigger button (bottom-right, pill-shaped, lilac background, floats with a slow vertical bob animation).
 
 ### Signature Component: The Vial Timer
-A hand-drawn SVG vial (glass body + neck + cap), never a circular progress ring. Liquid is a clipped `<rect>` animated between fixed `VIAL_TOP`/`VIAL_BOTTOM` coordinates via Framer Motion (tween, 0.8s, `[0.22, 1, 0.36, 1]` ease), with a meniscus ellipse at the liquid surface and three measurement tick marks at ¼/½/¾ height. During focus sessions the liquid drains; during breaks it inverts to "top up." The time readout sits centered over the glass in Fraunces tabular numerals. This is the single most distinctive element in the app — never replace it with a generic ring, bar, or numeric-only countdown.
+A hand-drawn SVG vessel (a flask by default, or a graduated cylinder via the small Flask/Cylinder selector above the readout), never a circular progress ring. Liquid is a clipped `<rect>` animated between fixed `VIAL_TOP`/`VIAL_BOTTOM` coordinates via Framer Motion (tween, 0.8s, `[0.22, 1, 0.36, 1]` ease), with a meniscus ellipse at the liquid surface (the cylinder adds graduation marks). During focus sessions the liquid drains; during breaks it inverts to "top up." The time readout sits above the glass in Fraunces tabular numerals. Space starts/pauses the timer when focus isn't in a field or dialog. This is the single most distinctive element in the app — never replace it with a generic ring, bar, or numeric-only countdown.
 
 ## 6. Do's and Don'ts
 

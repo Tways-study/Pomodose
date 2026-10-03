@@ -30,6 +30,11 @@ const CYLINDER_RANGE = CYLINDER_BOTTOM - CYLINDER_TOP; // 162px
 const CYLINDER_BODY_PATH =
   "M 56 16 L 68 26 L 68 184 Q 68 192, 76 192 L 104 192 Q 112 192, 112 184 L 112 26 L 118 20 L 112 20 L 68 20 Z";
 
+const VESSELS = [
+  { id: "flask", label: "Flask", aria: "Switch to Flask view" },
+  { id: "cylinder", label: "Cylinder", aria: "Switch to Graduated Cylinder view" },
+] as const;
+
 interface Props {
   state: TimerState;
   dispatch: Dispatch<TimerAction>;
@@ -135,36 +140,56 @@ export function VialTimer({ state, dispatch }: Props) {
         ? { label: "Resume", action: { type: "RESUME" as const } }
         : { label: `Begin ${PHASE_LABEL[state.phase].toLowerCase()}`, action: { type: "START" as const } };
 
+  function handlePrimary() {
+    stopCompletionAlert();
+    dispatch(primary.action);
+  }
+
+  // Space starts/pauses/resumes. Skipped while the user is typing, on a focused
+  // control (which already handles Space natively), or inside a dialog.
+  const handlePrimaryRef = useRef(handlePrimary);
+  useEffect(() => {
+    handlePrimaryRef.current = handlePrimary;
+  });
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.code !== "Space" || e.repeat || e.defaultPrevented) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const target = e.target;
+      if (
+        target instanceof Element &&
+        target.closest("input, textarea, select, button, a, [contenteditable], [role='dialog']")
+      ) {
+        return;
+      }
+      e.preventDefault();
+      handlePrimaryRef.current();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   return (
     <div className="flex flex-col items-center">
       {/* Vessel Shape Selector */}
       <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-5 border border-line">
-        <motion.button
-          onClick={() => setVessel("flask")}
-          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          transition={SPRING_UI}
-          className={`px-3 py-1 rounded-full transition-colors duration-200 ${
-            vessel === "flask"
-              ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
-              : "text-ink-soft hover:text-ink"
-          }`}
-          aria-label="Switch to Flask view"
-        >
-          Flask
-        </motion.button>
-        <motion.button
-          onClick={() => setVessel("cylinder")}
-          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          transition={SPRING_UI}
-          className={`px-3 py-1 rounded-full transition-colors duration-200 ${
-            vessel === "cylinder"
-              ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
-              : "text-ink-soft hover:text-ink"
-          }`}
-          aria-label="Switch to Graduated Cylinder view"
-        >
-          Graduated Cylinder
-        </motion.button>
+        {VESSELS.map(({ id, label, aria }) => (
+          <motion.button
+            key={id}
+            onClick={() => setVessel(id)}
+            aria-pressed={vessel === id}
+            aria-label={aria}
+            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+            transition={SPRING_UI}
+            className={`px-3 py-1.5 rounded-full transition-colors duration-200 ${
+              vessel === id
+                ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
+                : "text-ink-soft hover:text-ink"
+            }`}
+          >
+            {label}
+          </motion.button>
+        ))}
       </div>
 
       {/* Prominent Readout Display (100% visible with zero line overlap) */}
@@ -300,10 +325,7 @@ export function VialTimer({ state, dispatch }: Props) {
       {/* Controls */}
       <div className="flex items-center gap-3 mt-6">
         <motion.button
-          onClick={() => {
-            stopCompletionAlert();
-            dispatch(primary.action);
-          }}
+          onClick={handlePrimary}
           whileHover={reduceMotion ? undefined : { y: -1 }}
           whileTap={reduceMotion ? undefined : { scale: 0.98, y: 0 }}
           transition={SPRING_UI}

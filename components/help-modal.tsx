@@ -9,6 +9,10 @@ const TIPS = [
     body: "The glass vial tracks your current session. Press Start — the liquid drains as time passes. When the vial empties, your dose is complete.",
   },
   {
+    title: "Space bar",
+    body: "Press Space anywhere on the page to begin, pause or resume the current session. It stays out of the way while you're typing.",
+  },
+  {
     title: "Focus cycles",
     body: "Each cycle is four 25-minute focus sessions. Complete all four and earn the antidote — a 15-minute long break.",
   },

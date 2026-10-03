@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { trimHistory } from "@/lib/chat-history";
 import { loadRateLimit, saveRateLimit } from "@/lib/rate-limit-storage";
+import { renderChatText } from "@/lib/render-chat-text";
 import { todayKey } from "@/lib/date";
 import { api } from "@/convex/_generated/api";
 import { useAddressTerm } from "@/components/address-term-provider";
@@ -83,6 +84,13 @@ export function DoseyChat({ stats }: Props) {
   const { isAuthenticated } = useConvexAuth();
   const latestNotification = useLatestNotification();
 
+  const [isPhone, setIsPhone] = useState(false);
+  // The mascot only bobs briefly (on load, and when a new note arrives) to draw
+  // the eye once — a permanent idle loop is peripheral noise on a page that
+  // stays open for hours.
+  const [attention, setAttention] = useState(true);
+
+  const fabRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const appendedNotificationIdRef = useRef<number | null>(null);
@@ -120,6 +128,36 @@ export function DoseyChat({ stats }: Props) {
       inputRef.current?.focus();
     }
   }, [open]);
+
+  // Escape closes the panel and hands focus back to the trigger.
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      fabRef.current?.focus();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
+  // Phones get a bottom sheet (layout is in the panel's classes; this only
+  // picks the matching entrance motion).
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const notificationId = latestNotification?.id;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAttention(true);
+    const timer = window.setTimeout(() => setAttention(false), 6000);
+    return () => window.clearTimeout(timer);
+  }, [notificationId]);
 
   // Surfaces themed notifications (timer completions, break nudges, burnout
   // alerts, milestones) as a Dosey chat line. Skipped while a response is
@@ -205,18 +243,21 @@ export function DoseyChat({ stats }: Props) {
     <>
       {/* Floating trigger */}
       <motion.button
+        ref={fabRef}
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close Dosey" : "Ask Dosey"}
         aria-expanded={open}
         whileHover={reduceMotion ? undefined : { y: -1 }}
         whileTap={reduceMotion ? undefined : { scale: 0.97, y: 0 }}
         transition={SPRING_UI}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-lilac px-4 py-3 text-ink shadow-fab hover:bg-lilac-deep hover:text-paper transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-lilac-deep focus:ring-offset-2 focus:ring-offset-paper"
+        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-lilac px-4 py-3 text-ink shadow-fab hover:bg-lilac-deep hover:text-paper transition-[background-color,color,opacity] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lilac-deep focus-visible:ring-offset-2 focus-visible:ring-offset-paper${
+          open ? " max-sm:pointer-events-none max-sm:opacity-0" : ""
+        }`}
       >
         <motion.span
           className="flex h-7 w-7 items-center justify-center rounded-full bg-paper"
-          animate={reduceMotion || open ? undefined : { y: [0, -2, 0] }}
-          transition={reduceMotion || open ? undefined : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          animate={reduceMotion || open || !attention ? { y: 0 } : { y: [0, -2, 0] }}
+          transition={reduceMotion || open || !attention ? { duration: 0.2 } : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         >
           <DoseyMark size={18} />
         </motion.span>
@@ -228,12 +269,24 @@ export function DoseyChat({ stats }: Props) {
           <motion.div
             role="dialog"
             aria-label="Dosey chat"
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
+            initial={
+              reduceMotion
+                ? { opacity: 0 }
+                : isPhone
+                  ? { opacity: 0, y: 32 }
+                  : { opacity: 0, y: 16, scale: 0.96 }
+            }
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98, transition: { duration: 0.18, ease: EASE_OUT } }}
+            exit={
+              reduceMotion
+                ? { opacity: 0 }
+                : isPhone
+                  ? { opacity: 0, y: 24, transition: { duration: 0.18, ease: EASE_OUT } }
+                  : { opacity: 0, y: 12, scale: 0.98, transition: { duration: 0.18, ease: EASE_OUT } }
+            }
             transition={reduceMotion ? { duration: 0.2 } : SPRING_SOFT}
             style={{ originX: 1, originY: 1 }}
-            className="fixed bottom-24 right-6 z-50 flex h-[520px] max-h-[calc(100vh-8rem)] w-[360px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-card border border-white/60 bg-paper/90 backdrop-blur-xl shadow-panel"
+            className="fixed inset-x-0 bottom-0 z-50 flex h-[min(80dvh,560px)] flex-col overflow-hidden rounded-t-card border border-white/60 bg-paper/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl shadow-panel sm:inset-x-auto sm:bottom-24 sm:right-6 sm:h-[520px] sm:max-h-[calc(100dvh-8rem)] sm:w-[360px] sm:rounded-card sm:pb-0"
           >
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b border-line px-4 py-3">
@@ -248,14 +301,32 @@ export function DoseyChat({ stats }: Props) {
               >
                 <DoseyMark size={22} />
               </motion.span>
-              <div className="leading-tight">
+              <div className="flex-1 leading-tight">
                 <p className="font-serif font-semibold text-sm">Dosey</p>
-                <p className="text-[11px] text-ink-soft">Your study companion</p>
+                <p className="text-xs text-ink-soft">Your study companion</p>
               </div>
+              <motion.button
+                onClick={() => {
+                  setOpen(false);
+                  fabRef.current?.focus();
+                }}
+                aria-label="Close Dosey"
+                whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                transition={SPRING_UI}
+                className="flex h-10 w-10 -mr-2 items-center justify-center rounded-full text-lg leading-none text-ink-soft hover:text-ink transition-colors duration-150 sm:hidden"
+              >
+                ×
+              </motion.button>
             </div>
 
             {/* Transcript */}
-            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+            <div
+              ref={scrollRef}
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions"
+              className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+            >
               {messages.length === 0 && (
                 <div className="pt-1">
                   <div className="mb-3 flex justify-center">
@@ -312,10 +383,10 @@ export function DoseyChat({ stats }: Props) {
                     className={
                       m.role === "user"
                         ? "max-w-[80%] rounded-[18px] rounded-br-[6px] bg-lilac px-3.5 py-2 text-sm text-ink"
-                        : "max-w-[85%] rounded-[18px] rounded-bl-[6px] bg-paper-2 px-3.5 py-2 text-sm text-ink whitespace-pre-wrap"
+                        : "max-w-[85%] rounded-[18px] rounded-bl-[6px] bg-paper-2 px-3.5 py-2 text-sm text-ink"
                     }
                   >
-                    {m.content || (reduceMotion ? (
+                    {m.role === "model" && m.content ? renderChatText(m.content) : m.content || (reduceMotion ? (
                       <span className="text-ink-soft">Dosey is typing…</span>
                     ) : (
                       <span className="inline-flex gap-1 text-ink-soft" aria-label="Dosey is typing">
@@ -354,7 +425,7 @@ export function DoseyChat({ stats }: Props) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && send(input)}
                   placeholder={limitedUntil ? "Dosey's resting…" : "Ask Dosey…"}
-                  className="flex-1 rounded-control border border-line-strong bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
+                  className="flex-1 rounded-control border border-line-strong bg-paper-2 px-3.5 py-2.5 text-base sm:text-sm placeholder:text-ink-soft focus:border-lilac-deep focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60"
                 />
                 <motion.button
                   onClick={() => send(input)}
@@ -367,7 +438,7 @@ export function DoseyChat({ stats }: Props) {
                   ↑
                 </motion.button>
               </div>
-              <p className="mt-2 text-center text-[10px] text-ink-soft">
+              <p className="mt-2 text-center text-xs text-ink-soft">
                 Dosey is a study aid, not clinical advice — verify against official sources.
               </p>
             </div>

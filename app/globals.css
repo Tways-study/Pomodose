@@ -58,6 +58,26 @@
   }
 }
 
+/* Running-state ambient washes (colors set inline from PHASE_ACCENT). Opacity-only
+   breathe, two cadences and opposite phase so the layers never move in lockstep. */
+.ambient-wash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease-out, background 0.7s ease-out;
+}
+.ambient-wash.is-running { will-change: opacity; }
+.ambient-a.is-running { animation: ambient-breathe-a 3.5s ease-in-out infinite; }
+.ambient-b.is-running { animation: ambient-breathe-b 4.5s ease-in-out infinite; }
+@keyframes ambient-breathe-a { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.42; } }
+@keyframes ambient-breathe-b { 0%, 100% { opacity: 0.32; } 50% { opacity: 0.14; } }
+@media (prefers-reduced-motion: reduce) {
+  .ambient-a.is-running { animation: none; opacity: 0.32; }
+  .ambient-b.is-running { animation: none; opacity: 0.24; }
+}
+
 /* CSS-driven animations (Tailwind animate-*) are not covered by framer's
    useReducedMotion, so collapse them here. */
 @media (prefers-reduced-motion: reduce) {

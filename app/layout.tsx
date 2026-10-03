@@ -1,5 +1,5 @@
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Spline_Sans } from "next/font/google";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { AddressTermProvider } from "@/components/address-term-provider";
@@ -22,9 +22,21 @@ const splineSans = Spline_Sans({
   display: "swap",
 });
 
+const TITLE = "Pomodose — Study Companion";
+const DESCRIPTION = "A measured-dose focus timer for the pharmacist in your life.";
+
 export const metadata: Metadata = {
-  title: "Pomodose — Study Companion",
-  description: "A measured-dose focus timer for the pharmacist in your life.",
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION, type: "website" },
+  twitter: { card: "summary", title: TITLE, description: DESCRIPTION },
+  appleWebApp: { capable: true, title: "Pomodose", statusBarStyle: "default" },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#F6F2EC",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
