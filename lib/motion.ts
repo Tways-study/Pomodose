@@ -8,5 +8,4 @@ export const SPRING_BOUNCY = { type: "spring", stiffness: 520, damping: 18 } as 
 
 // GSAP counterparts (see lib/gsap.ts) for scroll-driven reveals.
 export const GSAP_EASE_OUT = "power3.out";
-export const GSAP_EASE_INOUT = "power2.inOut";
 export const REVEAL = { y: 12, duration: 0.4, stagger: 0.06 } as const;

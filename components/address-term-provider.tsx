@@ -31,8 +31,3 @@ export function AddressTermProvider({ children }: { children: ReactNode }) {
 export function useAddressTerm(): AddressTerm {
   return useContext(AddressTermContext);
 }
-
-/** The current address term as inline text — usable inside Server Components. */
-export function AddressName() {
-  return <>{useAddressTerm()}</>;
-}

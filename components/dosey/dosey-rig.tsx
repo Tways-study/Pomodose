@@ -5,7 +5,7 @@ import { gsap, useGSAP, withMotion } from "@/lib/gsap";
 import type { DoseyMood } from "@/lib/dosey-mood";
 import { usePointerEyes } from "@/components/dosey/use-pointer-eyes";
 
-export type DoseyVariant = "full" | "face" | "peek";
+type DoseyVariant = "full" | "face" | "peek";
 
 interface DoseyRigProps {
   mood: DoseyMood;
