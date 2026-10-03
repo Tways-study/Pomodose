@@ -220,7 +220,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close Dosey" : "Ask Dosey"}
         aria-expanded={open}
-        whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+        whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
         transition={SPRING_BOUNCY}
         className={`fixed bottom-6 right-6 z-modal flex min-h-[44px] cursor-pointer items-center gap-2 rounded-pill bg-gum-lilac py-2 pl-2 pr-4 text-ink shadow-pop transition-opacity duration-200${
           open ? " max-sm:pointer-events-none max-sm:opacity-0" : ""
@@ -283,7 +283,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
                   fabRef.current?.focus();
                 }}
                 aria-label="Close Dosey"
-                whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
                 transition={SPRING_BOUNCY}
                 className="-mr-2 flex h-11 w-11 cursor-pointer items-center justify-center rounded-pill text-ink-soft transition-colors duration-150 hover:bg-surface-2 hover:text-ink sm:hidden"
               >
@@ -326,7 +326,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
                           <motion.button
                             key={s}
                             onClick={() => send(s)}
-                            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                            whileTap={{ scale: reduceMotion ? 1 : 0.96 }}
                             transition={SPRING_BOUNCY}
                             className="flex min-h-[44px] cursor-pointer items-center justify-between gap-2 rounded-pill bg-surface-2 px-4 py-2 text-left font-display text-sm font-medium text-ink shadow-gum transition-colors hover:bg-gum-lilac/40"
                           >
@@ -396,7 +396,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
                 />
                 <motion.button
                   onClick={() => send(input)}
-                  whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                  whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
                   transition={SPRING_BOUNCY}
                   disabled={isStreaming || !!limitedUntil || !input.trim()}
                   aria-label="Send message"

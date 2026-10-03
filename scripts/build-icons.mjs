@@ -2,6 +2,7 @@
 //   app/icon.png        512x512 rounded tile
 //   app/apple-icon.png  180x180 full-bleed square (iOS rounds it itself)
 //   app/favicon.ico     16/32/48 PNGs in an ICO container
+//   app/opengraph-image.png + app/twitter-image.png   1200x630 link-preview card (scripts/og-source.svg)
 // Run: node scripts/build-icons.mjs
 // Uses `sharp`, which ships with Next.js as a transitive dependency, so nothing
 // is added to package.json. The ICO container is written by hand (PNG-in-ICO).
@@ -44,4 +45,10 @@ const entries = images.map((img, i) => {
 });
 await writeFile(path.join(root, "app/favicon.ico"), Buffer.concat([header, ...entries, ...images]));
 
-console.log("wrote app/icon.png, app/apple-icon.png, app/favicon.ico");
+// Link-preview card (same art as the icon, wider canvas).
+const og = await readFile(path.join(root, "scripts/og-source.svg"));
+const ogPng = await sharp(og, { density: 144 }).resize(1200, 630).png({ compressionLevel: 9 }).toBuffer();
+await writeFile(path.join(root, "app/opengraph-image.png"), ogPng);
+await writeFile(path.join(root, "app/twitter-image.png"), ogPng);
+
+console.log("wrote app/icon.png, app/apple-icon.png, app/favicon.ico, app/opengraph-image.png, app/twitter-image.png");

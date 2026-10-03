@@ -33,11 +33,6 @@
 @layer utilities {
   .font-display { font-family: var(--font-display), ui-rounded, system-ui, sans-serif; }
   .font-body    { font-family: var(--font-body), ui-rounded, system-ui, sans-serif; }
-  .display-label {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: 0;
-  }
   .digits {
     font-family: var(--font-display);
     font-variant-numeric: tabular-nums;
@@ -48,47 +43,49 @@
   .dots-divider {
     border-top: 3px dotted theme('colors.line-soft');
   }
-
-  /* Soft diagonal stripes for break segments; color follows currentColor. */
-  .hatch {
-    background-image: repeating-linear-gradient(
-      45deg,
-      currentColor 0 3px,
-      transparent 3px 7px
-    );
-  }
 }
 
-/* CSS-driven animations (Tailwind animate-*) are not covered by framer's
-   useReducedMotion, so collapse them here. */
+/* Reduced motion: no movement and no looping keyframes, but state feedback survives.
+   Transitions are limited to color, opacity and shadow (so hover, focus and press
+   still read) and transform transitions become instant. CSS keyframes (Tailwind
+   animate-*) are not covered by framer's useReducedMotion, so they collapse here. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow !important;
   }
+  .chime-slider::-webkit-slider-thumb { transition: none !important; }
 }
 
-/* Chime volume slider: a soft pill track with a round ink thumb. */
+/* Chime volume slider: a soft pill track with a round ink thumb. The input is
+   44px tall so it is a real touch target; the 6px track is drawn on the track
+   pseudo-element and the thumb is centred on it. */
 .chime-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 140px;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+.chime-slider::-webkit-slider-runnable-track {
   height: 6px;
+  border-radius: 9999px;
   background: linear-gradient(
     to right,
     theme('colors.gum-lilac') var(--fill, 70%),
     theme('colors.line-soft') var(--fill, 70%)
   );
-  border-radius: 9999px;
-  outline: none;
-  cursor: pointer;
 }
 .chime-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 18px;
   height: 18px;
+  margin-top: -9px; /* (6px track - 24px thumb incl. border) / 2 */
   border-radius: 9999px;
   background: theme('colors.ink');
   border: 3px solid theme('colors.surface');
@@ -98,6 +95,10 @@
 }
 .chime-slider:hover::-webkit-slider-thumb { transform: scale(1.12); }
 .chime-slider:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid theme('colors.ink');
+  outline-offset: 2px;
+}
+.chime-slider:focus-visible::-moz-range-thumb {
   outline: 3px solid theme('colors.ink');
   outline-offset: 2px;
 }

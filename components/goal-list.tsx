@@ -152,6 +152,7 @@ export function GoalList({ onProgressChange }: Props) {
             if (error) setError(null);
           }}
           onKeyDown={e => e.key === "Enter" && void add()}
+          aria-label="Study goal"
           placeholder="e.g. Review ch.4 kinetics"
           className="min-w-0 flex-1 min-h-[48px] bg-surface-2 border-2 border-line-strong rounded-control px-4 py-3 text-base font-body text-ink placeholder:text-ink-soft focus:border-ink focus:ring-4 focus:ring-gum-lilac/60 outline-none transition-[border-color,box-shadow]"
         />
@@ -160,7 +161,7 @@ export function GoalList({ onProgressChange }: Props) {
           onClick={() => void add()}
           disabled={adding}
           aria-label="Add goal"
-          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
           transition={SPRING_BOUNCY}
           className="flex h-12 w-12 flex-none cursor-pointer items-center justify-center rounded-pill bg-ink text-surface shadow-pop transition-transform [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5 disabled:opacity-60"
         >
@@ -204,7 +205,7 @@ export function GoalList({ onProgressChange }: Props) {
             <motion.button
               type="button"
               onClick={undo}
-              whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+              whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
               transition={SPRING_BOUNCY}
               className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-pill bg-surface px-4 font-display text-sm font-medium text-ink shadow-gum transition-colors duration-150 hover:bg-surface-2"
             >

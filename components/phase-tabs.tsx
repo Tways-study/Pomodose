@@ -33,7 +33,7 @@ export function PhaseTabs({ active, onChange }: Props) {
             aria-pressed={isActive}
             aria-label={`${label} — ${name}`}
             onClick={() => onChange(id)}
-            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+            whileTap={{ scale: reduceMotion ? 1 : 0.96 }}
             transition={SPRING_BOUNCY}
             className={[
               "relative flex-1 min-h-[48px] cursor-pointer rounded-pill px-2 py-1 font-display text-base font-medium transition-colors duration-200",

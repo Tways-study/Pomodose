@@ -227,7 +227,7 @@ export default function Home() {
       <CounterNote />
 
       {/* Main grid */}
-      <main className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 items-start">
+      <main id="main" tabIndex={-1} className="outline-none flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 items-start">
 
         {/* Left: the Rx label. Sticky on desktop; no ancestor sets overflow. */}
         <div className="w-full lg:sticky lg:top-6">

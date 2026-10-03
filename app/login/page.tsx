@@ -8,14 +8,19 @@ import { EASE_OUT } from "@/lib/motion";
 export default function LoginPage() {
   const reduceMotion = useReducedMotion();
 
+  // `initial` is rendered on the server, where the reduced-motion preference is
+  // unknown, so it must not depend on it. Reduced motion zeroes the y tween instead
+  // (the element is still transparent when it snaps into place).
   const enter = (delay: number) => ({
-    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 },
+    initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: reduceMotion ? 0.3 : 0.4, delay, ease: EASE_OUT },
+    transition: reduceMotion
+      ? { duration: 0.3, delay, ease: EASE_OUT, y: { duration: 0 } }
+      : { duration: 0.4, delay, ease: EASE_OUT },
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ground px-4 py-12">
+    <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-ground px-4 py-12 outline-none">
       <div className="w-full max-w-sm">
         <motion.div className="mb-6 flex items-center gap-3" {...enter(0)}>
           <DoseyRig size={72} mood="relaxed" />
@@ -34,6 +39,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </main>
   );
 }

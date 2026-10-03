@@ -25,7 +25,7 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
       <motion.button
         aria-label={goal.done ? "Mark incomplete" : "Mark complete"}
         onClick={() => onToggle(goal.id)}
-        whileTap={reduceMotion ? undefined : { scale: 0.88 }}
+        whileTap={{ scale: reduceMotion ? 1 : 0.88 }}
         transition={SPRING_BOUNCY}
         className="flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-pill"
       >
@@ -80,7 +80,7 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
       <motion.button
         aria-label="Remove goal"
         onClick={() => onDelete(goal.id)}
-        whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+        whileTap={{ scale: reduceMotion ? 1 : 0.92 }}
         transition={SPRING_BOUNCY}
         className="flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-pill text-ink-soft transition-colors duration-150 hover:bg-gum-rose hover:text-ink"
       >

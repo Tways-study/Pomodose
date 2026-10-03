@@ -58,7 +58,7 @@ export function StickyTimerBar({ timer, dispatch, vialRef }: Props) {
         </div>
         <motion.button
           type="button"
-          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
           transition={SPRING_BOUNCY}
           onClick={() => {
             stopCompletionAlert();

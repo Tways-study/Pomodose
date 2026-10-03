@@ -25,9 +25,14 @@ export function CounterNote() {
   const reduceMotion = useReducedMotion();
 
   // Directional blur-lift, mirroring quote-card.tsx — entrance/exit only,
-  // opacity-only under reduced motion.
+  // opacity-only under reduced motion (same keys, zeroed values, so the markup
+  // never depends on the client-only reduced-motion preference).
   const variants = reduceMotion
-    ? { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
+    ? {
+        enter: { opacity: 0, y: 0, filter: "blur(0px)" },
+        center: { opacity: 1, y: 0, filter: "blur(0px)" },
+        exit: { opacity: 0, y: 0, filter: "blur(0px)" },
+      }
     : {
         enter: { opacity: 0, y: -8, filter: "blur(4px)" },
         center: { opacity: 1, y: 0, filter: "blur(0px)" },

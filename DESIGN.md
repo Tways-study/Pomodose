@@ -231,7 +231,7 @@ Hybrid: tonal layering first (ground, then cream surface, then shell-cream wells
 
 A three-step radius scale: `control` 18px (inputs, goal rows, digit cells, the Dosey bubble, inner stages), `bubble` 28px (every card, dialog, notes, chat bubbles), `pill` 9999px (all buttons, tabs, stickers, icon bubbles, checkboxes, cycle segments). Chat bubbles use `bubble` with one corner dropped to `control` at the speaker's tail corner. Header bands round the card's top corners to match.
 
-Hairline 1px `line-soft` borders outline cards; the dotted 3px `line-soft` divider separates label sections. Break segments may use the diagonal-stripe `.hatch` utility, though the build currently fills segments solidly.
+Hairline 1px `line-soft` borders outline cards; the dotted 3px `line-soft` divider separates label sections. Break segments in the cycle strip are filled solidly.
 
 Dosey follows mascot rules: flat outline-free shapes, about five large rounded shapes, three semantic colors, a big head with tiny wide-set eyes, blunt tips, upright posture. Below 40px the rig automatically switches to the `face` variant.
 

@@ -94,14 +94,58 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
   const reduceMotion = useReducedMotion();
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; });
+  const dialogRef = useRef<HTMLDivElement>(null);
 
+  // aria-modal promises that nothing behind the dialog is reachable, so make it
+  // true for keyboard users too: move focus in on open, keep Tab inside, and hand
+  // focus back to whatever had it (the Help button, usually) on close.
   useEffect(() => {
     if (!open) return;
-    function handle(e: KeyboardEvent) {
-      if (e.key === "Escape") onCloseRef.current();
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.focus({ preventScroll: true });
+
+    function focusables(): HTMLElement[] {
+      const root = dialogRef.current;
+      if (!root) return [];
+      return Array.from(
+        root.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'),
+      );
     }
+
+    function handle(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      const inside = dialogRef.current?.contains(active) ?? false;
+      if (!inside) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      } else if (e.shiftKey && (active === first || active === dialogRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
     window.addEventListener("keydown", handle);
-    return () => window.removeEventListener("keydown", handle);
+    return () => {
+      window.removeEventListener("keydown", handle);
+      if (previous && previous !== document.body && previous.isConnected) {
+        previous.focus({ preventScroll: true });
+      }
+    };
   }, [open]);
 
   return (
@@ -124,10 +168,12 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
 
           {/* Card */}
           <motion.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="help-title"
-            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-bubble border border-line-soft bg-surface text-ink shadow-soft"
+            tabIndex={-1}
+            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-bubble border border-line-soft bg-surface text-ink shadow-soft outline-none"
             initial={{ y: 16, scale: 0.96, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 8, scale: 0.98, opacity: 0, transition: { duration: 0.15 } }}
@@ -185,7 +231,7 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
               {/* CTA */}
               <motion.button
                 onClick={onClose}
-                whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
                 transition={SPRING_BOUNCY}
                 className="mt-8 flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-pill bg-ink px-6 py-3 font-display text-base font-medium text-surface shadow-pop"
               >

@@ -490,7 +490,7 @@ export function LoginForm() {
           type="submit"
           disabled={isSubmitting}
           className={submitClass}
-          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+          whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
           transition={SPRING_BOUNCY}
         >
           {isSubmitting ? submittingLabel : submitLabel}

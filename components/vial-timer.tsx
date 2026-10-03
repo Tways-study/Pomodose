@@ -176,7 +176,9 @@ export function VialTimer({ state, dispatch }: Props) {
   const glossY = isFlask ? 120 : 40;
   const glossH = isFlask ? 66 : 120;
   const bodyPath = isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH;
-  const tapProps = reduceMotion ? {} : { whileTap: { scale: 0.94 } };
+  // Always present (reduced motion makes it a no-op): framer adds tabindex="0" to any
+  // element with a tap gesture, so the prop must not differ between server and client.
+  const tapProps = { whileTap: { scale: reduceMotion ? 1 : 0.94 } };
 
   return (
     <div className="flex flex-col items-center">

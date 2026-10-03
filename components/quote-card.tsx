@@ -57,8 +57,15 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
   const author = quote.author.replaceAll(ADDRESS_TOKEN, name);
 
   // Directional blur-lift: exits up, enters from below
+  // Same keys either way: the resting ("center") style is rendered on the server,
+  // and useReducedMotion() only exists on the client, so a different key set would
+  // hydrate with a mismatch. Reduced motion just zeroes the movement and blur.
   const variants = reduceMotion
-    ? { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
+    ? {
+        enter:  { opacity: 0, y: 0, filter: "blur(0px)" },
+        center: { opacity: 1, y: 0, filter: "blur(0px)" },
+        exit:   { opacity: 0, y: 0, filter: "blur(0px)" },
+      }
     : {
         enter:  { opacity: 0, y: 8,  filter: "blur(4px)" },
         center: { opacity: 1, y: 0,  filter: "blur(0px)" },

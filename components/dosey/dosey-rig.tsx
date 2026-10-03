@@ -146,19 +146,33 @@ export function DoseyRig({
       if (size < IDLE_MIN_SIZE) return;
 
       const mm = withMotion(() => {
+        // The idle loops (blink + breathe) only run while the rig is on screen: an
+        // offscreen rig (Meet Dosey sits below the fold for most of a session) would
+        // otherwise keep writing transforms to the DOM every frame for nothing.
+        // Hidden tabs need no handling: browsers already suspend rAF there.
+        let active = true;
+        let chainOn = false; // a blink delayedCall or blink timeline is pending
         let blinkCall: gsap.core.Tween | null = null;
         const scheduleBlink = () => {
+          chainOn = true;
           blinkCall = gsap.delayedCall(3 + Math.random() * 2, () => {
+            blinkCall = null;
             gsap
-              .timeline({ onComplete: scheduleBlink })
+              .timeline({
+                onComplete: () => {
+                  if (active) scheduleBlink();
+                  else chainOn = false;
+                },
+              })
               .to(lids, { scaleY: 1, duration: 0.07, ease: "power1.in" })
               .to(lids, { scaleY: rest, duration: 0.14, ease: "power1.out" });
           });
         };
         scheduleBlink();
 
+        let breathe: gsap.core.Tween | null = null;
         if (mood === "sleepy") {
-          gsap.to(move, {
+          breathe = gsap.to(move, {
             scale: 1.02,
             svgOrigin: origin,
             duration: 4,
@@ -167,6 +181,28 @@ export function DoseyRig({
             repeat: -1,
           });
         }
+
+        const setActive = (next: boolean) => {
+          active = next;
+          if (next) {
+            breathe?.resume();
+            if (!chainOn) scheduleBlink();
+          } else {
+            breathe?.pause();
+            if (blinkCall) {
+              blinkCall.kill();
+              blinkCall = null;
+              chainOn = false;
+            }
+          }
+        };
+
+        const root = svgRef.current;
+        const observer =
+          root && typeof IntersectionObserver !== "undefined"
+            ? new IntersectionObserver(([entry]) => setActive(entry.isIntersecting))
+            : null;
+        if (root) observer?.observe(root);
 
         if (mood === "proud") {
           if (kind === "peek") {
@@ -189,6 +225,7 @@ export function DoseyRig({
         }
 
         return () => {
+          observer?.disconnect();
           blinkCall?.kill();
         };
       });

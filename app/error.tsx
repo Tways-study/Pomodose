@@ -34,7 +34,7 @@ export default function Error({
             <div className="mt-6 flex flex-col gap-2">
               <motion.button
                 onClick={reset}
-                whileTap={reduceMotion ? undefined : { scale: 0.94 }}
+                whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
                 transition={SPRING_BOUNCY}
                 className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-pill bg-ink px-6 py-3 font-display text-base font-medium text-surface shadow-pop"
               >
