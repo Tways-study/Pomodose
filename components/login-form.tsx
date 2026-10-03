@@ -161,7 +161,7 @@ const labelClass = `block mb-1.5 ${labelTextClass}`;
 // 1.20:1 — under WCAG 1.4.11's 3:1 for a component boundary — which left the fields
 // reading as unbordered blocks. See the token comment in tailwind.config.ts.
 const inputClass =
-  "w-full rounded-control border bg-paper-2 px-3.5 py-2.5 text-sm placeholder:text-ink-soft focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60";
+  "w-full rounded-control border bg-paper-2 px-3.5 py-2.5 text-base sm:text-sm placeholder:text-ink-soft focus:ring-[3px] focus:ring-lilac/25 outline-none transition-[border-color,box-shadow] disabled:opacity-60";
 const inputRestClass = "border-line-strong focus:border-lilac-deep";
 const inputInvalidClass = "border-clay-deep focus:border-clay-deep";
 // No disabled-until-valid state: the button stays live so a failed submit can say

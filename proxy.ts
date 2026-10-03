@@ -25,5 +25,5 @@ export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) 
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|manifest.webmanifest).*)"],
 };

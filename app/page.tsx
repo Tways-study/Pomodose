@@ -108,43 +108,10 @@ export default function Home() {
     transition: { duration: reduceMotion ? 0.3 : 0.55, delay, ease: EASE_OUT },
   });
 
-  // Made a full pass louder after a live feel-check: solid-color rings and
-  // full-viewport coverage instead of faint low-alpha tints, because the
-  // low-alpha version genuinely didn't register as "different" at a glance.
-  const ambientOpacity = reduceMotion
-    ? (isRunning ? 0.32 : 0)
-    : (isRunning ? [0.2, 0.42, 0.2] : 0);
-  const ambientOpacityTransition = !reduceMotion && isRunning
-    ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.4, ease: "easeOut" as const };
-
-  // Slow drift, deliberately much slower than the 3.5s breathe so the two
-  // read as independent layers, not one mechanical loop.
-  const ambientDrift = reduceMotion || !isRunning
-    ? { x: 0, y: 0, scale: 1 }
-    : { x: [0, 30, -14, 0], y: [0, -18, 10, 0], scale: [1, 1.08, 1.03, 1] };
-  const ambientDriftTransition = !reduceMotion && isRunning
-    ? { duration: 11, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.4, ease: "easeOut" as const };
-
-  // Second ambient layer, top-right, deliberately off-cadence and phase-
-  // inverted from the primary bottom-left wash (4.5s vs 3.5s breathe, 14s
-  // vs 11s drift, opposite opacity phase) so the two never move in
-  // lockstep — together they read as shifting light crossing the page
-  // rather than one blob breathing in a corner. Uses the deeper accent
-  // tone so it reads as a second, richer layer rather than a duplicate.
-  const secondaryOpacity = reduceMotion
-    ? (isRunning ? 0.24 : 0)
-    : (isRunning ? [0.32, 0.14, 0.32] : 0);
-  const secondaryOpacityTransition = !reduceMotion && isRunning
-    ? { duration: 4.5, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.4, ease: "easeOut" as const };
-  const secondaryDrift = reduceMotion || !isRunning
-    ? { x: 0, y: 0, scale: 1 }
-    : { x: [0, -26, 18, 0], y: [0, 22, -14, 0], scale: [1, 1.1, 1.04, 1] };
-  const secondaryDriftTransition = !reduceMotion && isRunning
-    ? { duration: 14, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.4, ease: "easeOut" as const };
+  // Two ambient washes, phase-colored via PHASE_ACCENT. They only breathe in
+  // opacity (CSS keyframes in globals.css, compositor-friendly) at different
+  // cadences so they never move in lockstep; the earlier x/y/scale drift ran on
+  // the main thread for hours and is gone. Idle: faded out.
 
   // Header: the border itself recolors (not just a thin sweep underneath),
   // plus an under-glow — the header edge should read as unmistakably
@@ -164,31 +131,15 @@ export default function Home() {
 
   return (
     <NotificationProvider timer={timer} goalsDone={goalsDone} goalsTotal={goalsTotal}>
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 transition-[background] duration-700 ease-out"
+        className={`ambient-wash ambient-a${isRunning ? " is-running" : ""}`}
         style={{ background: `radial-gradient(120% 90% at 10% 105%, ${phaseAccent.base} 0%, transparent 62%)` }}
-        initial={{ opacity: 0, x: 0, y: 0, scale: 1 }}
-        animate={{ opacity: ambientOpacity, ...ambientDrift }}
-        transition={{
-          opacity: ambientOpacityTransition,
-          x: ambientDriftTransition,
-          y: ambientDriftTransition,
-          scale: ambientDriftTransition,
-        }}
       />
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 transition-[background] duration-700 ease-out"
+        className={`ambient-wash ambient-b${isRunning ? " is-running" : ""}`}
         style={{ background: `radial-gradient(100% 80% at 92% -6%, ${phaseAccent.deep} 0%, transparent 60%)` }}
-        initial={{ opacity: 0, x: 0, y: 0, scale: 1 }}
-        animate={{ opacity: secondaryOpacity, ...secondaryDrift }}
-        transition={{
-          opacity: secondaryOpacityTransition,
-          x: secondaryDriftTransition,
-          y: secondaryDriftTransition,
-          scale: secondaryDriftTransition,
-        }}
       />
       <RxField accent={phaseAccent} active={isRunning} />
       <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
@@ -302,19 +253,21 @@ export default function Home() {
         </motion.aside>
       </main>
 
-      <motion.footer {...reveal(0.2)} className="mt-12 pt-5 border-t border-line flex flex-wrap justify-between gap-3 text-xs text-ink-soft">
+      <motion.footer {...reveal(0.2)} className="mt-12 pt-5 border-t border-line flex flex-col gap-4 text-xs text-ink-soft">
         <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
-        <div className="flex items-center gap-4">
-          <ChimeVolume />
-          <OsNotificationToggle />
-          <span className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <ChimeVolume />
+            <OsNotificationToggle />
+          </div>
+          <span className="flex items-center gap-1">
             Pomodose · v1
             <button
               onClick={() => setShowHelp(true)}
               aria-label="Help and tips"
-              className="w-8 h-8 rounded-full border border-current flex items-center justify-center text-[11px] hover:text-ink hover:border-ink active:scale-95 transition-[color,border-color,transform] duration-150"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-xs hover:text-ink active:scale-95 transition-[color,transform] duration-150"
             >
-              ?
+              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-current">?</span>
             </button>
           </span>
         </div>

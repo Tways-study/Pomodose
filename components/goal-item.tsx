@@ -21,28 +21,33 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
       className="flex items-center gap-3 px-3.5 py-3 bg-paper-2 border border-line rounded-control"
     >
       {/* Checkmark button */}
+      {/* 40px hit area around the 20px visual box; negative margin keeps the row height. */}
       <motion.button
         aria-label={goal.done ? "Mark incomplete" : "Mark complete"}
         onClick={() => onToggle(goal.id)}
         whileTap={reduceMotion ? undefined : { scale: 0.96 }}
         transition={SPRING_UI}
-        className={[
-          "flex-none w-5 h-5 rounded-md border-2 relative transition-colors duration-200",
-          goal.done
-            ? "bg-sage border-sage"
-            : "border-lilac-deep bg-transparent",
-        ].join(" ")}
+        className="flex-none -m-2.5 flex h-10 w-10 items-center justify-center"
       >
-        <motion.svg
-          viewBox="0 0 13 13"
-          fill="none"
-          className="absolute inset-0 m-auto w-3 h-3"
-          initial={false}
-          animate={{ opacity: goal.done ? 1 : 0, scale: goal.done ? 1 : 0.7 }}
-          transition={{ duration: 0.2 }}
+        <span
+          className={[
+            "relative block w-5 h-5 rounded-md border-2 transition-colors duration-200",
+            goal.done
+              ? "bg-sage border-sage"
+              : "border-lilac-deep bg-transparent",
+          ].join(" ")}
         >
-          <path d="M2 7l3 3 6-7" className="stroke-paper" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </motion.svg>
+          <motion.svg
+            viewBox="0 0 13 13"
+            fill="none"
+            className="absolute inset-0 m-auto w-3 h-3"
+            initial={false}
+            animate={{ opacity: goal.done ? 1 : 0, scale: goal.done ? 1 : 0.7 }}
+            transition={{ duration: 0.2 }}
+          >
+            <path d="M2 7l3 3 6-7" className="stroke-paper" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </motion.svg>
+        </span>
       </motion.button>
 
       {/* Label */}
@@ -61,7 +66,7 @@ export function GoalItem({ goal, onToggle, onDelete }: Props) {
         onClick={() => onDelete(goal.id)}
         whileTap={reduceMotion ? undefined : { scale: 0.96 }}
         transition={SPRING_UI}
-        className="flex-none text-ink-soft hover:text-clay text-lg leading-none opacity-50 hover:opacity-100 transition-opacity duration-150"
+        className="flex-none -my-2.5 -mr-2.5 flex h-10 w-10 items-center justify-center text-ink-soft hover:text-clay-deep text-lg leading-none opacity-60 hover:opacity-100 transition-[opacity,color] duration-150"
       >
         ×
       </motion.button>
