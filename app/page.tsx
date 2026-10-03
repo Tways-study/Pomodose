@@ -7,8 +7,7 @@ import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
-import { AnimatePresence, motion } from "framer-motion";
-import { CircleHelp, Lightbulb, ListChecks, LogOut, Repeat, type LucideIcon } from "lucide-react";
+import { Lightbulb, ListChecks, Repeat, type LucideIcon } from "lucide-react";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
 import { QuoteCard }         from "@/components/quote-card";
@@ -24,14 +23,13 @@ import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
 import { PHASE_STICKER_CLASS } from "@/lib/phase-theme";
-import { SPRING_BOUNCY } from "@/lib/motion";
 import { PHASE_LABEL } from "@/lib/timer-format";
 import { StickyTimerBar } from "@/components/sticky-timer-bar";
-import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
 import { NotificationProvider } from "@/components/notification-provider";
 import { CounterNote }         from "@/components/counter-note";
-import { OsNotificationToggle } from "@/components/os-notification-toggle";
+import { ProfileMenuConnected } from "@/components/profile-menu";
+import { SettingsMenu }         from "@/components/settings-menu";
 
 const MeetDosey = dynamic(
   () => import("@/components/dosey/meet-dosey").then((m) => m.MeetDosey),
@@ -186,41 +184,24 @@ export default function Home() {
       <div className="relative z-content max-w-[1240px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-32 sm:pb-28">
 
       {/* Header, on the ground */}
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4 sm:mb-10 lg:mb-0">
+      <header className="mb-8 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-3 sm:mb-10 sm:flex sm:flex-wrap sm:justify-between sm:gap-4 lg:mb-0">
         <div>
           <h1 className="font-display text-3xl font-semibold text-ink">Pomodose</h1>
           <p className="mt-0.5 font-body text-base text-ink">Study companion</p>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-3 rounded-pill bg-gum-butter px-5 py-1.5 text-ink shadow-gum">
-            <span className="font-display text-sm font-medium">Doses today</span>
-            <span className="font-display text-2xl font-semibold leading-none">{timer.dailyDoses}</span>
+        {/* On a phone the gear sits top-right beside the wordmark and the pill + email share
+            the row below; from sm up it is one row: pill, email, gear. */}
+        <div className="contents sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
+          <div className="col-span-2 row-start-2 flex items-center gap-2 sm:contents">
+            <div className="flex flex-none items-center gap-3 rounded-pill bg-gum-butter px-5 py-1.5 text-ink shadow-gum">
+              <span className="font-display text-sm font-medium">Doses today</span>
+              <span className="font-display text-2xl font-semibold leading-none">{timer.dailyDoses}</span>
+            </div>
+            <ProfileMenuConnected onSignOut={handleSignOut} signingOut={signingOut} signOutError={signOutError} />
           </div>
-          <motion.button
-            type="button"
-            onClick={handleSignOut}
-            disabled={signingOut}
-            whileTap={{ scale: 0.94 }}
-            transition={SPRING_BOUNCY}
-            className="flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-pill bg-surface-2 px-4 font-display text-sm font-medium text-ink shadow-gum transition-colors duration-150 hover:bg-gum-lilac/40 disabled:opacity-60"
-          >
-            <LogOut size={16} strokeWidth={2.25} aria-hidden />
-            {signingOut ? "Signing out…" : "Sign out"}
-          </motion.button>
-          <AnimatePresence>
-            {signOutError && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="rounded-control border-2 border-alert bg-surface px-3 py-2 text-xs text-alert"
-                role="alert"
-              >
-                {signOutError}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          <div className="col-start-2 row-start-1">
+            <SettingsMenu onOpenHelp={() => setShowHelp(true)} />
+          </div>
         </div>
       </header>
 
@@ -320,25 +301,9 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="mt-12 flex flex-col gap-4 border-t border-line-soft pt-5 font-body text-sm text-ink">
+      <footer className="mt-12 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-line-soft pt-5 font-body text-sm text-ink">
         <span>Each session is a measured dose — take care of yourself, {name}.</span>
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-            <ChimeVolume />
-            <OsNotificationToggle />
-          </div>
-          <span className="flex items-center gap-2">
-            Pomodose · v1
-            <button
-              type="button"
-              onClick={() => setShowHelp(true)}
-              aria-label="Help and tips"
-              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-pill bg-surface text-ink shadow-soft transition-colors duration-150 hover:bg-surface-2"
-            >
-              <CircleHelp size={20} strokeWidth={2.25} aria-hidden />
-            </button>
-          </span>
-        </div>
+        <span>Pomodose · v1</span>
       </footer>
 
       <StickyTimerBar timer={timer} dispatch={dispatch} vialRef={rxLabelRef} />

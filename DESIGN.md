@@ -167,7 +167,7 @@ A peach-and-cream ground with a pastel confectionery accent set where each hue m
 
 ### Neutral
 - **Peach Ground** (`{colors.ground}`): the page, the browser theme color, the manifest background.
-- **Cream Surface** (`{colors.surface}`): cards, modal, chat panel, input-less pills in the footer.
+- **Cream Surface** (`{colors.surface}`): cards, modal, chat panel, the header's profile bubble and gear button, and the settings and account panels.
 - **Shell Cream** (`{colors.surface-2}`): inset wells: tab track, goal rows, input fills, digit cells, secondary buttons, Dosey's reply bubble.
 - **Ink Soft** (`{colors.ink-soft}`): secondary text; 5.6:1 on surface, only 4.5:1 on ground, so use it on surfaces and never on the bare ground.
 - **Soft Line** (`{colors.line-soft}`): decorative hairlines and the dotted divider; never a control boundary.
@@ -207,7 +207,7 @@ Dosey Lilac (`{colors.dosey-lilac}`) body and the vessel liquid, Dosey Cream (`{
 
 A single main page, max width 1240px, side padding 16px (32px from `sm`), top padding 32px (48px from `sm`). On large screens (`lg`) a two-column grid, 5fr / 7fr with a 40px gap: the left column is the sticky Rx label (timer card) at `top-6`; the right column is a stack of cards with 24px vertical rhythm, offset 90px down so the left card's mascot peek has headroom. Below `lg` it is a single column with 24px gap, and a sticky timer bar pins to the top (mobile only) once the Rx label has scrolled out of view. Card padding is 20px (24px from `sm`); header bands 14px vertical.
 
-Controls hold a 44px minimum hit area (goal check and remove, sign out, help, chat close) and 48px for primary actions, tabs, and footer pills. Footer is a hairline-topped row of chime, notification toggle, version, and help.
+Controls hold a 44px minimum hit area (goal check and remove, profile bubble, gear, sign out, help, chat close) and 48px for primary actions, tabs, and the rows inside the settings panel. The footer is a hairline-topped row of the quote line and the version; every preference lives in the gear menu.
 
 Layers via named z-index tokens: `base` 0, `content` 10, `sticky` 20 (phase sticker, sticky bar), `overlay` 30, `modal` 50 (chat FAB, chat panel, help modal).
 
@@ -218,7 +218,7 @@ The login page is one centered column, max width 24rem on the ground: Dosey and 
 Hybrid: tonal layering first (ground, then cream surface, then shell-cream wells), with shallow warm shadows that all carry a 1px white inner top highlight, so surfaces read like soft gel, not like floating paper. Shadows are tinted warm brown or plum, never neutral black.
 
 ### Shadow Vocabulary
-- **Soft** (`box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 10px 24px -12px rgba(150,90,60,.30)`; class `shadow-soft`): cards, chat panel, help modal, sticky bar, footer pills.
+- **Soft** (`box-shadow: 0 1px 0 rgba(255,255,255,.9) inset, 0 10px 24px -12px rgba(150,90,60,.30)`; class `shadow-soft`): cards, chat panel, help modal, sticky bar, the profile bubble, the gear button, and the settings and account panels.
 - **Gum** (`0 1px 0 rgba(255,255,255,.7) inset, 0 3px 8px -3px rgba(150,90,60,.35)`; `shadow-gum`): stickers, icon bubbles, secondary pills, tab thumb, notes.
 - **Pop** (`0 1px 0 rgba(255,255,255,.55) inset, 0 6px 14px -6px rgba(58,47,69,.45)`; `shadow-pop`): the ink primary buttons and the Dosey trigger only.
 
@@ -280,7 +280,7 @@ A lilac pill trigger (`shadow-pop`) bottom-right; a 360px panel on desktop and a
 One rig with three variants: `full` (Meet Dosey, login), `peek` (head over the Rx label's top edge, 120 by 96 slot), `face` (under 40px, chat trigger). Meet Dosey crops the body into the stage's lower-left corner and scrubs the body, sprout, leaves, and tomatoes in on scroll; eyes follow the pointer; poking cycles speech lines in a bubble with a small tail.
 
 ### Help Modal and Form Controls
-The help modal is a `bubble` card over an `ink/40` scrim with a list of 40px colored icon bubbles per tip. The chime slider is a 6px pill track filled lilac with a round ink thumb ringed in surface; the notification toggle and chime are `surface` pills with `shadow-soft`.
+The help modal is a `bubble` card over an `ink/40` scrim with a list of 40px colored icon bubbles per tip. The chime slider is a 6px pill track filled lilac with a round ink thumb ringed in surface; the chime and notification rows sit inside the gear menu as flat `surface-2` pills. The header holds a profile bubble (a lilac initial avatar plus the signed-in email, truncated) and a gear button; each opens a small `bubble` panel (`HeaderPopover`) that closes on Escape or an outside press, and the panel is nudged back inside the viewport on phones. The gear panel holds Chime, Notify and Help and tips; the profile panel shows the full email and Sign out.
 
 ### Motion
 GSAP (`lib/gsap.ts`) owns scroll reveals (12px rise, 0.4s, 0.06s stagger, `power3.out`, one-shot at top 88%) and the mascot timeline; hidden start states exist only inside `withMotion`, so reduced-motion and no-JS users see everything. Framer owns micro-interactions: `SPRING_UI` (stiffness 400, damping 30), `SPRING_SOFT` (260, 26) for panels, `SPRING_BOUNCY` (520, 18) for presses, and `EASE_OUT` cubic-bezier(0.22, 1, 0.36, 1) for entrances. A global reduced-motion media rule collapses CSS animations and transitions. Never animate one element with both libraries.

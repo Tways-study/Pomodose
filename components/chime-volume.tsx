@@ -34,7 +34,7 @@ export function ChimeVolume() {
   const muted = volume === 0;
 
   return (
-    <div className="flex min-h-[48px] w-full items-center gap-2 rounded-pill bg-surface px-4 text-ink shadow-soft sm:w-auto sm:gap-3">
+    <div className="flex min-h-[48px] w-full items-center gap-2 rounded-pill bg-surface-2 px-4 text-ink">
       <span className="shrink-0 select-none font-display text-sm font-medium text-ink">Chime</span>
 
       <button
@@ -45,9 +45,9 @@ export function ChimeVolume() {
         {muted ? <VolumeX size={18} strokeWidth={2.25} aria-hidden /> : <Volume2 size={18} strokeWidth={2.25} aria-hidden />}
       </button>
 
-      {/* Fluid on phones (never wider than the chip), 140px from sm up. The input is
-          44px tall for touch; the 6px track is drawn on its track pseudo-element. */}
-      <div className="relative min-w-[72px] flex-1 sm:w-[140px] sm:flex-none">
+      {/* Fills whatever the settings panel gives it. The input is 44px tall for touch;
+          the 6px track is drawn on its track pseudo-element. */}
+      <div className="relative min-w-[72px] flex-1">
         <input
           type="range"
           min={0}
