@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Pomodose app icon: Dosey rising from the lower-right corner of a plum tile.
+    Rules (ip-as-logo): flat, no outlines, no cast shadow, upright, one solid
+    background, big head and tiny dot eyes. The geometry is the rig's `full`
+    variant (components/dosey/dosey-rig.tsx, viewBox 200x250); the eyes reuse
+    the tile color so the face reads as negative space.
+    The rect's corner radius placeholder is filled in by scripts/build-icons.mjs (112 = rounded tile, 0 = full-bleed).
+  -->
+  <rect width="512" height="512" rx="__TILE_RX__" fill="#3A2F45"/>
+  <g transform="translate(41 -52) scale(2.9)">
+    <path d="M49.89 36.26 A26 14 22 1 0 98.11 55.74 A26 14 22 1 0 49.89 36.26 Z" fill="#7CC38A"/>
+    <path d="M101.89 55.74 A26 14 -22 1 0 150.11 36.26 A26 14 -22 1 0 101.89 55.74 Z" fill="#7CC38A"/>
+    <circle cx="100" cy="45" r="16" fill="#FF7A6B"/>
+    <path d="M30 150 V125 A70 70 0 0 1 170 125 V150 Z" fill="#B9A4F5"/>
+    <path d="M30 150 H170 V165 A70 70 0 0 1 30 165 Z" fill="#FFF1DC"/>
+    <circle cx="65.5" cy="112" r="5.5" fill="#3A2F45"/>
+    <circle cx="134.5" cy="112" r="5.5" fill="#3A2F45"/>
+    <path d="M91 124 Q100 132 109 124" fill="none" stroke="#3A2F45" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
