@@ -2,17 +2,18 @@
 
 import { useEffect, useRef, useState, type Dispatch } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { FlaskConical, Pause, Play, RotateCcw, TestTube } from "lucide-react";
 import type { TimerState } from "@/types";
 import type { TimerAction } from "@/lib/timer-machine";
-import { EASE_OUT, SPRING_UI } from "@/lib/motion";
 import { startCompletionAlert, stopCompletionAlert } from "@/lib/chime";
 import { PHASE_LABEL, formatTime } from "@/lib/timer-format";
 import { setRunningTitle, resetTitle } from "@/lib/document-title";
-import { PHASE_ACCENT } from "@/lib/phase-theme";
+import { primaryAction } from "@/lib/primary-action";
 import { useNotify } from "@/components/notification-provider";
 import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
+import { SPRING_BOUNCY } from "@/lib/motion";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -30,9 +31,21 @@ const CYLINDER_RANGE = CYLINDER_BOTTOM - CYLINDER_TOP; // 162px
 const CYLINDER_BODY_PATH =
   "M 56 16 L 68 26 L 68 184 Q 68 192, 76 192 L 104 192 Q 112 192, 112 184 L 112 26 L 118 20 L 112 20 L 68 20 Z";
 
+// Static bubble spots [cx, cy, r] in the lower part of each vessel.
+const FLASK_BUBBLES: ReadonlyArray<readonly [number, number, number]> = [
+  [62, 182, 6],
+  [108, 168, 4],
+  [128, 188, 7],
+];
+const CYLINDER_BUBBLES: ReadonlyArray<readonly [number, number, number]> = [
+  [86, 176, 5],
+  [98, 150, 4],
+  [90, 124, 4],
+];
+
 const VESSELS = [
-  { id: "flask", label: "Flask", aria: "Switch to Flask view" },
-  { id: "cylinder", label: "Cylinder", aria: "Switch to Graduated Cylinder view" },
+  { id: "flask", label: "Flask", aria: "Switch to Flask view", Icon: FlaskConical },
+  { id: "cylinder", label: "Cylinder", aria: "Switch to Graduated Cylinder view", Icon: TestTube },
 ] as const;
 
 interface Props {
@@ -118,27 +131,14 @@ export function VialTimer({ state, dispatch }: Props) {
   // Meniscus rx for flask scales with height (wider at bottom, narrower at top)
   const meniscusRx = isFlask ? 16 + 48 * (1 - clamped) : 22;
 
+  // Linear and one tick long: the drain is constant motion, so each 1s tick
+  // hands off to the next without the surge-and-stall an ease-out produces.
   const liquidTransition = reduceMotion
     ? { duration: 0 }
-    : { type: "tween" as const, duration: 0.8, ease: EASE_OUT };
+    : { type: "tween" as const, duration: 1, ease: "linear" as const };
 
-  // --- "Session is running" ambient halo ---------------------------------
-  const isRunning = state.status === "running";
-  const phaseAccent = PHASE_ACCENT[state.phase];
-  const haloOpacity = reduceMotion
-    ? (isRunning ? 0.4 : 0)
-    : (isRunning ? [0.3, 0.55, 0.3] : 0);
-  const haloTransition = !reduceMotion && isRunning
-    ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.3, ease: "easeOut" as const };
-
-  // --- Primary control label / action ----------------------------------------
-  const primary =
-    state.status === "running"
-      ? { label: "Pause", action: { type: "PAUSE" as const } }
-      : state.status === "paused"
-        ? { label: "Resume", action: { type: "RESUME" as const } }
-        : { label: `Begin ${PHASE_LABEL[state.phase].toLowerCase()}`, action: { type: "START" as const } };
+  // --- Primary control label / action (shared with the sticky bar) -----------
+  const primary = primaryAction(state);
 
   function handlePrimary() {
     stopCompletionAlert();
@@ -169,41 +169,56 @@ export function VialTimer({ state, dispatch }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const PrimaryIcon = primary.icon === "pause" ? Pause : Play;
+
+  const bubbles = isFlask ? FLASK_BUBBLES : CYLINDER_BUBBLES;
+  const glossX = isFlask ? 42 : 74;
+  const glossY = isFlask ? 120 : 40;
+  const glossH = isFlask ? 66 : 120;
+  const bodyPath = isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH;
+  const tapProps = reduceMotion ? {} : { whileTap: { scale: 0.94 } };
+
   return (
     <div className="flex flex-col items-center">
       {/* Vessel Shape Selector */}
-      <div className="flex items-center gap-1 bg-paper-2/80 p-1 rounded-full text-xs mb-5 border border-line">
-        {VESSELS.map(({ id, label, aria }) => (
-          <motion.button
+      <div role="group" aria-label="Vessel shape" className="mb-4 flex items-center gap-2">
+        {VESSELS.map(({ id, label, aria, Icon }) => (
+          <button
             key={id}
+            type="button"
             onClick={() => setVessel(id)}
             aria-pressed={vessel === id}
             aria-label={aria}
-            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-            transition={SPRING_UI}
-            className={`px-3 py-1.5 rounded-full transition-colors duration-200 ${
-              vessel === id
-                ? "bg-paper text-ink font-medium shadow-[0_1px_0_rgba(255,255,255,.8)_inset,0_1px_2px_rgba(46,36,51,.10)]"
-                : "text-ink-soft hover:text-ink"
+            className={`flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-pill px-4 font-display text-sm font-medium text-ink transition-colors duration-150 ${
+              vessel === id ? "bg-gum-lilac shadow-gum" : "bg-surface-2 shadow-gum hover:bg-gum-lilac/40"
             }`}
           >
+            <Icon size={16} strokeWidth={2.25} aria-hidden />
             {label}
-          </motion.button>
+          </button>
         ))}
       </div>
 
-      {/* Prominent Readout Display (100% visible with zero line overlap) */}
-      <div className="flex flex-col items-center mb-4">
+      {/* Readout: one fixed-width soft cell per character so digits never jitter */}
+      <div className="mb-3 flex flex-col items-center">
         <span
-          className="font-serif timer-display text-6xl tabular-nums text-ink tracking-[-0.02em]"
-          style={{ fontVariationSettings: '"opsz" 72, "wght" 500' }}
+          className="digits flex items-center gap-1 text-6xl leading-none text-ink sm:text-7xl"
+          aria-hidden
         >
-          {formatTime(state.remaining)}
+          {formatTime(state.remaining).split("").map((ch, i) => (
+            <span
+              key={i}
+              className={
+                ch === ":"
+                  ? "inline-flex w-[0.4em] justify-center pb-[0.08em]"
+                  : "inline-flex w-[1.05em] justify-center rounded-control bg-surface-2 py-[0.08em]"
+              }
+            >
+              {ch}
+            </span>
+          ))}
         </span>
-        <span
-          className={`text-xs tracking-widest uppercase mt-1 transition-colors duration-500${isRunning ? "" : " text-ink-soft"}`}
-          style={{ color: isRunning ? phaseAccent.deep : undefined }}
-        >
+        <span className="mt-3 font-display text-base text-ink-soft">
           {PHASE_LABEL[state.phase]}
         </span>
       </div>
@@ -212,145 +227,138 @@ export function VialTimer({ state, dispatch }: Props) {
       <div className="relative">
         <svg
           viewBox="0 0 180 230"
-          className="w-[200px] h-auto"
+          className="h-auto w-[200px]"
           role="img"
           aria-label={`${PHASE_LABEL[state.phase]} timer, ${formatTime(state.remaining)} remaining`}
+          strokeLinejoin="round"
+          strokeLinecap="round"
         >
           <defs>
             <clipPath id="vessel-clip">
-              <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} />
+              <path d={bodyPath} />
             </clipPath>
-            <filter id="vial-glow" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="10" />
-            </filter>
           </defs>
-
-          {/* Ambient halo — signals a session is running. Traces the vessel's own
-              silhouette (not a plain circle) so the blurred bleed always clears
-              the opaque glass-interior fill painted on top of it, for either
-              vessel shape, instead of mostly disappearing behind it. */}
-          <motion.path
-            d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH}
-            className="fill-lilac"
-            filter="url(#vial-glow)"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: haloOpacity }}
-            transition={haloTransition}
-          />
 
           {/* Base for Cylinder */}
           {!isFlask && (
             <path
               d="M 48 190 L 34 204 L 44 216 L 136 216 L 146 204 L 132 190 Z"
-              className="fill-paper-2 stroke-ink"
-              strokeWidth={2}
-              strokeLinejoin="round"
+              className="fill-line-soft stroke-line-soft"
+              strokeWidth={6}
             />
           )}
 
-          {/* Empty glass interior tint */}
-          <path d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH} className="fill-paper-2" />
+          {/* Gummy glass body: lilac tint so empty glass reads on the white card */}
+          <path d={bodyPath} className="fill-gum-lilac" fillOpacity={0.25} />
 
           {/* Liquid + meniscus, constrained to the glass interior */}
           <g clipPath="url(#vessel-clip)">
+            {/* Full-height liquid scaled from the bottom: a transform, not a
+                per-frame y/height attribute repaint. */}
             <motion.rect
               x={0}
+              y={bottomY - range}
               width={180}
-              className="fill-lilac"
-              initial={{ y, height }}
-              animate={{ y, height }}
+              height={range}
+              className="fill-dosey-lilac"
+              style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
+              initial={false}
+              animate={{ scaleY: clamped }}
               transition={liquidTransition}
             />
             <motion.ellipse
               cx={90}
+              cy={bottomY}
               rx={meniscusRx}
               ry={3.5}
-              className="fill-lilac-deep"
-              initial={{ cy: y, opacity: 0 }}
-              animate={{ cy: y, opacity: clamped > 0 && clamped < 1 ? 0.9 : 0 }}
+              className="fill-surface"
+              initial={false}
+              animate={{ y: y - bottomY, opacity: clamped > 0 && clamped < 1 ? 0.45 : 0 }}
               transition={liquidTransition}
+            />
+            {/* Flat bubbles: static spots, hidden when the level is too low */}
+            <motion.g
+              className="fill-surface"
+              initial={false}
+              animate={{ opacity: clamped < 0.3 ? 0 : 0.5 }}
+              transition={{ duration: reduceMotion ? 0 : 0.3 }}
+            >
+              {bubbles.map(([cx, cy, br]) => (
+                <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={br} />
+              ))}
+            </motion.g>
+            {/* Soft vertical gloss stripe along the left of the glass */}
+            <rect
+              x={glossX}
+              y={glossY}
+              width={7}
+              height={glossH}
+              rx={3.5}
+              className="fill-surface"
+              fillOpacity={0.55}
             />
           </g>
 
           {/* Graduations only on Cylinder (Flask is kept completely clean) */}
           {!isFlask && (
-            <g className="stroke-lilac-deep fill-ink-soft" opacity={0.7}>
+            <g className="stroke-ink-soft">
               {[1.0, 0.8, 0.6, 0.4, 0.2].map((frac) => {
                 const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
                 const val = Math.round(frac * 100);
                 return (
                   <g key={frac}>
-                    <line x1={98} x2={112} y1={tickY} y2={tickY} strokeWidth={1.5} />
-                    <text x={116} y={tickY + 3} className="text-[8px] font-mono fill-ink-soft stroke-none">{val}</text>
+                    <line x1={98} x2={112} y1={tickY} y2={tickY} strokeWidth={2.5} />
+                    <text x={118} y={tickY + 4} fontSize={11} className="fill-ink-soft stroke-none font-display">{val}</text>
                   </g>
                 );
               })}
               {[0.9, 0.7, 0.5, 0.3, 0.1].map((frac) => {
                 const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
-                return <line key={frac} x1={104} x2={112} y1={tickY} y2={tickY} strokeWidth={1} />;
+                return <line key={frac} x1={104} x2={112} y1={tickY} y2={tickY} strokeWidth={2} />;
               })}
-              {[0.95, 0.85, 0.75, 0.65, 0.55, 0.45, 0.35, 0.25, 0.15, 0.05].map((frac) => {
-                const tickY = CYLINDER_BOTTOM - CYLINDER_RANGE * frac;
-                return <line key={frac} x1={108} x2={112} y1={tickY} y2={tickY} strokeWidth={0.8} opacity={0.6} />;
-              })}
-              <text x={116} y={22} className="text-[8px] font-mono fill-ink-soft stroke-none">mL</text>
+              <text x={118} y={22} fontSize={11} className="fill-ink-soft stroke-none font-display">mL</text>
             </g>
           )}
 
-          {/* Glass outline over the liquid for a crisp edge */}
-          <path
-            d={isFlask ? FLASK_BODY_PATH : CYLINDER_BODY_PATH}
-            className="fill-none stroke-ink"
-            strokeWidth={2}
-            strokeLinejoin="round"
-          />
-
-          {/* Top rim / Lip detail */}
+          {/* Top rim / cap */}
           {isFlask ? (
-            <g>
-              <rect x={68} y={16} width={44} height={10} rx={4} className="fill-lilac stroke-ink" strokeWidth={2} />
-              <line x1={68} x2={112} y1={26} y2={26} className="stroke-ink" strokeWidth={1.5} />
-            </g>
+            <rect x={66} y={14} width={48} height={14} rx={7} className="fill-gum-butter" />
           ) : (
             <path
               d="M 56 16 L 68 26 L 112 26 L 118 20 L 112 20 L 68 20 Z"
-              className="fill-lilac stroke-ink"
-              strokeWidth={1.5}
-              strokeLinejoin="round"
+              className="fill-gum-butter stroke-gum-butter"
+              strokeWidth={4}
             />
           )}
         </svg>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 mt-6">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <motion.button
+          type="button"
           onClick={handlePrimary}
-          whileHover={reduceMotion ? undefined : { y: -1 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.98, y: 0 }}
-          transition={SPRING_UI}
-          style={isRunning ? { backgroundColor: phaseAccent.base } : undefined}
-          className={`px-6 py-2.5 rounded-full text-sm font-medium transition-colors duration-500${
-            isRunning ? " text-ink shadow-press" : " bg-ink text-paper shadow-press hover:bg-ink/90"
-          }`}
+          {...tapProps}
+          transition={SPRING_BOUNCY}
+          className="flex min-h-[48px] cursor-pointer items-center gap-2 rounded-pill bg-ink px-6 py-3 font-display text-base font-medium text-surface shadow-pop transition-transform [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-0.5"
         >
+          <PrimaryIcon size={18} strokeWidth={2.25} aria-hidden />
           {primary.label}
         </motion.button>
         <motion.button
+          type="button"
           onClick={() => {
             stopCompletionAlert();
             dispatch({ type: "RESET" });
           }}
-          whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-          transition={SPRING_UI}
-          className="px-5 py-2.5 rounded-full border border-line text-ink-soft text-sm font-medium hover:text-ink hover:border-ink-soft transition-colors duration-200"
+          {...tapProps}
+          transition={SPRING_BOUNCY}
+          className="flex min-h-[48px] cursor-pointer items-center gap-2 rounded-pill bg-surface-2 px-5 py-3 font-display text-base font-medium text-ink shadow-gum transition-colors duration-150 hover:bg-gum-lilac/40"
         >
+          <RotateCcw size={18} strokeWidth={2.25} aria-hidden />
           Reset
         </motion.button>
       </div>
     </div>
   );
 }
-
-
-

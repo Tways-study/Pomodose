@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { X } from "lucide-react";
 import { useActiveNotification } from "@/components/notification-provider";
 import { isBurnoutEvent } from "@/lib/burnout";
 import { EASE_OUT } from "@/lib/motion";
@@ -15,11 +16,9 @@ function eyebrowFor(event: NotificationEvent): string {
 }
 
 /**
- * The in-page notification surface — deliberately a slim paper strip in the
- * page's own visual register, not a corner toast. DESIGN.md §6 bans
- * achievement toasts/gamified chrome, so this carries no icon, no progress
- * bar, no badge: just the eyebrow + one italic sentence, same typographic
- * move as the quote card's "Rx — Take as needed" tag.
+ * The in-page notification surface: an auxiliary sticker strip on the ground,
+ * not a corner toast. No progress bar, no badge — just the eyebrow + one
+ * sentence. Color carries meaning: orange warns, yellow nudges, green dispensed.
  */
 export function CounterNote() {
   const { note, dismiss } = useActiveNotification();
@@ -47,28 +46,24 @@ export function CounterNote() {
           transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: EASE_OUT }}
           role={isBurnoutEvent(note.event) ? "alert" : "status"}
           aria-live="polite"
-          className={`mb-8 flex items-start justify-between gap-4 rounded-card px-5 py-3.5 ${
+          className={`mb-8 flex items-start justify-between gap-4 rounded-bubble px-5 py-3.5 shadow-gum ${
             isBurnoutEvent(note.event)
-              ? "border border-clay-deep bg-clay/60"
-              : "border border-line bg-paper-2"
+              ? "bg-gum-apricot text-ink"
+              : NUDGE_EVENTS.has(note.event)
+                ? "bg-gum-butter text-ink"
+                : "bg-gum-mint text-ink"
           }`}
         >
           <div className="min-w-0">
-            <span
-              className={`block font-serif italic text-xs tracking-widest uppercase mb-1 ${
-                isBurnoutEvent(note.event) ? "text-ink" : "text-lilac-deep"
-              }`}
-            >
-              {eyebrowFor(note.event)}
-            </span>
-            <p className="font-serif italic text-sm text-ink">{note.variant.note}</p>
+            <span className="block font-display text-sm font-semibold mb-1">{eyebrowFor(note.event)}</span>
+            <p className="font-body text-sm">{note.variant.note}</p>
           </div>
           <button
             onClick={dismiss}
             aria-label="Dismiss notification"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-soft hover:text-ink transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-lilac-deep"
+            className="-my-2 -mr-3 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-pill hover:bg-ink/10 transition-colors duration-150"
           >
-            ×
+            <X size={20} strokeWidth={2.25} aria-hidden />
           </button>
         </motion.div>
       )}

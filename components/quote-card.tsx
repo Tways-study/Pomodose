@@ -66,13 +66,9 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
       };
 
   return (
-    <figure className="max-w-sm mt-12">
-      <span className="font-serif italic text-xs tracking-widest uppercase text-lilac-deep block mb-2.5">
-        Rx — Take as needed
-      </span>
-
+    <figure>
       {/* min-h prevents layout jump between quote lengths */}
-      <div className="min-h-[84px]">
+      <div className="min-h-[64px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.blockquote
             key={index}
@@ -82,8 +78,8 @@ export function QuoteCard({ advanceSignal = 0, paused = false }: Props) {
             exit="exit"
             transition={{ duration: reduceMotion ? 0.2 : 0.45, ease: EASE_OUT }}
           >
-            <p className="font-serif text-lg leading-snug">{quote.text}</p>
-            <cite className="block mt-2 not-italic text-sm text-ink-soft">{author}</cite>
+            <p className="font-display text-xl leading-snug text-ink">{quote.text}</p>
+            <cite className="block mt-2 not-italic font-body text-sm text-ink-soft">{author}</cite>
           </motion.blockquote>
         </AnimatePresence>
       </div>

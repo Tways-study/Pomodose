@@ -1,29 +1,26 @@
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Spline_Sans } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { AddressTermProvider } from "@/components/address-term-provider";
 import "./globals.css";
 
-// Fraunces is a variable font: to use the `opsz` axis the weight must stay
-// variable (not pinned), so weights 400–600 remain available via font-weight.
-const fraunces = Fraunces({
+// Fredoka: rounded display face (variable weight) for headings, labels, digits.
+const fredoka = Fredoka({
   subsets: ["latin"],
-  axes: ["opsz"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
+  variable: "--font-display",
   display: "swap",
 });
 
-const splineSans = Spline_Sans({
+// Nunito: friendly rounded body face (variable weight).
+const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-sans",
+  variable: "--font-body",
   display: "swap",
 });
 
 const TITLE = "Pomodose — Study Companion";
-const DESCRIPTION = "A measured-dose focus timer for the pharmacist in your life.";
+const DESCRIPTION = "A measured-dose focus timer and study companion for pharmacy students and pharmacists.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -36,14 +33,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#F6F2EC",
+  themeColor: "#F8DFCF",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ConvexAuthNextjsServerProvider>
-      <html lang="en" className={`${fraunces.variable} ${splineSans.variable}`}>
-        <body className="font-sans bg-paper text-ink antialiased">
+      <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
+        <body className="font-body bg-ground text-ink antialiased">
           <ConvexClientProvider>
             <AddressTermProvider>{children}</AddressTermProvider>
           </ConvexClientProvider>

@@ -8,15 +8,15 @@ import type { NotificationEvent, NotificationVariant } from "@/types";
 export const NOTIFICATION_COPY: Record<NotificationEvent, readonly NotificationVariant[]> = {
   "focus-complete": [
     { headline: "Dose dispensed", note: "That's one measured dose down. Set the vial aside for a moment." },
-    { headline: "Dose complete", note: "Twenty-five careful minutes, logged. Let the counter rest." },
-    { headline: "Counter's clear", note: "Dose dispensed, %NAME%. Your refill is already poured." },
+    { headline: "Dose complete", note: "Twenty-five careful minutes, logged. Let your notes rest." },
+    { headline: "Desk is clear", note: "Dose dispensed, %NAME%. Your refill is already poured." },
     { headline: "That's the dose", note: "Nicely measured. Step back before you pour the next one." },
     { headline: "Dose logged", note: "One more on today's prescription. Breathe before the refill." },
   ],
   "short-complete": [
     { headline: "Refill's done", note: "Five minutes back in the bottle. Ready when you are." },
     { headline: "Topped up", note: "The vial's full again. Take the next dose when you're steady." },
-    { headline: "Refill complete", note: "Short and sufficient. Back to the counter, %NAME%." },
+    { headline: "Refill complete", note: "Short and sufficient. Back to the books, %NAME%." },
     { headline: "Back to the bench", note: "Rest taken as directed. The next dose is waiting." },
   ],
   "long-complete": [
@@ -25,14 +25,14 @@ export const NOTIFICATION_COPY: Record<NotificationEvent, readonly NotificationV
     { headline: "Fully restored", note: "The long rest is done. Begin the next cycle unhurried." },
   ],
   "break-unstarted": [
-    { headline: "Your refill is waiting", note: "The break's poured and sitting on the counter. Take it." },
+    { headline: "Your refill is waiting", note: "The break's poured and sitting on your desk. Take it." },
     { headline: "Refill untouched", note: "It's been a few minutes. Rest is part of the prescription, not a break from it." },
     { headline: "Take the refill", note: "You measured the dose carefully. Measure the rest the same way." },
     { headline: "Rest is prescribed", note: "Two minutes since the bell, %NAME%. The refill won't take itself." },
   ],
   "paused-too-long": [
     { headline: "Session on hold", note: "The vial's been paused a while. Resume, or reset and start clean." },
-    { headline: "Still paused", note: "No rush — but the counter's been quiet for ten minutes." },
+    { headline: "Still paused", note: "No rush — but your desk has been quiet for ten minutes." },
   ],
   "no-antidote": [
     { headline: "Three doses, no rest", note: "That's three straight without a refill. Even good medicine needs spacing." },
@@ -43,16 +43,16 @@ export const NOTIFICATION_COPY: Record<NotificationEvent, readonly NotificationV
     { headline: "Exceeding the dose", note: "You're past what's safe to take in a row. The long rest is the prescription now." },
   ],
   "long-stretch": [
-    { headline: "Four hours at the counter", note: "You've been dispensing since this morning. Close the shop for a bit." },
-    { headline: "Long shift", note: "Four hours in. Whatever's left will still be here after a real break." },
+    { headline: "Four hours of study", note: "You've been at it since this morning. Close the books for a bit." },
+    { headline: "Long study stretch", note: "Four hours in. Whatever's left will still be here after a real break." },
   ],
   "late-hour": [
-    { headline: "It's late, %NAME%", note: "The counter will still be here tomorrow. Sleep is the strongest dose there is." },
-    { headline: "Past closing time", note: "Nothing you finish now will beat what rest gives you. Go on." },
+    { headline: "It's late, %NAME%", note: "Your notes will still be here tomorrow. Sleep is the strongest dose there is." },
+    { headline: "Past lights-out", note: "Nothing you finish now will beat what rest gives you. Go on." },
   ],
   "first-dose": [
-    { headline: "First dose of the day", note: "The shop's open and the first one's logged. Good start, %NAME%." },
-    { headline: "Counter's open", note: "First dose down. The rest of the day follows this one." },
+    { headline: "First dose of the day", note: "Books open and the first one's logged. Good start, %NAME%." },
+    { headline: "Books are open", note: "First dose down. The rest of the day follows this one." },
   ],
   "cycle-complete": [
     { headline: "Full cycle", note: "Four doses, a complete course. The long antidote is yours." },
@@ -60,7 +60,7 @@ export const NOTIFICATION_COPY: Record<NotificationEvent, readonly NotificationV
   ],
   "goals-cleared": [
     { headline: "All dispensed", note: "Every goal off the shelf. Today's prescription is filled, %NAME%." },
-    { headline: "Prescription filled", note: "Nothing left on the list. That's a clean counter." },
+    { headline: "Prescription filled", note: "Nothing left on the list. That's a clean desk." },
   ],
 };
 

@@ -1,4 +1,5 @@
 "use client";
+import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getChimeVolume, playPickupBell, setChimeVolume } from "@/lib/chime";
 
@@ -33,15 +34,15 @@ export function ChimeVolume() {
   const muted = volume === 0;
 
   return (
-    <div className="flex items-center gap-3 bg-paper-2/70 border border-line rounded-full px-4 py-2">
-      <span className="font-serif italic text-xs text-ink-soft/80 select-none shrink-0">Chime</span>
+    <div className="flex min-h-[48px] items-center gap-3 rounded-pill bg-surface px-4 text-ink shadow-soft">
+      <span className="shrink-0 select-none font-display text-sm font-medium text-ink">Chime</span>
 
       <button
         onClick={toggleMute}
         aria-label={muted ? "Unmute chime" : "Mute chime"}
-        className="text-ink-soft hover:text-ink transition-colors duration-150 shrink-0"
+        className="flex h-11 w-8 shrink-0 cursor-pointer items-center justify-center text-ink transition-colors duration-150 hover:text-ink-soft"
       >
-        {muted ? <BellOffIcon /> : <BellIcon />}
+        {muted ? <VolumeX size={18} strokeWidth={2.25} aria-hidden /> : <Volume2 size={18} strokeWidth={2.25} aria-hidden />}
       </button>
 
       <div className="flex flex-col gap-1">
@@ -59,7 +60,7 @@ export function ChimeVolume() {
         {/* Tick marks echoing the graduated cylinder's measurement lines */}
         <div className="flex justify-between" style={{ width: 140, paddingInline: 5 }}>
           {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} className="w-px h-1 bg-ink-soft/30" />
+            <div key={i} className="h-1 w-px bg-ink-soft/40" />
           ))}
         </div>
       </div>
@@ -67,31 +68,10 @@ export function ChimeVolume() {
       <button
         onClick={playPickupBell}
         aria-label="Preview chime"
-        className="font-serif italic text-xs text-ink-soft hover:text-ink transition-colors duration-150 select-none shrink-0"
+        className="min-h-[44px] shrink-0 cursor-pointer select-none rounded-pill px-2 font-display text-sm font-medium text-ink transition-colors duration-150 hover:bg-surface-2"
       >
-        ring
+        Ring
       </button>
     </div>
-  );
-}
-
-function BellIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  );
-}
-
-function BellOffIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      <path d="M18.63 13A17.9 17.9 0 0 1 18 8" />
-      <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14" />
-      <path d="M18 8a6 6 0 0 0-9.33-5" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
   );
 }

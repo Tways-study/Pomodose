@@ -2,30 +2,110 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { CircleHelp, Lightbulb, ListChecks, LogOut, Repeat, type LucideIcon } from "lucide-react";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
-import { VialMark }          from "@/components/vial-mark";
 import { QuoteCard }         from "@/components/quote-card";
 import { GoalList }          from "@/components/goal-list";
 import { RegimenProgress }   from "@/components/regimen-progress";
 import { DoseyChat }          from "@/components/dosey-chat";
+import { ScrollReveals }       from "@/components/scroll-reveals";
+import { useDoseyMood }        from "@/components/dosey/use-dosey-mood";
+import type { DoseyStats, Phase, TimerStatus } from "@/types";
+import { DoseyPeek } from "@/components/dosey/dosey-peek";
 import { timerReducer, initialTimerState } from "@/lib/timer-machine";
 import { stopCompletionAlert } from "@/lib/chime";
 import { SETTINGS }           from "@/lib/settings";
 import { useAddressTerm }      from "@/components/address-term-provider";
-import { PHASE_ACCENT, runningShadow } from "@/lib/phase-theme";
-import { RxField }             from "@/components/rx-field";
+import { PHASE_STICKER_CLASS } from "@/lib/phase-theme";
+import { SPRING_BOUNCY } from "@/lib/motion";
+import { PHASE_LABEL } from "@/lib/timer-format";
+import { StickyTimerBar } from "@/components/sticky-timer-bar";
 import { ChimeVolume }         from "@/components/chime-volume";
 import { HelpModal }           from "@/components/help-modal";
 import { NotificationProvider } from "@/components/notification-provider";
 import { CounterNote }         from "@/components/counter-note";
 import { OsNotificationToggle } from "@/components/os-notification-toggle";
-import { EASE_OUT, SPRING_UI } from "@/lib/motion";
+
+const MeetDosey = dynamic(
+  () => import("@/components/dosey/meet-dosey").then((m) => m.MeetDosey),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-[352px] rounded-bubble border border-line-soft bg-surface shadow-soft" />
+    ),
+  },
+);
+
+// Reads the mascot mood inside NotificationProvider (the hook needs its context).
+function ConnectedDoseyChat({
+  stats,
+  open,
+  onOpenChange,
+}: {
+  stats: DoseyStats;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const mood = useDoseyMood(stats.phase, stats.status);
+  return <DoseyChat stats={stats} open={open} onOpenChange={onOpenChange} mood={mood} />;
+}
+
+// Peeks over the top edge of the timer card; mood follows the session.
+function ConnectedDoseyPeek({ phase, status }: { phase: Phase; status: TimerStatus }) {
+  const mood = useDoseyMood(phase, status);
+  return <DoseyPeek mood={mood} />;
+}
+
+function sigFor(phase: "focus" | "short" | "long"): string {
+  if (phase === "focus") return `SIG: Study for ${SETTINGS.FOCUS_DURATION / 60} minutes, then take a ${SETTINGS.SHORT_BREAK / 60}-minute refill.`;
+  if (phase === "short") return `SIG: Rest ${SETTINGS.SHORT_BREAK / 60} minutes, then back to the books.`;
+  return `SIG: Rest ${SETTINGS.LONG_BREAK / 60} minutes — the antidote.`;
+}
+
+type CardTint = "mint" | "sky" | "butter" | "lilac";
+
+// Full class strings so Tailwind sees them (never build these dynamically).
+const CARD_TINT: Record<CardTint, { header: string; bubble: string }> = {
+  mint: { header: "bg-gum-mint/25", bubble: "bg-gum-mint" },
+  sky: { header: "bg-gum-sky/25", bubble: "bg-gum-sky" },
+  butter: { header: "bg-gum-butter/25", bubble: "bg-gum-butter" },
+  lilac: { header: "bg-gum-lilac/25", bubble: "bg-gum-lilac" },
+};
+
+// A soft card: tinted header row (icon bubble + title) and body.
+function LabelCard({
+  title,
+  icon: Icon,
+  tint,
+  compact = false,
+  children,
+}: {
+  title: string;
+  icon: LucideIcon;
+  tint: CardTint;
+  compact?: boolean;
+  children?: ReactNode;
+}) {
+  const t = CARD_TINT[tint];
+  return (
+    <div className="rounded-bubble border border-line-soft bg-surface text-ink shadow-soft">
+      <div data-reveal-item className={`flex items-center gap-3 rounded-t-bubble px-5 py-3.5 sm:px-6 ${t.header}`}>
+        <span className={`grid h-9 w-9 place-items-center rounded-pill shadow-gum ${t.bubble}`}>
+          <Icon size={18} strokeWidth={2.25} className="text-ink" aria-hidden />
+        </span>
+        <h2 className="font-display text-lg font-semibold text-ink">{title}</h2>
+      </div>
+      <div data-reveal-item className={compact ? "px-5 py-3 sm:px-6" : "p-5 sm:p-6"}>{children}</div>
+    </div>
+  );
+}
 
 export default function Home() {
   const { signOut } = useAuthActions();
@@ -37,6 +117,8 @@ export default function Home() {
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const rightColRef = useRef<HTMLDivElement>(null);
 
   // --- Restore today's counters from persisted sessions -------------------
   // The timer reducer keeps dailyDoses/focusCycle in page state only, so a
@@ -49,6 +131,10 @@ export default function Home() {
     isAuthenticated ? { date: todayKey() } : "skip",
   );
   const hydratedRef = useRef(false);
+  const rxLabelRef = useRef<HTMLDivElement>(null);
+
+  // No entrance on the Rx label: it holds the primary Begin control, and hiding
+  // it (even briefly) on every load would delay the app's most-used action.
 
   useEffect(() => {
     if (hydratedRef.current || todaySessions === undefined) return;
@@ -81,7 +167,7 @@ export default function Home() {
       await signOut();
     } catch (err) {
       console.error("Sign out failed", err);
-      setSignOutError("Couldn't sign out, Doc — try again.");
+      setSignOutError("Couldn't sign out — try again.");
       setSigningOut(false);
       return;
     }
@@ -92,83 +178,33 @@ export default function Home() {
   const cyclePosition = timer.focusCycle % 4;
   const name = useAddressTerm();
 
-  // --- Phase-linked accent + running-state chrome, shared by the wash,
-  // header sweep, and both dashboard cards ---------------------------------
-  const reduceMotion = useReducedMotion();
   const isRunning = timer.status === "running";
   const isFocusRunning = isRunning && timer.phase === "focus";
-  const phaseAccent = PHASE_ACCENT[timer.phase];
-
-  // Staggered entrance for the four content blocks on mount — mirrors the
-  // login page's blur-lift reveal. Runs once on mount; timer ticks and
-  // running-state changes never replay it.
-  const reveal = (delay: number) => ({
-    initial: reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14, filter: "blur(5px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { duration: reduceMotion ? 0.3 : 0.55, delay, ease: EASE_OUT },
-  });
-
-  // Two ambient washes, phase-colored via PHASE_ACCENT. They only breathe in
-  // opacity (CSS keyframes in globals.css, compositor-friendly) at different
-  // cadences so they never move in lockstep; the earlier x/y/scale drift ran on
-  // the main thread for hours and is gone. Idle: faded out.
-
-  // Header: the border itself recolors (not just a thin sweep underneath),
-  // plus an under-glow — the header edge should read as unmistakably
-  // different while running, not just faintly shimmering.
-  const headerBorderColor = isRunning ? phaseAccent.base : undefined;
-  const headerGlowOpacity = reduceMotion
-    ? (isRunning ? 0.7 : 0)
-    : (isRunning ? [0.45, 0.85, 0.45] : 0);
-  const headerGlowTransition = !reduceMotion && isRunning
-    ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const }
-    : { duration: 0.4, ease: "easeOut" as const };
-
-  // Running-state dashboard-card treatment: accent hairline plus a wide soft
-  // glow (runningShadow), binary on/off via CSS transition. Idle falls back to
-  // the shadow-card class, so the inline style is only set while running.
-  const cardShadowRunning = runningShadow(phaseAccent);
 
   return (
     <NotificationProvider timer={timer} goalsDone={goalsDone} goalsTotal={goalsTotal}>
-      <div
-        aria-hidden
-        className={`ambient-wash ambient-a${isRunning ? " is-running" : ""}`}
-        style={{ background: `radial-gradient(120% 90% at 10% 105%, ${phaseAccent.base} 0%, transparent 62%)` }}
-      />
-      <div
-        aria-hidden
-        className={`ambient-wash ambient-b${isRunning ? " is-running" : ""}`}
-        style={{ background: `radial-gradient(100% 80% at 92% -6%, ${phaseAccent.deep} 0%, transparent 60%)` }}
-      />
-      <RxField accent={phaseAccent} active={isRunning} />
-      <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-28">
+      <div className="relative z-content max-w-[1240px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-32 sm:pb-28">
 
-      {/* Header */}
-      <motion.header
-        {...reveal(0)}
-        className="relative flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5 mb-10 transition-[border-color] duration-500 ease-out"
-        style={{ borderBottomColor: headerBorderColor }}
-      >
-        <div className="flex items-center gap-3.5">
-          <VialMark />
-          <div>
-            <h1 className="font-serif font-medium text-2xl sm:text-3xl tracking-tight">Pomodose</h1>
-            <p className="text-xs tracking-[.18em] uppercase text-ink-soft mt-0.5">Study Companion</p>
-          </div>
+      {/* Header, on the ground */}
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4 sm:mb-10 lg:mb-0">
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-ink">Pomodose</h1>
+          <p className="mt-0.5 font-body text-base text-ink">Study companion</p>
         </div>
-        <div className="flex flex-col items-end gap-1 w-full sm:w-auto">
-          <p className="text-sm text-ink-soft">
-            Daily Prescription &nbsp;
-            <b className="font-serif text-lg text-ink font-semibold">{timer.dailyDoses}</b>
-          </p>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-3 rounded-pill bg-gum-butter px-5 py-1.5 text-ink shadow-gum">
+            <span className="font-display text-sm font-medium">Doses today</span>
+            <span className="font-display text-2xl font-semibold leading-none">{timer.dailyDoses}</span>
+          </div>
           <motion.button
+            type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-            transition={SPRING_UI}
-            className="rounded-full px-3 py-1 text-xs text-ink-soft hover:text-ink hover:bg-paper-2 transition-colors disabled:opacity-60"
+            whileTap={{ scale: 0.94 }}
+            transition={SPRING_BOUNCY}
+            className="flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-pill bg-surface-2 px-4 font-display text-sm font-medium text-ink shadow-gum transition-colors duration-150 hover:bg-gum-lilac/40 disabled:opacity-60"
           >
+            <LogOut size={16} strokeWidth={2.25} aria-hidden />
             {signingOut ? "Signing out…" : "Sign out"}
           </motion.button>
           <AnimatePresence>
@@ -178,7 +214,7 @@ export default function Home() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="rounded-xl border border-clay-deep bg-clay/60 px-3 py-2 text-xs text-ink"
+                className="rounded-control border-2 border-alert bg-surface px-3 py-2 text-xs text-alert"
                 role="alert"
               >
                 {signOutError}
@@ -186,94 +222,130 @@ export default function Home() {
             )}
           </AnimatePresence>
         </div>
-
-        {/* Running-state header glow: a soft, blurred bar sitting just below
-            the (now recolored) border, breathing with the shared cadence. */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 -bottom-2 h-3 transition-[background] duration-500 ease-out"
-          style={{
-            background: `linear-gradient(90deg, transparent 0%, ${phaseAccent.base} 50%, transparent 100%)`,
-            filter: "blur(6px)",
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: headerGlowOpacity }}
-          transition={headerGlowTransition}
-        />
-      </motion.header>
+      </header>
 
       <CounterNote />
 
       {/* Main grid */}
-      <main className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-8 lg:gap-14 max-w-xl mx-auto lg:max-w-none">
+      <main className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 items-start">
 
-        {/* Left: timer + quote */}
-        <motion.section {...reveal(0.08)} className="flex flex-col items-center text-center">
-          <PhaseTabs
-            active={timer.phase}
-            isRunning={isRunning}
-            onChange={phase => {
-              stopCompletionAlert();
-              dispatch({ type: "SET_PHASE", phase });
-            }}
-          />
-
-          <div className="mt-6">
-            <VialTimer state={timer} dispatch={dispatch} />
+        {/* Left: the Rx label. Sticky on desktop; no ancestor sets overflow. */}
+        <div className="w-full lg:sticky lg:top-6">
+          <div ref={rxLabelRef} className="relative pt-[90px]">
+            {/* Dosey peeks over the card edge; the card (z-content) covers the head's lower part. */}
+            <div data-peek-slot className="pointer-events-none absolute left-6 top-0 z-base h-[96px] w-[120px]">
+              <ConnectedDoseyPeek phase={timer.phase} status={timer.status} />
+            </div>
+            {/* Decorative phase sticker on the label's corner */}
+            <span
+              aria-hidden
+              className={`absolute right-3 top-[78px] z-sticky rotate-3 rounded-pill px-3 py-1 font-display text-sm font-medium shadow-gum transition-colors duration-200 ${PHASE_STICKER_CLASS[timer.phase]}`}
+            >
+              {PHASE_LABEL[timer.phase]} · {timer.total / 60} min
+            </span>
+            <div className="relative z-content rounded-bubble border border-line-soft bg-surface text-ink shadow-soft">
+              <div className="flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-6">
+                <span className="rounded-pill bg-surface-2 px-3 py-1 font-display text-sm text-ink-soft">
+                  Rx #{String(timer.dailyDoses + 1).padStart(4, "0")}
+                </span>
+                <span suppressHydrationWarning className="rounded-pill bg-surface-2 px-3 py-1 font-display text-sm text-ink-soft">
+                  {todayKey()}
+                </span>
+              </div>
+              <div className="px-5 pt-3 sm:px-6">
+                <p className="font-display text-xl font-semibold">Pomodose Pharmacy</p>
+                <p className="mt-1 font-body text-sm text-ink-soft">{sigFor(timer.phase)}</p>
+              </div>
+              <div className="px-5 pb-5 pt-4 sm:px-6">
+                <PhaseTabs
+                  active={timer.phase}
+                  isRunning={isRunning}
+                  onChange={phase => {
+                    stopCompletionAlert();
+                    dispatch({ type: "SET_PHASE", phase });
+                  }}
+                />
+                <div className="mt-6">
+                  <VialTimer state={timer} dispatch={dispatch} />
+                </div>
+              </div>
+              <div className="px-5 pb-4 sm:px-6">
+                <div aria-hidden className="dots-divider" />
+                <p className="mt-3 font-body text-sm text-ink-soft">
+                  Qty {SETTINGS.CYCLE_LENGTH} doses · refills {SETTINGS.CYCLE_LENGTH - cyclePosition}
+                </p>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <QuoteCard
-            advanceSignal={timer.dailyDoses}
-            paused={timer.status === "running"}
-          />
-        </motion.section>
+        {/* Right: stacked label sections */}
+        <div ref={rightColRef} className="w-full min-w-0 space-y-6 lg:pt-[90px]">
+          <ScrollReveals scopeRef={rightColRef} refreshKey={goalsTotal} />
+          <section data-reveal aria-label="Today's goals">
+            <LabelCard title="Today's goals" icon={ListChecks} tint="mint">
+              <GoalList
+                onProgressChange={(done, total) => {
+                  setGoalsDone(done);
+                  setGoalsTotal(total);
+                }}
+              />
+            </LabelCard>
+          </section>
 
-        {/* Right: goals + progress */}
-        <motion.aside {...reveal(0.14)} className="flex flex-col gap-5">
-          <div
-            className="bg-paper border border-line rounded-card shadow-card p-6 transition-[box-shadow] duration-700 ease-out"
-            style={isRunning ? { boxShadow: cardShadowRunning } : undefined}
-          >
-            <GoalList
-              onProgressChange={(done, total) => {
-                setGoalsDone(done);
-                setGoalsTotal(total);
-              }}
-            />
-          </div>
-          <RegimenProgress
-            cyclePosition={cyclePosition}
-            dailyDoses={timer.dailyDoses}
-            goalsDone={goalsDone}
-            goalsTotal={goalsTotal}
-            phase={timer.phase}
-            isRunning={isRunning}
-            isFocusRunning={isFocusRunning}
-          />
-        </motion.aside>
+          <section data-reveal aria-label="Dose cycle">
+            <LabelCard title="Dose cycle" icon={Repeat} tint="sky">
+              <RegimenProgress
+                cyclePosition={cyclePosition}
+                dailyDoses={timer.dailyDoses}
+                phase={timer.phase}
+                isRunning={isRunning}
+                isFocusRunning={isFocusRunning}
+              />
+            </LabelCard>
+          </section>
+
+          <section data-reveal id="meet-dosey" aria-label="Meet Dosey" className="min-h-[352px]">
+            <MeetDosey phase={timer.phase} status={timer.status} onAskDosey={() => setChatOpen(true)} />
+          </section>
+
+          <section data-reveal aria-label="Study note">
+            <LabelCard title="Study note" icon={Lightbulb} tint="butter" compact>
+              <QuoteCard
+                advanceSignal={timer.dailyDoses}
+                paused={timer.status === "running"}
+              />
+            </LabelCard>
+          </section>
+        </div>
       </main>
 
-      <motion.footer {...reveal(0.2)} className="mt-12 pt-5 border-t border-line flex flex-col gap-4 text-xs text-ink-soft">
-        <span className="font-serif italic">Each session is a measured dose — take care of yourself, {name}.</span>
+      <footer className="mt-12 flex flex-col gap-4 border-t border-line-soft pt-5 font-body text-sm text-ink">
+        <span>Each session is a measured dose — take care of yourself, {name}.</span>
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <ChimeVolume />
             <OsNotificationToggle />
           </div>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-2">
             Pomodose · v1
             <button
+              type="button"
               onClick={() => setShowHelp(true)}
               aria-label="Help and tips"
-              className="flex h-10 w-10 items-center justify-center rounded-full text-xs hover:text-ink active:scale-95 transition-[color,transform] duration-150"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-pill bg-surface text-ink shadow-soft transition-colors duration-150 hover:bg-surface-2"
             >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full border border-current">?</span>
+              <CircleHelp size={20} strokeWidth={2.25} aria-hidden />
             </button>
           </span>
         </div>
-      </motion.footer>
+      </footer>
 
-      <DoseyChat
+      <StickyTimerBar timer={timer} dispatch={dispatch} vialRef={rxLabelRef} />
+
+      <ConnectedDoseyChat
+        open={chatOpen}
+        onOpenChange={setChatOpen}
         stats={{
           dailyDoses: timer.dailyDoses,
           cyclePosition,

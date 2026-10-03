@@ -1,43 +1,57 @@
 import type { Config } from "tailwindcss";
 
+// "Gelcap Pastel" world: a pharmacy made of gumdrops and gelcaps. Soft peach
+// ground, cream surfaces, plum-black ink, and pastel "gum" stickers that each
+// mean one thing. Text on every gum color is `ink`.
+// Contrast notes: ink is 9.8:1 on ground, 12.3:1 on surface. ink-soft is 5.6:1
+// on surface and 5.1:1 on surface-2 but only 4.5:1 on ground, so use ink-soft
+// on surfaces only. line-strong (3.6:1) is for interactive control borders;
+// line-soft is decorative only. alert is 6.4:1 on surface.
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        paper:      "#F6F2EC",
-        "paper-2":  "#EFE9DF",
-        ink:        "#2E2433",
-        "ink-soft": "#6B5E6F",
-        lilac:      "#C9B6E4",
-        "lilac-deep":"#8465B0",
-        amber:      "#D9B36B",
-        "amber-deep":"#B98A3E",
-        sage:       "#A8B89A",
-        clay:       "#E0B4A8",
-        "clay-deep":"#A96552",
-        line:       "#DED5C8",
-        // Borders on the paper-2 surface (inputs). `line` measures 1.20:1 there,
-        // short of WCAG 1.4.11's 3:1 for a UI component boundary; this clears it
-        // at 3.14:1 without darkening every card edge in the app.
-        "line-strong":"#948066",
+        ground: "#F8DFCF",
+        surface: "#FFFCF8",
+        "surface-2": "#FBEFE6",
+        ink: "#3A2F45",
+        "ink-soft": "#6E6178",
+        "line-soft": "#E8D3C4",
+        "line-strong": "#8A7A86",
+        "gum-sky": "#A8D4FF", // dose / focus
+        "gum-mint": "#B4E5C4", // refill / short break / done
+        "gum-apricot": "#FFB88A", // antidote / long break / warnings
+        "gum-butter": "#FFE28A", // nudges
+        "gum-rose": "#FFB3C7", // remove / undo
+        "gum-lilac": "#CDBBFF", // Dosey / chat
+        alert: "#B42318",
+        "dosey-lilac": "#B9A4F5",
+        "dosey-cream": "#FFF1DC",
+        "dosey-sprout": "#7CC38A",
+        "dosey-tomato": "#FF7A6B",
+        "dosey-blush": "#FF9FB2",
       },
       fontFamily: {
-        serif: ["Fraunces", "Georgia", "serif"],
-        sans:  ["Spline Sans", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "ui-rounded", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "ui-rounded", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        card: "18px",
-        control: "12px",
+        bubble: "28px",
+        control: "18px",
+        pill: "9999px",
       },
-      // Layered, ink-tinted shadows (never black) with a 1px top highlight.
-      // `running` is the neutral fallback; phase-tinted glow comes from
-      // runningShadow() in lib/phase-theme.ts.
       boxShadow: {
-        card:  "0 1px 0 rgba(255,255,255,.7) inset, 0 1px 2px rgba(46,36,51,.04), 0 10px 28px -16px rgba(46,36,51,.14)",
-        panel: "0 1px 0 rgba(255,255,255,.7) inset, 0 2px 6px rgba(46,36,51,.06), 0 28px 60px -22px rgba(46,36,51,.34)",
-        fab:   "0 1px 0 rgba(255,255,255,.35) inset, 0 2px 6px rgba(46,36,51,.10), 0 12px 28px -10px rgba(46,36,51,.40)",
-        press: "0 1px 0 rgba(255,255,255,.35) inset, 0 1px 2px rgba(46,36,51,.14), 0 6px 14px -8px rgba(46,36,51,.30)",
+        soft: "0 1px 0 rgba(255,255,255,.9) inset, 0 10px 24px -12px rgba(150,90,60,.30)",
+        pop: "0 1px 0 rgba(255,255,255,.55) inset, 0 6px 14px -6px rgba(58,47,69,.45)",
+        gum: "0 1px 0 rgba(255,255,255,.7) inset, 0 3px 8px -3px rgba(150,90,60,.35)",
+      },
+      zIndex: {
+        base: "0",
+        content: "10",
+        sticky: "20",
+        overlay: "30",
+        modal: "50",
       },
     },
   },
