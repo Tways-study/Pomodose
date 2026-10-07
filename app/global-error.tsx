@@ -22,7 +22,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body className="bg-ground text-ink antialiased" style={{ fontFamily: FALLBACK_FONT }}>
-        <main className="flex min-h-screen items-center justify-center px-4 py-12">
+        <main className="flex min-h-dvh items-center justify-center px-4 py-12">
           <div className="w-full max-w-sm rounded-bubble border border-line-soft bg-surface text-ink shadow-soft">
             <div className="p-5 sm:p-6">
               <span className="inline-block -rotate-3 rounded-pill bg-gum-apricot px-3 py-1 text-sm font-medium text-ink shadow-gum">

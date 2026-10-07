@@ -222,7 +222,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
         aria-expanded={open}
         whileTap={{ scale: reduceMotion ? 1 : 0.94 }}
         transition={SPRING_BOUNCY}
-        className={`fixed bottom-6 right-6 z-modal flex min-h-[44px] cursor-pointer items-center gap-2 rounded-pill bg-gum-lilac py-2 pl-2 pr-4 text-ink shadow-pop transition-opacity duration-200${
+        className={`fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] z-modal flex min-h-[44px] cursor-pointer items-center gap-2 rounded-pill bg-gum-lilac py-2 pl-2 pr-4 text-ink shadow-pop transition-opacity duration-200${
           open ? " max-sm:pointer-events-none max-sm:opacity-0" : ""
         }`}
       >

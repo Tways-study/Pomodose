@@ -173,7 +173,7 @@ export function HelpModal({ open, isFirstVisit, onClose }: Props) {
             aria-modal="true"
             aria-labelledby="help-title"
             tabIndex={-1}
-            className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-bubble border border-line-soft bg-surface text-ink shadow-soft outline-none"
+            className="relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-bubble border border-line-soft bg-surface text-ink shadow-soft outline-none"
             initial={{ y: 16, scale: 0.96, opacity: 0 }}
             animate={{ y: 0, scale: 1, opacity: 1 }}
             exit={{ y: 8, scale: 0.98, opacity: 0, transition: { duration: 0.15 } }}

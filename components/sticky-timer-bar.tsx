@@ -18,8 +18,9 @@ interface Props {
   vialRef: RefObject<HTMLElement | null>;
 }
 
-// Mobile-only strip pinned to the top once the Rx label scrolls away, so the
-// countdown and start/pause control stay reachable.
+// Strip pinned to the top once the Rx label scrolls away, so the countdown and
+// start/pause control stay reachable. Hidden on desktop windows tall enough that
+// the Rx card is sticky (page.tsx); shown on phones, tablets and short windows.
 export function StickyTimerBar({ timer, dispatch, vialRef }: Props) {
   const reduceMotion = useReducedMotion();
   const [labelInView, setLabelInView] = useState(true);
@@ -47,7 +48,7 @@ export function StickyTimerBar({ timer, dispatch, vialRef }: Props) {
       // them), so the SSR markup matches; reduced motion just drops the slide.
       animate={{ opacity: hidden ? 0 : 1, y: hidden ? "-100%" : 0 }}
       transition={reduceMotion ? { duration: 0.15, y: { duration: 0 } } : { ...SPRING_UI, opacity: { duration: 0.15 } }}
-      className="fixed inset-x-0 top-0 z-sticky rounded-b-bubble bg-surface/95 pt-[env(safe-area-inset-top)] shadow-soft backdrop-blur lg:hidden"
+      className="fixed inset-x-0 top-0 z-sticky rounded-b-bubble bg-surface/95 pt-[env(safe-area-inset-top)] shadow-soft lg:[@media(min-height:900px)]:hidden"
     >
       <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 px-4 py-2">
         <div className="flex min-w-0 items-center gap-3">
