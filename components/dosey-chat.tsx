@@ -271,7 +271,7 @@ export function DoseyChat({ stats, open: openProp, onOpenChange, mood = "relaxed
                     : { duration: 0.2 }
                 }
               >
-                <DoseyRig mood={mood} size={36} />
+                <DoseyRig mood={mood} size={36} thinking={isStreaming} />
               </motion.span>
               <div className="flex-1 leading-tight">
                 <p className="font-display text-lg font-semibold">Dosey</p>

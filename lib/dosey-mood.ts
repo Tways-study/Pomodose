@@ -1,6 +1,6 @@
 import type { Phase, TimerStatus } from "@/types";
 
-export type DoseyMood = "sleepy" | "focused" | "relaxed" | "proud";
+export type DoseyMood = "sleepy" | "focused" | "relaxed" | "proud" | "waiting";
 
 export function doseyMoodFor(input: {
   phase: Phase;
@@ -11,6 +11,6 @@ export function doseyMoodFor(input: {
   if (input.status === "running") {
     return input.phase === "focus" ? "focused" : "relaxed";
   }
-  if (input.status === "paused") return "relaxed";
+  if (input.status === "paused") return "waiting";
   return "sleepy";
 }

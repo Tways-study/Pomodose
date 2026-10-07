@@ -14,4 +14,7 @@ export const SETTINGS = {
   LONG_STRETCH_MS:     4 * 60 * 60_000,   // "long-stretch" threshold since firstDoseAt
   LATE_HOUR_START:     23,                // "late-hour" window start (local hour, inclusive)
   LATE_HOUR_END:        4,                // "late-hour" window end (local hour, exclusive)
+
+  // --- Dosey ---
+  DOSEY_DEEP_SLEEP_SECONDS: 180,          // idle this long and Dosey drops into deep sleep
 } as const;

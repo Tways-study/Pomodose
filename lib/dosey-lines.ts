@@ -22,6 +22,7 @@ export const MOOD_LINES: Record<DoseyMood, string> = {
   focused: "Shh — dose in progress.",
   relaxed: "Ahh. This part is the medicine.",
   proud: "Dose dispensed. Well done.",
+  waiting: "Paused. I'll keep the vial warm.",
 };
 
 /** Returns an index into POKE_LINES that differs from prevIndex (when possible). */
@@ -33,3 +34,5 @@ export function nextPokeLine(prevIndex: number, rand: () => number = Math.random
   const pick = Math.min(pool - 1, Math.floor(rand() * pool));
   return hasPrev && pick >= prevIndex ? pick + 1 : pick;
 }
+
+export const DIZZY_LINE = "Whoa — that's above the max dose.";
