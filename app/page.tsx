@@ -30,6 +30,7 @@ import { NotificationProvider } from "@/components/notification-provider";
 import { CounterNote }         from "@/components/counter-note";
 import { ProfileMenuConnected } from "@/components/profile-menu";
 import { SettingsMenu }         from "@/components/settings-menu";
+import { CompletionBurstHost }  from "@/components/three/completion-burst-host";
 
 const MeetDosey = dynamic(
   () => import("@/components/dosey/meet-dosey").then((m) => m.MeetDosey),
@@ -206,6 +207,7 @@ export default function Home() {
       </header>
 
       <CounterNote />
+      <CompletionBurstHost status={timer.status} />
 
       {/* Main grid */}
       <main id="main" tabIndex={-1} className="outline-none flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 items-start">
