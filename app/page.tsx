@@ -7,10 +7,10 @@ import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
-import { Lightbulb, ListChecks, Repeat, type LucideIcon } from "lucide-react";
+import { ListChecks, NotebookPen, Repeat, type LucideIcon } from "lucide-react";
 import { PhaseTabs }        from "@/components/phase-tabs";
 import { VialTimer }         from "@/components/vial-timer";
-import { QuoteCard }         from "@/components/quote-card";
+import { JournalCard }       from "@/components/journal-card";
 import { GoalList }          from "@/components/goal-list";
 import { RegimenProgress }   from "@/components/regimen-progress";
 import { DoseyChat }          from "@/components/dosey-chat";
@@ -292,9 +292,9 @@ export default function Home() {
             <MeetDosey phase={timer.phase} status={timer.status} onAskDosey={() => setChatOpen(true)} />
           </section>
 
-          <section data-reveal aria-label="Study note">
-            <LabelCard title="Study note" icon={Lightbulb} tint="butter" compact>
-              <QuoteCard
+          <section data-reveal aria-label="Journal">
+            <LabelCard title="Journal" icon={NotebookPen} tint="butter">
+              <JournalCard
                 advanceSignal={timer.dailyDoses}
                 paused={timer.status === "running"}
               />
@@ -305,7 +305,7 @@ export default function Home() {
 
       <footer className="mt-12 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-line-soft pt-5 font-body text-sm text-ink">
         <span>Each session is a measured dose — take care of yourself, {name}.</span>
-        <span>Pomodose · v1</span>
+        <span>Pomodose · v0.2.0</span>
       </footer>
 
       <StickyTimerBar timer={timer} dispatch={dispatch} vialRef={rxLabelRef} />
