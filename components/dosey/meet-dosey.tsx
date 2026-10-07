@@ -5,8 +5,9 @@ import { MessageCircle, Sparkles } from "lucide-react";
 import { useAddressTerm } from "@/components/address-term-provider";
 import { DoseyRig } from "@/components/dosey/dosey-rig";
 import { useDoseyMood } from "@/components/dosey/use-dosey-mood";
+import { DoseyDioramaSlot } from "@/components/three/scenes";
 import { ADDRESS_TOKEN } from "@/lib/address-terms";
-import { MOOD_LINES, POKE_LINES, nextPokeLine } from "@/lib/dosey-lines";
+import { DIZZY_LINE, MOOD_LINES, POKE_LINES, nextPokeLine } from "@/lib/dosey-lines";
 import { gsap, useGSAP, withMotion } from "@/lib/gsap";
 import type { Phase, TimerStatus } from "@/types";
 
@@ -21,13 +22,18 @@ export function MeetDosey({ phase, status, onAskDosey }: MeetDoseyProps) {
   const name = useAddressTerm();
   const mood = useDoseyMood(phase, status);
   const [pokeIndex, setPokeIndex] = useState(-1);
+  const [dizzy, setDizzy] = useState(false);
 
-  const line =
-    pokeIndex >= 0
+  const line = dizzy
+    ? DIZZY_LINE
+    : pokeIndex >= 0
       ? POKE_LINES[pokeIndex].replaceAll(ADDRESS_TOKEN, name)
       : MOOD_LINES[mood];
 
-  const handlePoke = () => setPokeIndex((prev) => nextPokeLine(prev));
+  const handlePoke = (isDizzy: boolean) => {
+    setDizzy(isDizzy);
+    if (!isDizzy) setPokeIndex((prev) => nextPokeLine(prev));
+  };
 
   useGSAP(
     () => {
@@ -97,6 +103,7 @@ export function MeetDosey({ phase, status, onAskDosey }: MeetDoseyProps) {
           i.e. 64px - 52px = 12px) and the left eye stay fully inside.
         */}
         <div className="relative min-h-[340px] overflow-hidden rounded-control bg-gum-lilac/35">
+          <DoseyDioramaSlot />
           <DoseyRig
             interactive
             size={300}

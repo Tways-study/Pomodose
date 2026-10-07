@@ -1,4 +1,5 @@
 "use client";
+import { DoseJarSlot } from "@/components/three/scenes";
 import { SETTINGS } from "@/lib/settings";
 import type { Phase } from "@/types";
 
@@ -58,9 +59,12 @@ export function RegimenProgress({
         })}
       </div>
 
-      <div className="mt-4 flex flex-wrap justify-between gap-x-4 gap-y-1 font-body text-sm text-ink-soft">
-        <span>{cyclePosition} of {SETTINGS.CYCLE_LENGTH} doses to your antidote</span>
-        <span>{dailyDoses} doses today</span>
+      <div className="mt-4 flex items-end gap-4">
+        <div className="flex min-w-0 flex-1 flex-wrap justify-between gap-x-4 gap-y-1 font-body text-sm text-ink-soft">
+          <span>{cyclePosition} of {SETTINGS.CYCLE_LENGTH} doses to your antidote</span>
+          <span>{dailyDoses} doses today</span>
+        </div>
+        <DoseJarSlot dailyDoses={dailyDoses} />
       </div>
     </div>
   );

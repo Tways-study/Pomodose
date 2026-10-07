@@ -13,10 +13,18 @@ if (typeof window !== "undefined") {
 
 export { gsap, ScrollTrigger, useGSAP };
 
+/** Wraps a function so tweens it creates later (events, delayed calls) join the matchMedia context. */
+export type ContextSafe = <A extends unknown[], R>(fn: (...args: A) => R) => (...args: A) => R;
+
 // Runs `setup` only when the user has no reduced-motion preference.
 // Callers must revert the returned MatchMedia (e.g. in cleanup).
-export function withMotion(setup: () => void | (() => void)): gsap.MatchMedia {
+// `setup` receives a `safe` wrapper for callbacks that create tweens after setup returns.
+export function withMotion(setup: (safe: ContextSafe) => void | (() => void)): gsap.MatchMedia {
   const mm = gsap.matchMedia();
-  mm.add("(prefers-reduced-motion: no-preference)", setup);
+  mm.add("(prefers-reduced-motion: no-preference)", (_ctx, contextSafe) => {
+    const safe: ContextSafe = (fn) =>
+      contextSafe ? (contextSafe(fn) as typeof fn) : fn;
+    return setup(safe);
+  });
   return mm;
 }

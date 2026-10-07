@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { DoseyRig } from "@/components/dosey/dosey-rig";
 import { LoginForm } from "@/components/login-form";
+import { LoginCapsulesSlot } from "@/components/three/scenes";
 import { EASE_OUT } from "@/lib/motion";
 
 export default function LoginPage() {
@@ -21,7 +22,8 @@ export default function LoginPage() {
 
   return (
     <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-ground px-4 py-12 outline-none">
-      <div className="w-full max-w-sm">
+      <LoginCapsulesSlot />
+      <div className="relative z-content w-full max-w-sm">
         <motion.div className="mb-6 flex items-center gap-3" {...enter(0)}>
           <DoseyRig size={72} mood="relaxed" />
           <div className="leading-tight">

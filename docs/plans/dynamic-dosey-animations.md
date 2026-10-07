@@ -1,6 +1,6 @@
 # Plan: Dynamic Dosey animations while a session runs
 
-**Status:** proposed
+**Status:** superseded by implementation (see `lib/dosey-motion.ts` and `components/dosey/`)
 
 ## Goal
 Dosey should visibly react to what the timer is doing: one behavior while a focus session runs, a different one while a break runs, so the mascot feels alive without distracting from work.

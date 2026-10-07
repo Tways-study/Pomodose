@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { MOOD_LINES, POKE_LINES, nextPokeLine } from "./dosey-lines";
+import { DIZZY_LINE, MOOD_LINES, POKE_LINES, nextPokeLine } from "./dosey-lines";
 
 describe("dosey lines", () => {
   it("has non-empty lines of at most 80 chars", () => {
-    const all = [...POKE_LINES, ...Object.values(MOOD_LINES)];
+    const all = [...POKE_LINES, ...Object.values(MOOD_LINES), DIZZY_LINE];
     for (const line of all) {
       expect(line.length).toBeGreaterThan(0);
       expect(line.length).toBeLessThanOrEqual(80);

@@ -1,38 +1,37 @@
 "use client";
 
 import { useId, useRef } from "react";
-import { gsap, useGSAP, withMotion } from "@/lib/gsap";
 import type { DoseyMood } from "@/lib/dosey-mood";
+import { registerPoke } from "@/lib/dosey-motion";
+import { DoseyFx } from "@/components/dosey/dosey-fx";
+import {
+  BLUSH_MIN_SIZE,
+  FX_MIN_SIZE,
+  IDLE_MIN_SIZE,
+  LID_REST,
+  MOODS,
+  spiralPath,
+  type DoseyVariant,
+} from "@/components/dosey/rig-config";
+import { useDoseyIdle } from "@/components/dosey/use-dosey-idle";
+import { useDoseyMoments } from "@/components/dosey/use-dosey-moments";
+import { useHoverLean } from "@/components/dosey/use-hover-lean";
 import { usePointerEyes } from "@/components/dosey/use-pointer-eyes";
-
-type DoseyVariant = "full" | "face" | "peek";
 
 interface DoseyRigProps {
   mood: DoseyMood;
   size?: number;
   interactive?: boolean;
   className?: string;
-  onPoke?: () => void;
+  /** `dizzy` is true when this poke completes a rapid combo. */
+  onPoke?: (dizzy: boolean) => void;
   /** full = whole capsule, face = lilac head + bare sprout, peek = head cropped flat. */
   variant?: DoseyVariant;
   /** Eyes follow the pointer even when not interactive (decorative peek). */
   trackPointer?: boolean;
+  /** Chat is streaming: gaze up-right and blink slowly. */
+  thinking?: boolean;
 }
-
-// Eyelid scaleY at rest per mood (0 = open, 1 = shut).
-const LID_REST: Record<DoseyMood, number> = {
-  sleepy: 0.55,
-  focused: 0.25,
-  relaxed: 0,
-  proud: 0,
-};
-
-// Below this size no idle GSAP loops run (static pose). Below BLUSH_MIN_SIZE
-// the cheeks are dropped so the mark stays legible.
-const IDLE_MIN_SIZE = 40;
-const BLUSH_MIN_SIZE = 28;
-
-const MOODS: DoseyMood[] = ["sleepy", "focused", "relaxed", "proud"];
 
 interface Geometry {
   vbW: number;
@@ -99,10 +98,6 @@ const SPROUT = {
   },
 } as const;
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
 export function DoseyRig({
   mood,
   size = 160,
@@ -111,162 +106,47 @@ export function DoseyRig({
   onPoke,
   variant,
   trackPointer = false,
+  thinking = false,
 }: DoseyRigProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const leftPupil = useRef<SVGCircleElement>(null);
   const rightPupil = useRef<SVGCircleElement>(null);
+  const pokeHistory = useRef<number[]>([]);
   const clipId = `dosey-clip-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
   const kind: DoseyVariant = variant ?? (size < IDLE_MIN_SIZE ? "face" : "full");
   const g = GEOMETRY[kind];
   const sprout = kind === "face" ? SPROUT.face : SPROUT.full;
   const showBlush = size >= BLUSH_MIN_SIZE;
+  const showFx = (kind === "full" || kind === "peek") && size >= FX_MIN_SIZE;
   const origin = g.origin;
+  const lidRest = LID_REST[mood];
 
-  usePointerEyes(
-    svgRef,
-    leftPupil,
-    rightPupil,
-    (interactive || trackPointer) && size >= IDLE_MIN_SIZE,
-    g.eyeY / g.vbH,
-  );
+  // A focused peek stays quiet: no pointer tracking to pull attention.
+  const eyesFollow =
+    (interactive || trackPointer) && size >= IDLE_MIN_SIZE && !(kind === "peek" && mood === "focused");
+  usePointerEyes(svgRef, leftPupil, rightPupil, eyesFollow, g.eyeY / g.vbH);
 
-  // Mood-driven motion. Re-runs (and reverts) on every mood change.
-  useGSAP(
-    () => {
-      const lids = gsap.utils.toArray<SVGElement>('[data-rig="lid"]');
-      const move = '[data-rig="move"]';
-      const sway = '[data-rig="sway"]';
-      const rest = LID_REST[mood];
-
-      // Static pose first: reduced-motion users get exactly this.
-      gsap.set(lids, { opacity: 1, scaleY: rest, transformOrigin: "50% 0%" });
-
-      // Small marks (FAB, chat header) stay a static pose: no infinite loops.
-      if (size < IDLE_MIN_SIZE) return;
-
-      const mm = withMotion(() => {
-        // The idle loops (blink + breathe) only run while the rig is on screen: an
-        // offscreen rig (Meet Dosey sits below the fold for most of a session) would
-        // otherwise keep writing transforms to the DOM every frame for nothing.
-        // Hidden tabs need no handling: browsers already suspend rAF there.
-        let active = true;
-        let chainOn = false; // a blink delayedCall or blink timeline is pending
-        let blinkCall: gsap.core.Tween | null = null;
-        const scheduleBlink = () => {
-          chainOn = true;
-          blinkCall = gsap.delayedCall(3 + Math.random() * 2, () => {
-            blinkCall = null;
-            gsap
-              .timeline({
-                onComplete: () => {
-                  if (active) scheduleBlink();
-                  else chainOn = false;
-                },
-              })
-              .to(lids, { scaleY: 1, duration: 0.07, ease: "power1.in" })
-              .to(lids, { scaleY: rest, duration: 0.14, ease: "power1.out" });
-          });
-        };
-        scheduleBlink();
-
-        let breathe: gsap.core.Tween | null = null;
-        if (mood === "sleepy") {
-          breathe = gsap.to(move, {
-            scale: 1.02,
-            svgOrigin: origin,
-            duration: 4,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          });
-        }
-
-        const setActive = (next: boolean) => {
-          active = next;
-          if (next) {
-            breathe?.resume();
-            if (!chainOn) scheduleBlink();
-          } else {
-            breathe?.pause();
-            if (blinkCall) {
-              blinkCall.kill();
-              blinkCall = null;
-              chainOn = false;
-            }
-          }
-        };
-
-        const root = svgRef.current;
-        const observer =
-          root && typeof IntersectionObserver !== "undefined"
-            ? new IntersectionObserver(([entry]) => setActive(entry.isIntersecting))
-            : null;
-        if (root) observer?.observe(root);
-
-        if (mood === "proud") {
-          if (kind === "peek") {
-            // Head is pinned to the card edge: stretch up instead of hopping (no gap).
-            gsap
-              .timeline()
-              .to(move, { scaleY: 1.1, svgOrigin: origin, duration: 0.22, ease: "power2.out" })
-              .to(move, { scaleY: 1, duration: 0.6, ease: "back.out(3)" });
-          } else {
-            gsap
-              .timeline()
-              .to(move, { y: -14, duration: 0.22, ease: "power2.out" })
-              .to(move, { y: 0, duration: 0.6, ease: "back.out(3)" });
-          }
-          gsap.fromTo(
-            sway,
-            { rotation: -9, transformOrigin: "50% 100%" },
-            { rotation: 0, duration: 1, ease: "elastic.out(1, 0.25)" },
-          );
-        }
-
-        return () => {
-          observer?.disconnect();
-          blinkCall?.kill();
-        };
-      });
-
-      return () => mm.revert();
-    },
-    { scope: svgRef, dependencies: [mood, size, kind], revertOnUpdate: true },
-  );
-
-  const { contextSafe } = useGSAP({ scope: svgRef });
-
-  const poke = contextSafe(() => {
-    if (!prefersReducedMotion()) {
-      const squash = '[data-rig="squash"]';
-      gsap.killTweensOf(squash);
-      gsap
-        .timeline()
-        .to(squash, {
-          scaleY: 0.82,
-          scaleX: 1.12,
-          svgOrigin: origin,
-          duration: 0.1,
-          ease: "power2.out",
-        })
-        .to(squash, {
-          scaleY: 1,
-          scaleX: 1,
-          duration: 0.9,
-          ease: "elastic.out(1, 0.4)",
-        });
-      // Impulse from the current angle (not a fixed -12°) so rapid pokes
-      // retarget smoothly instead of snapping back to the start pose.
-      const sway = '[data-rig="sway"]';
-      gsap.killTweensOf(sway);
-      gsap
-        .timeline()
-        .to(sway, { rotation: "-=12", transformOrigin: "50% 100%", duration: 0.1, ease: "power2.out" })
-        .to(sway, { rotation: 0, duration: 1.1, ease: "elastic.out(1, 0.2)" });
-    }
-    onPoke?.();
+  const { deepAsleepRef } = useDoseyIdle({
+    scope: svgRef,
+    mood,
+    size,
+    kind,
+    origin,
+    lidRest,
+    thinking,
+    fx: showFx,
   });
+  const moments = useDoseyMoments({ scope: svgRef, mood, kind, origin, lidRest, deepAsleepRef });
+  useHoverLean(svgRef, buttonRef, interactive && size >= IDLE_MIN_SIZE, origin, g.eyeR);
+
+  const handlePoke = () => {
+    const result = registerPoke(pokeHistory.current, Date.now());
+    pokeHistory.current = result.history;
+    moments.poke(result.dizzy);
+    onPoke?.(result.dizzy);
+  };
 
   const leftX = 100 - g.eyeDx;
   const rightX = 100 + g.eyeDx;
@@ -301,23 +181,27 @@ export function DoseyRig({
         <ellipse data-dosey="shadow" cx="100" cy="242" rx="52" ry="6" className="fill-ink" opacity="0.1" />
       )}
 
+      <g data-rig="lean">
       <g data-rig="squash">
+        <g data-rig="react">
         <g data-rig="move">
           <g data-dosey="body">
             {/* sprout: two plump leaves + one tomato */}
             <g data-dosey="sprout">
               <g data-rig="sway">
-                <g data-dosey="leaves">
-                  <path d={sprout.left} className="fill-dosey-sprout" />
-                  <path d={sprout.right} className="fill-dosey-sprout" />
-                </g>
-                <g data-dosey="tomatoes">
-                  <circle
-                    cx={sprout.tomato.cx}
-                    cy={sprout.tomato.cy}
-                    r={sprout.tomato.r}
-                    className="fill-dosey-tomato"
-                  />
+                <g data-rig="perk">
+                  <g data-dosey="leaves">
+                    <path d={sprout.left} className="fill-dosey-sprout" />
+                    <path d={sprout.right} className="fill-dosey-sprout" />
+                  </g>
+                  <g data-dosey="tomatoes">
+                    <circle
+                      cx={sprout.tomato.cx}
+                      cy={sprout.tomato.cy}
+                      r={sprout.tomato.r}
+                      className="fill-dosey-tomato"
+                    />
+                  </g>
                 </g>
               </g>
             </g>
@@ -343,7 +227,17 @@ export function DoseyRig({
             {/* face */}
             <g data-dosey="face">
               <g>
-                <circle ref={leftPupil} cx={leftX} cy={g.eyeY} r={g.eyeR} className="fill-ink" />
+                <g data-rig="gaze">
+                  <circle ref={leftPupil} data-rig="pupil" cx={leftX} cy={g.eyeY} r={g.eyeR} className="fill-ink" />
+                  <path
+                    data-rig="spiral"
+                    d={spiralPath(leftX, g.eyeY, g.eyeR)}
+                    className="fill-none stroke-ink"
+                    strokeWidth={1.6}
+                    strokeLinecap="round"
+                    style={{ opacity: 0 }}
+                  />
+                </g>
                 <rect
                   data-rig="lid"
                   x={leftX - lid}
@@ -355,7 +249,17 @@ export function DoseyRig({
                 />
               </g>
               <g>
-                <circle ref={rightPupil} cx={rightX} cy={g.eyeY} r={g.eyeR} className="fill-ink" />
+                <g data-rig="gaze">
+                  <circle ref={rightPupil} data-rig="pupil" cx={rightX} cy={g.eyeY} r={g.eyeR} className="fill-ink" />
+                  <path
+                    data-rig="spiral"
+                    d={spiralPath(rightX, g.eyeY, g.eyeR)}
+                    className="fill-none stroke-ink"
+                    strokeWidth={1.6}
+                    strokeLinecap="round"
+                    style={{ opacity: 0 }}
+                  />
+                </g>
                 <rect
                   data-rig="lid"
                   x={rightX - lid}
@@ -374,6 +278,7 @@ export function DoseyRig({
                     cy={g.cheekY}
                     rx={g.cheekRx}
                     ry={g.cheekRy}
+                    data-rig="blush"
                     className="fill-dosey-blush transition-opacity duration-200 motion-reduce:transition-none"
                     style={{ opacity: mood === "proud" ? 0.85 : 0.6 }}
                   />
@@ -382,6 +287,7 @@ export function DoseyRig({
                     cy={g.cheekY}
                     rx={g.cheekRx}
                     ry={g.cheekRy}
+                    data-rig="blush"
                     className="fill-dosey-blush transition-opacity duration-200 motion-reduce:transition-none"
                     style={{ opacity: mood === "proud" ? 0.85 : 0.6 }}
                   />
@@ -422,6 +328,14 @@ export function DoseyRig({
                         strokeLinecap="round"
                       />
                     )}
+                    {m === "waiting" && (
+                      <path
+                        d="M93 129 L107 126"
+                        className="fill-none stroke-ink"
+                        strokeWidth={MOUTH_STROKE}
+                        strokeLinecap="round"
+                      />
+                    )}
                     {m === "proud" && (
                       <path
                         d="M89 123 Q100 142 111 123 Z"
@@ -436,7 +350,11 @@ export function DoseyRig({
             </g>
           </g>
         </g>
+        </g>
       </g>
+      </g>
+
+      {showFx && <DoseyFx />}
     </svg>
   );
 
@@ -444,9 +362,10 @@ export function DoseyRig({
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-label="Poke Dosey"
-      onClick={poke}
+      onClick={handlePoke}
       className={`inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-pill ${className ?? ""}`}
     >
       {svg}

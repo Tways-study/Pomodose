@@ -16,8 +16,8 @@ describe("doseyMoodFor", () => {
     expect(doseyMoodFor({ phase: "long", status: "running", justCompleted: false })).toBe("relaxed");
   });
 
-  it("is relaxed when paused", () => {
-    expect(doseyMoodFor({ phase: "focus", status: "paused", justCompleted: false })).toBe("relaxed");
+  it("is waiting when paused", () => {
+    expect(doseyMoodFor({ phase: "focus", status: "paused", justCompleted: false })).toBe("waiting");
   });
 
   it("is sleepy when idle or complete", () => {

@@ -226,7 +226,7 @@ export function VialTimer({ state, dispatch }: Props) {
       </div>
 
       {/* Vessel Graphic */}
-      <div className="relative">
+      <div className="relative" data-vial-anchor>
         <svg
           viewBox="0 0 180 230"
           className="h-auto w-[200px]"
