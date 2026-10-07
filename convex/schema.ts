@@ -21,4 +21,11 @@ export default defineSchema({
     completedAt: v.number(),
     date: v.string(), // "YYYY-MM-DD", client-computed local day
   }).index("by_user_and_date", ["userId", "date"]),
+  // One journal entry per user per day (upserted by journal.save).
+  journal: defineTable({
+    userId: v.id("users"),
+    date: v.string(), // "YYYY-MM-DD", client-computed day (lib/date.ts's todayKey)
+    text: v.string(),
+    updatedAt: v.number(),
+  }).index("by_user_and_date", ["userId", "date"]),
 });
