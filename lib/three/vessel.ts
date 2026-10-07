@@ -1,25 +1,30 @@
 import { clamp, seededRandom } from "./math";
 
-/** One point of the flask's half-section: radius from the axis, height above the base. */
+/** One point of a vessel's half-section: radius from the axis, height above the base. */
 export interface ProfilePoint {
   r: number;
   y: number;
 }
 
-// The 3D flask is the SVG flask in vial-timer.tsx at 1 unit = 40 SVG units, base at y = 0.
-export const FLASK = {
-  HEIGHT: 4.6,
-  /** The liquid wall sits inside the glass by this factor so the two never z-fight. */
-  GLASS_INSET: 0.92,
-  /** Liquid surface height when the vessel is empty / full (SVG 206 / 54). */
-  LIQUID_BOTTOM: 0.05,
-  LIQUID_TOP: 3.85,
-  CAP_RADIUS: 0.6,
-  CAP_HEIGHT: 0.35,
-  CAP_Y: 4.675,
-  /** Highest point a splash droplet may reach (still inside the neck). */
-  SPLASH_CEILING: 4.3,
-} as const;
+export type VesselId = "flask" | "cylinder";
+
+export interface VesselSpec {
+  id: VesselId;
+  /** The glass silhouette, bottom centre up to the rim. */
+  profile: readonly ProfilePoint[];
+  /** Surface height when the vessel is empty / full. */
+  liquidBottom: number;
+  liquidTop: number;
+  /** Highest point a splash droplet may reach (still inside the glass). */
+  splashCeiling: number;
+  /** Height the camera looks at. */
+  lookY: number;
+}
+
+/** The liquid wall sits inside the glass by this factor so the two never z-fight. */
+export const GLASS_INSET = 0.92;
+
+// Both vessels are the SVG vessels in vial-timer.tsx at 1 unit = 40 SVG units.
 
 type Pair = readonly [number, number];
 
@@ -49,6 +54,15 @@ function cubic(p0: Pair, p1: Pair, p2: Pair, p3: Pair, steps: number): ProfilePo
   return out;
 }
 
+// --- Flask -------------------------------------------------------------------
+
+export const FLASK = {
+  HEIGHT: 4.6,
+  CAP_RADIUS: 0.6,
+  CAP_HEIGHT: 0.35,
+  CAP_Y: 4.675,
+} as const;
+
 /** The flask silhouette, bottom centre up to the neck rim: flat base, soft corner, cone, neck. */
 export const FLASK_PROFILE: readonly ProfilePoint[] = [
   { r: 0, y: 0 },
@@ -58,10 +72,84 @@ export const FLASK_PROFILE: readonly ProfilePoint[] = [
   { r: 0.4, y: FLASK.HEIGHT },
 ];
 
+export const FLASK_VESSEL: VesselSpec = {
+  id: "flask",
+  profile: FLASK_PROFILE,
+  liquidBottom: 0.05,
+  liquidTop: 3.85,
+  splashCeiling: 4.3,
+  lookY: 2.3,
+};
+
+// --- Graduated cylinder ------------------------------------------------------
+
+export const CYLINDER = {
+  RADIUS: 0.55,
+  HEIGHT: 4.9,
+  /** The collar ring around the rim. */
+  RIM_Y: 4.78,
+  RIM_RADIUS: 0.6,
+  /** Tick marks sit on the glass at the right-hand side of the front. */
+  TICK_MAJOR_FROM_X: 0.2,
+  TICK_MINOR_FROM_X: 0.35,
+} as const;
+
+/** Round-bottomed tube with a slightly flared lip, sitting in its foot. */
+export const CYLINDER_PROFILE: readonly ProfilePoint[] = [
+  { r: 0, y: 0.6 },
+  { r: 0.35, y: 0.6 },
+  ...quad([0.35, 0.6], [0.55, 0.6], [0.55, 0.8], 5),
+  { r: CYLINDER.RADIUS, y: 4.75 },
+  { r: 0.68, y: CYLINDER.HEIGHT },
+];
+
+/** The flared round foot, bottom centre up to the top face (the glass sits inside it). */
+export const CYLINDER_FOOT_PROFILE: readonly ProfilePoint[] = [
+  { r: 0, y: 0 },
+  { r: 1.15, y: 0 },
+  { r: 1.4, y: 0.3 },
+  { r: 1.05, y: 0.65 },
+  { r: 0, y: 0.65 },
+];
+
+export const CYLINDER_VESSEL: VesselSpec = {
+  id: "cylinder",
+  profile: CYLINDER_PROFILE,
+  liquidBottom: 0.65,
+  liquidTop: 4.7,
+  splashCeiling: 4.6,
+  lookY: 2.45,
+};
+
+export const VESSELS: Record<VesselId, VesselSpec> = {
+  flask: FLASK_VESSEL,
+  cylinder: CYLINDER_VESSEL,
+};
+
+export interface Tick {
+  y: number;
+  major: boolean;
+  /** Printed value for major ticks (percent of the full volume). */
+  label: string | null;
+}
+
+/** Graduation marks, 10% apart, majors labelled 100 down to 20 (as on the SVG cylinder). */
+export function cylinderTicks(): Tick[] {
+  const ticks: Tick[] = [];
+  for (let i = 10; i >= 1; i--) {
+    const frac = i / 10;
+    const major = i % 2 === 0;
+    ticks.push({ y: levelY(frac, CYLINDER_VESSEL), major, label: major ? String(i * 10) : null });
+  }
+  return ticks;
+}
+
+// --- Shared maths ------------------------------------------------------------
+
 /** Radius of the glass at height `y` (linear between profile points). */
 export function radiusAt(y: number, profile: readonly ProfilePoint[] = FLASK_PROFILE): number {
   const top = profile[profile.length - 1];
-  const yy = clamp(y, 0, top.y);
+  const yy = clamp(y, profile[0].y, top.y);
   for (let i = 1; i < profile.length; i++) {
     const a = profile[i - 1];
     const b = profile[i];
@@ -71,8 +159,8 @@ export function radiusAt(y: number, profile: readonly ProfilePoint[] = FLASK_PRO
 }
 
 /** Surface height for a fill fraction in [0, 1]. */
-export function levelY(fraction: number): number {
-  return FLASK.LIQUID_BOTTOM + (FLASK.LIQUID_TOP - FLASK.LIQUID_BOTTOM) * clamp(fraction, 0, 1);
+export function levelY(fraction: number, vessel: VesselSpec = FLASK_VESSEL): number {
+  return vessel.liquidBottom + (vessel.liquidTop - vessel.liquidBottom) * clamp(fraction, 0, 1);
 }
 
 const smooth = (x: number) => {
@@ -102,7 +190,7 @@ export interface SwayPose {
   y: number;
 }
 
-/** A barely-there tilt and bob of the whole flask; `amount` in [0, 1] fades it in. */
+/** A barely-there tilt and bob of the whole vessel; `amount` in [0, 1] fades it in. */
 export function swayPose(t: number, amount: number): SwayPose {
   return {
     rotZ: Math.sin(t * 0.9) * 0.028 * amount,
@@ -141,16 +229,16 @@ export function makeBubbles(count: number, seed = 4242): BubbleSpec[] {
   }));
 }
 
-const BUBBLE_FLOOR = FLASK.LIQUID_BOTTOM + 0.25;
 const MIN_RISE = 0.3;
 
 /** Where a bubble is at time `t`; scale 0 when hidden (too little liquid, or just born/popped). */
-export function bubblePose(spec: BubbleSpec, t: number, level: number): Pose {
+export function bubblePose(spec: BubbleSpec, t: number, level: number, vessel: VesselSpec = FLASK_VESSEL): Pose {
+  const floor = vessel.liquidBottom + 0.25;
   const top = level - 0.06;
-  if (top - BUBBLE_FLOOR < MIN_RISE) return { x: 0, y: BUBBLE_FLOOR, z: 0, scale: 0 };
+  if (top - floor < MIN_RISE) return { x: 0, y: floor, z: 0, scale: 0 };
   const p = (spec.phase + spec.speed * t) % 1;
-  const y = BUBBLE_FLOOR + (top - BUBBLE_FLOOR) * p;
-  const room = Math.max(0, radiusAt(y) * FLASK.GLASS_INSET - spec.size - 0.03);
+  const y = floor + (top - floor) * p;
+  const room = Math.max(0, radiusAt(y, vessel.profile) * GLASS_INSET - spec.size - 0.03);
   const rr = room * spec.radial;
   const drift = Math.sin(t * 2.1 + spec.wobble) * 0.04;
   return {
@@ -186,13 +274,13 @@ export function makeDroplets(count: number, seed = 777): DropletSpec[] {
 }
 
 /** A droplet thrown from the surface; scale 0 before launch and once it falls back in. */
-export function dropletPose(spec: DropletSpec, since: number, level: number): Pose {
+export function dropletPose(spec: DropletSpec, since: number, level: number, vessel: VesselSpec = FLASK_VESSEL): Pose {
   const tt = since - spec.delay;
   if (tt < 0 || since > SPLASH_SECONDS) return { x: 0, y: level, z: 0, scale: 0 };
   const rise = level + spec.lift * tt - 0.5 * GRAVITY * tt * tt;
   if (rise < level) return { x: 0, y: level, z: 0, scale: 0 };
-  const y = Math.min(rise, FLASK.SPLASH_CEILING);
-  const room = Math.max(0, radiusAt(y) * FLASK.GLASS_INSET - spec.size - 0.02);
+  const y = Math.min(rise, vessel.splashCeiling);
+  const room = Math.max(0, radiusAt(y, vessel.profile) * GLASS_INSET - spec.size - 0.02);
   const r = Math.min(spec.speed * tt, room);
   return { x: Math.cos(spec.angle) * r, y, z: Math.sin(spec.angle) * r, scale: spec.size };
 }

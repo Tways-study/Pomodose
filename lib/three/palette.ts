@@ -16,6 +16,8 @@ export const PALETTE = {
   butter: pick("gum-butter"),
   lilac: pick("gum-lilac"),      // Dosey / brand
   liquid: pick("dosey-lilac"),   // the vial's liquid
+  line: pick("line-soft"),       // the cylinder's foot
+  inkSoft: pick("ink-soft"),     // graduation marks and labels
   cream: pick("dosey-cream"),
   sprout: pick("dosey-sprout"),
   tomato: pick("dosey-tomato"),

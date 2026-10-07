@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { SilentBoundary } from "@/components/silent-boundary";
-import type { FlaskProps } from "./flask-3d";
+import type { VesselProps } from "./vessel-3d";
 import { useNearViewport, useThreeEnabled } from "./use-three-enabled";
 
 // Every Canvas is a separate lazy chunk (ssr: false) so three never reaches a page's
@@ -12,23 +12,23 @@ const LoginCapsules = dynamic(() => import("./login-capsules"), { ssr: false });
 const DoseJar = dynamic(() => import("./dose-jar"), { ssr: false });
 const DoseyDiorama = dynamic(() => import("./dosey-diorama"), { ssr: false });
 
-const Flask3D = dynamic(() => import("./flask-3d"), { ssr: false });
+const Vessel3D = dynamic(() => import("./vessel-3d"), { ssr: false });
 
-/** Tells the owner to keep the SVG flask if the 3D scene throws after it was shown. */
-function FlaskFailed({ onStatus }: { onStatus: (ready: boolean) => void }) {
+/** Tells the owner to keep the SVG vessel if the 3D scene throws after it was shown. */
+function VesselFailed({ onStatus }: { onStatus: (ready: boolean) => void }) {
   useEffect(() => {
     onStatus(false);
   }, [onStatus]);
   return null;
 }
 
-/** The 3D flask. Never calls `onStatus(true)` when disabled, so the SVG flask stays. */
-export function FlaskSlot(props: FlaskProps) {
+/** The 3D vessel. Never calls `onStatus(true)` when disabled, so the SVG vessel stays. */
+export function VesselSlot(props: VesselProps) {
   const enabled = useThreeEnabled();
   if (!enabled) return null;
   return (
-    <SilentBoundary fallback={<FlaskFailed onStatus={props.onStatus} />}>
-      <Flask3D {...props} />
+    <SilentBoundary fallback={<VesselFailed onStatus={props.onStatus} />}>
+      <Vessel3D key={props.vessel} {...props} />
     </SilentBoundary>
   );
 }

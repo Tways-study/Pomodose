@@ -14,7 +14,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
 import { SPRING_BOUNCY } from "@/lib/motion";
-import { FlaskSlot } from "@/components/three/scenes";
+import { VesselSlot } from "@/components/three/scenes";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -56,10 +56,10 @@ interface Props {
 
 export function VialTimer({ state, dispatch }: Props) {
   const [vessel, setVessel] = useState<"flask" | "cylinder">("flask");
-  // The 3D flask replaces the SVG one only once it has drawn a frame; until then
-  // (and for reduced motion / no WebGL / a failed scene) the SVG flask stays.
-  const [flask3dReady, setFlask3dReady] = useState(false);
-  // Bumped on every completed session so the 3D flask can splash.
+  // The 3D vessel replaces the SVG one only once it has drawn a frame; until then
+  // (and for reduced motion / low-end devices / no WebGL / a failed scene) the SVG stays.
+  const [vessel3dReady, setVessel3dReady] = useState(false);
+  // Bumped on every completed session so the 3D vessel can splash.
   const [completions, setCompletions] = useState(0);
   const reduceMotion = useReducedMotion();
   const justCompletedRef = useRef(false);
@@ -198,7 +198,7 @@ export function VialTimer({ state, dispatch }: Props) {
             type="button"
             onClick={() => {
               setVessel(id);
-              setFlask3dReady(false);
+              setVessel3dReady(false);
             }}
             aria-pressed={vessel === id}
             aria-label={aria}
@@ -238,16 +238,15 @@ export function VialTimer({ state, dispatch }: Props) {
 
       {/* Vessel Graphic */}
       <div className="relative aspect-[180/230] w-[200px]" data-vial-anchor>
-        {isFlask && (
-          <FlaskSlot
-            fraction={clamped}
-            running={state.status === "running"}
-            splashKey={completions}
-            label={vesselLabel}
-            onStatus={setFlask3dReady}
-          />
-        )}
-        {!(isFlask && flask3dReady) && (
+        <VesselSlot
+          vessel={vessel}
+          fraction={clamped}
+          running={state.status === "running"}
+          splashKey={completions}
+          label={vesselLabel}
+          onStatus={setVessel3dReady}
+        />
+        {!vessel3dReady && (
         <svg
           viewBox="0 0 180 230"
           className="h-auto w-[200px]"
