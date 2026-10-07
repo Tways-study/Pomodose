@@ -19,7 +19,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ground px-4 py-12">
+    <div className="flex min-h-dvh items-center justify-center bg-ground px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="rounded-bubble border border-line-soft bg-surface text-ink shadow-soft">
           <div className="p-5 sm:p-6">

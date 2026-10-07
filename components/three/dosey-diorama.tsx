@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, invalidate, useFrame, useThree } from "@react-three/fiber";
 import { SphereGeometry, type BufferGeometry, type Group, type Material } from "three";
 import { THREE_FX } from "@/lib/three/fx";
 import { easeToward } from "@/lib/three/math";
@@ -15,6 +15,7 @@ import {
 import { makeGelcapGeometry, makeToonMaterial } from "@/lib/three/toon";
 import { CANVAS_DPR, CANVAS_GL, FlatLights, useToonGradient } from "./scene-kit";
 import { useActiveFrameloop } from "./use-frameloop";
+import { usePointerFine } from "./use-three-enabled";
 
 const CAMERA_Z = 10;
 const CAMERA_FOV = 40;
@@ -106,9 +107,20 @@ function DioramaScene({ pointer }: { pointer: PointerRef }) {
 export default function DoseyDiorama() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0 });
-  const frameloop = useActiveFrameloop(wrapRef);
+  const fine = usePointerFine();
+  const loop = useActiveFrameloop(wrapRef);
+  // Touch devices have no pointer parallax and the drift is slow, so ~30 fps
+  // (demand frames on a timer) looks the same and saves battery.
+  const frameloop = fine ? loop : loop === "never" ? "never" : "demand";
 
   useEffect(() => {
+    if (fine || loop === "never") return;
+    const id = window.setInterval(() => invalidate(), 33);
+    return () => window.clearInterval(id);
+  }, [fine, loop]);
+
+  useEffect(() => {
+    if (!fine) return;
     const onMove = (e: PointerEvent) => {
       const el = wrapRef.current;
       if (!el) return;
@@ -120,7 +132,7 @@ export default function DoseyDiorama() {
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, []);
+  }, [fine]);
 
   return (
     <div ref={wrapRef} aria-hidden="true" className="pointer-events-none absolute inset-0">

@@ -182,7 +182,7 @@ export default function Home() {
 
   return (
     <NotificationProvider timer={timer} goalsDone={goalsDone} goalsTotal={goalsTotal}>
-      <div className="relative z-content max-w-[1240px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-32 sm:pb-28">
+      <div className="relative z-content max-w-[680px] lg:max-w-[1240px] mx-auto px-4 sm:px-8 pt-8 sm:pt-12 pb-32 sm:pb-28">
 
       {/* Header, on the ground */}
       <header className="mb-8 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-3 sm:mb-10 sm:flex sm:flex-wrap sm:justify-between sm:gap-4 lg:mb-0">
@@ -212,8 +212,10 @@ export default function Home() {
       {/* Main grid */}
       <main id="main" tabIndex={-1} className="outline-none flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10 items-start">
 
-        {/* Left: the Rx label. Sticky on desktop; no ancestor sets overflow. */}
-        <div className="w-full lg:sticky lg:top-6">
+        {/* Left: the Rx label. Sticky on desktop only when the viewport is tall enough to
+            show the whole card (otherwise its Begin button would be pinned out of reach);
+            the sticky timer bar covers shorter windows. No ancestor sets overflow. */}
+        <div className="w-full lg:top-6 lg:[@media(min-height:900px)]:sticky">
           <div ref={rxLabelRef} className="relative pt-[90px]">
             {/* Dosey peeks over the card edge; the card (z-content) covers the head's lower part. */}
             <div data-peek-slot className="pointer-events-none absolute left-6 top-0 z-base h-[96px] w-[120px]">

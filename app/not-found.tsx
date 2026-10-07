@@ -4,7 +4,7 @@ import { DoseyRig } from "@/components/dosey/dosey-rig";
 
 export default function NotFound() {
   return (
-    <main id="main" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-ground px-4 py-12 outline-none">
+    <main id="main" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-ground px-4 py-12 outline-none">
       <div className="w-full max-w-sm rounded-bubble border border-line-soft bg-surface text-ink shadow-soft">
         <div className="p-5 sm:p-6">
           <div className="flex items-center gap-4">

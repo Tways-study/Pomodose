@@ -9,6 +9,8 @@ import type { Config } from "tailwindcss";
 // line-soft is decorative only. alert is 6.4:1 on surface.
 const config: Config = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  // hover: styles apply only on devices that can hover, so taps never leave them stuck.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {

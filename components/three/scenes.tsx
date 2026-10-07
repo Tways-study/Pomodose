@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { SilentBoundary } from "@/components/silent-boundary";
 import type { FlaskProps } from "./flask-3d";
-import { useThreeEnabled } from "./use-three-enabled";
+import { useNearViewport, useThreeEnabled } from "./use-three-enabled";
 
 // Every Canvas is a separate lazy chunk (ssr: false) so three never reaches a page's
 // first-load JS. Each slot renders nothing under reduced motion or without WebGL2.
@@ -53,12 +53,19 @@ export function DoseJarSlot({ dailyDoses }: { dailyDoses: number }) {
   );
 }
 
+/** Mounts the diorama (and its WebGL context) only once it is near the viewport. */
 export function DoseyDioramaSlot() {
   const enabled = useThreeEnabled();
+  const ref = useRef<HTMLDivElement>(null);
+  const near = useNearViewport(ref, enabled);
   if (!enabled) return null;
   return (
-    <SilentBoundary fallback={null}>
-      <DoseyDiorama />
-    </SilentBoundary>
+    <div ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0">
+      {near && (
+        <SilentBoundary fallback={null}>
+          <DoseyDiorama />
+        </SilentBoundary>
+      )}
+    </div>
   );
 }
