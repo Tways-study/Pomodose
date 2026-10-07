@@ -14,6 +14,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { todayKey } from "@/lib/date";
 import { SPRING_BOUNCY } from "@/lib/motion";
+import { FlaskSlot } from "@/components/three/scenes";
 
 // --- Flask Geometry (SVG user units, 180 x 230 viewBox) ----------------------
 const FLASK_TOP = 54;
@@ -55,6 +56,11 @@ interface Props {
 
 export function VialTimer({ state, dispatch }: Props) {
   const [vessel, setVessel] = useState<"flask" | "cylinder">("flask");
+  // The 3D flask replaces the SVG one only once it has drawn a frame; until then
+  // (and for reduced motion / no WebGL / a failed scene) the SVG flask stays.
+  const [flask3dReady, setFlask3dReady] = useState(false);
+  // Bumped on every completed session so the 3D flask can splash.
+  const [completions, setCompletions] = useState(0);
   const reduceMotion = useReducedMotion();
   const justCompletedRef = useRef(false);
   const notify = useNotify();
@@ -87,6 +93,7 @@ export function VialTimer({ state, dispatch }: Props) {
             console.error("Failed to log completed session", err);
           });
         }
+        setCompletions((c) => c + 1);
         dispatch({ type: "COMPLETE" });
       } else {
         dispatch({ type: "TICK" });
@@ -169,6 +176,7 @@ export function VialTimer({ state, dispatch }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const vesselLabel = `${PHASE_LABEL[state.phase]} timer, ${formatTime(state.remaining)} remaining`;
   const PrimaryIcon = primary.icon === "pause" ? Pause : Play;
 
   const bubbles = isFlask ? FLASK_BUBBLES : CYLINDER_BUBBLES;
@@ -188,7 +196,10 @@ export function VialTimer({ state, dispatch }: Props) {
           <button
             key={id}
             type="button"
-            onClick={() => setVessel(id)}
+            onClick={() => {
+              setVessel(id);
+              setFlask3dReady(false);
+            }}
             aria-pressed={vessel === id}
             aria-label={aria}
             className={`flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-pill px-4 font-display text-sm font-medium text-ink transition-colors duration-150 ${
@@ -226,12 +237,22 @@ export function VialTimer({ state, dispatch }: Props) {
       </div>
 
       {/* Vessel Graphic */}
-      <div className="relative" data-vial-anchor>
+      <div className="relative aspect-[180/230] w-[200px]" data-vial-anchor>
+        {isFlask && (
+          <FlaskSlot
+            fraction={clamped}
+            running={state.status === "running"}
+            splashKey={completions}
+            label={vesselLabel}
+            onStatus={setFlask3dReady}
+          />
+        )}
+        {!(isFlask && flask3dReady) && (
         <svg
           viewBox="0 0 180 230"
           className="h-auto w-[200px]"
           role="img"
-          aria-label={`${PHASE_LABEL[state.phase]} timer, ${formatTime(state.remaining)} remaining`}
+          aria-label={vesselLabel}
           strokeLinejoin="round"
           strokeLinecap="round"
         >
@@ -333,6 +354,7 @@ export function VialTimer({ state, dispatch }: Props) {
             />
           )}
         </svg>
+        )}
       </div>
 
       {/* Controls */}

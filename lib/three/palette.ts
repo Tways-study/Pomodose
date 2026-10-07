@@ -15,6 +15,7 @@ export const PALETTE = {
   apricot: pick("gum-apricot"),  // long break
   butter: pick("gum-butter"),
   lilac: pick("gum-lilac"),      // Dosey / brand
+  liquid: pick("dosey-lilac"),   // the vial's liquid
   cream: pick("dosey-cream"),
   sprout: pick("dosey-sprout"),
   tomato: pick("dosey-tomato"),
