@@ -3,12 +3,13 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { ConvexError } from "convex/values";
 import { CircleAlert, Eye, EyeOff } from "lucide-react";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { SPRING_BOUNCY } from "@/lib/motion";
 import { useAddressTerm } from "@/components/address-term-provider";
 import { PasswordStrengthMeter } from "@/components/password-strength-meter";
+import { clearRememberedEmail, readRememberedEmail, saveRememberedEmail } from "@/lib/remembered-email";
 
 type Mode = "login" | "register" | "reset-request" | "reset-verify";
 
@@ -160,10 +161,22 @@ export function LoginForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetCode, setResetCode] = useState("");
   const [reveal, setReveal] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+
+  // Prefill a remembered email and move focus on to the password. Read after mount, not
+  // during render, so the server and client markup match.
+  useEffect(() => {
+    const remembered = readRememberedEmail();
+    if (!remembered) return;
+    // Intentional: post-mount localStorage read to avoid an SSR mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEmail(remembered);
+    document.getElementById(passwordId)?.focus();
+  }, [passwordId]);
 
   /** Clears one field's error as soon as the user starts fixing it. */
   function clearFieldError(field: keyof FieldErrors) {
@@ -233,6 +246,11 @@ export function LoginForm() {
           password,
           ...(mode === "register" && name ? { name } : {}),
         });
+        // Only after a successful sign-in, so a failed attempt changes nothing.
+        if (mode === "login") {
+          if (remember) saveRememberedEmail(email);
+          else clearRememberedEmail();
+        }
         router.push("/");
         router.refresh();
       } else if (mode === "reset-request") {
@@ -473,6 +491,19 @@ export function LoginForm() {
                 ? "Sent — check your inbox."
                 : "Didn't get a code? Send another."}
           </button>
+        )}
+
+        {mode === "login" && (
+          <label className="-mt-1 flex min-h-[44px] cursor-pointer items-center gap-3 font-body text-base text-ink">
+            <input
+              type="checkbox"
+              checked={remember}
+              disabled={isSubmitting}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-5 w-5 flex-none cursor-pointer accent-ink"
+            />
+            Remember me on this device
+          </label>
         )}
 
         {error && (

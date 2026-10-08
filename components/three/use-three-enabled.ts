@@ -9,7 +9,7 @@ const subscribe = () => () => {};
 
 /**
  * True only on the client, with motion allowed, WebGL2 available and a device that
- * is not low-end (data saver, 2 GB or less memory, 2 cores or fewer). Never true during SSR.
+ * is not asking to save data. Never true during SSR.
  */
 export function useThreeEnabled(): boolean {
   const reduceMotion = useReducedMotion();

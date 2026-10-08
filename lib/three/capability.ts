@@ -1,29 +1,23 @@
-/** Signals a browser may expose about the device; all optional (Safari exposes none). */
+/** Signals a browser may expose about the device; all optional. */
 export interface DeviceHints {
   saveData?: boolean;
-  /** GB, as reported by navigator.deviceMemory (coarse: 0.25 to 8). */
-  deviceMemory?: number;
-  hardwareConcurrency?: number;
 }
 
-/** True for devices where decorative WebGL is not worth its download, memory and battery. */
+/**
+ * True when the user asked the browser to save data. That is the only signal used on
+ * purpose: `navigator.hardwareConcurrency` and `navigator.deviceMemory` are randomised
+ * ("farbled") by privacy browsers such as Brave, so gating on them made the 3D scenes
+ * appear on some loads and not others on a perfectly capable machine.
+ */
 export function isLowEndDevice(hints: DeviceHints): boolean {
-  if (hints.saveData) return true;
-  if (hints.deviceMemory !== undefined && hints.deviceMemory <= 2) return true;
-  if (hints.hardwareConcurrency !== undefined && hints.hardwareConcurrency <= 2) return true;
-  return false;
+  return hints.saveData === true;
 }
 
 interface NavigatorWithHints extends Navigator {
-  deviceMemory?: number;
   connection?: { saveData?: boolean };
 }
 
 export function readDeviceHints(): DeviceHints {
   const nav = navigator as NavigatorWithHints;
-  return {
-    saveData: nav.connection?.saveData,
-    deviceMemory: nav.deviceMemory,
-    hardwareConcurrency: nav.hardwareConcurrency,
-  };
+  return { saveData: nav.connection?.saveData };
 }

@@ -6,17 +6,8 @@ describe("isLowEndDevice", () => {
     expect(isLowEndDevice({})).toBe(false);
   });
 
-  it("flags data saver", () => {
+  it("flags data saver only", () => {
     expect(isLowEndDevice({ saveData: true })).toBe(true);
-  });
-
-  it("flags 2 GB or less of memory, but not 4 GB", () => {
-    expect(isLowEndDevice({ deviceMemory: 2 })).toBe(true);
-    expect(isLowEndDevice({ deviceMemory: 4 })).toBe(false);
-  });
-
-  it("flags two cores or fewer, but not four", () => {
-    expect(isLowEndDevice({ hardwareConcurrency: 2 })).toBe(true);
-    expect(isLowEndDevice({ hardwareConcurrency: 4 })).toBe(false);
+    expect(isLowEndDevice({ saveData: false })).toBe(false);
   });
 });

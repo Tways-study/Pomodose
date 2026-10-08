@@ -1,6 +1,6 @@
 # Plan: Remember me on login
 
-**Status:** proposed
+**Status:** implemented (email remembering only; the session cookie lifetime is unchanged)
 
 ## Goal
 When someone signs in again on the same device, make it quick: prefill their email, and let them choose whether the session survives a browser restart.

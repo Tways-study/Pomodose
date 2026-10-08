@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Object3D, type Group, type InstancedMesh } from "three";
 import { THREE_FX } from "@/lib/three/fx";
@@ -94,6 +94,8 @@ export default function LoginCapsules() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0 });
   const frameloop = useActiveFrameloop(wrapRef);
+  // Fade in once the scene exists so the capsules ease in instead of popping.
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -107,7 +109,11 @@ export default function LoginCapsules() {
   }, []);
 
   return (
-    <div ref={wrapRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-base">
+    <div
+      ref={wrapRef}
+      aria-hidden="true"
+      className={`pointer-events-none fixed inset-0 z-base transition-opacity duration-700 ${shown ? "opacity-100" : "opacity-0"}`}
+    >
       <Canvas
         flat
         camera={{ position: [0, 0, CAMERA_Z], fov: CAMERA_FOV }}
@@ -115,6 +121,7 @@ export default function LoginCapsules() {
         gl={CANVAS_GL}
         frameloop={frameloop}
         style={{ pointerEvents: "none" }}
+        onCreated={() => setShown(true)}
       >
         <FlatLights />
         <LoginScene pointer={pointer} />

@@ -6,6 +6,10 @@ import { LoginForm } from "@/components/login-form";
 import { LoginCapsulesSlot } from "@/components/three/scenes";
 import { EASE_OUT } from "@/lib/motion";
 
+// Start fetching the capsule scene as soon as this page's code loads, in parallel with
+// hydration, instead of after it (the slot only mounts it once motion/WebGL are known).
+if (typeof window !== "undefined") void import("@/components/three/login-capsules");
+
 export default function LoginPage() {
   const reduceMotion = useReducedMotion();
 
